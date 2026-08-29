@@ -1,0 +1,17 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment secrets
+.env
+
+# Datasets - too large for git, download locally instead
+data/*.parquet
+data/*.csv
+
+# Node
+node_modules/
+
+# OS junk
+.DS_Store
+Thumbs.db
