@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Network Detection</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: #f4f6f9;
+        }
+
+        /* NAVBAR */
+
+        .navbar {
+
+            background: #141e30;
+
+            color: white;
+
+            padding: 18px 30px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+        }
+
+        .brand {
+
+            font-size: 20px;
+
+            font-weight: bold;
+        }
+
+        .navbar a {
+
+            color: white;
+
+            text-decoration: none;
+
+            margin-left: 20px;
+        }
+
+        .username {
+
+            background: white;
+
+            color: #243b55;
+
+            padding: 8px 15px;
+
+            border-radius: 20px;
+
+            font-weight: bold;
+
+            margin-left: 20px;
+        }
+
+        /* CONTAINER */
+
+        .container {
+
+            width: 800px;
+
+            max-width: 95%;
+
+            margin: 35px auto;
+
+            background: white;
+
+            padding: 35px;
+
+            border-radius: 15px;
+
+            box-shadow:
+            0 3px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+
+            text-align: center;
+
+            color: #243b55;
+
+            margin-bottom: 8px;
+        }
+
+        .description {
+
+            text-align: center;
+
+            color: #777;
+
+            margin-bottom: 30px;
+        }
+
+        /* BACK BUTTON */
+
+        .home-button {
+
+            display: inline-block;
+
+            background: #243b55;
+
+            color: white;
+
+            padding: 10px 18px;
+
+            border-radius: 7px;
+
+            text-decoration: none;
+
+            margin-bottom: 25px;
+        }
+
+        .home-button:hover {
+
+            background: #141e30;
+        }
+
+        /* FORM */
+
+        .grid {
+
+            display: grid;
+
+            grid-template-columns:
+            1fr 1fr;
+
+            gap: 20px;
+        }
+
+        label {
+
+            display: block;
+
+            font-weight: bold;
+
+            margin-bottom: 7px;
+
+            color: #444;
+        }
+
+        input,
+        select {
+
+            width: 100%;
+
+            padding: 12px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 7px;
+        }
+
+        input:focus,
+        select:focus {
+
+            outline: none;
+
+            border-color: #243b55;
+        }
+
+        button {
+
+            width: 100%;
+
+            margin-top: 25px;
+
+            padding: 14px;
+
+            background: #243b55;
+
+            color: white;
+
+            border: none;
+
+            border-radius: 7px;
+
+            font-size: 16px;
+
+            cursor: pointer;
+        }
+
+        button:hover {
+
+            background: #141e30;
+        }
+
+        @media(max-width:700px) {
+
+            .grid {
+
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- NAVBAR -->
+
+<div class="navbar">
+
+    <div class="brand">
+
+        🛡️ Network Intrusion Platform
+
+    </div>
+
+
+    <div>
+
+        <a href="/dashboard">
+            Home
+        </a>
+
+        <a href="/traffic">
+            Traffic
+        </a>
+
+        <a href="/alerts">
+            Alerts
+        </a>
+
+        <span class="username">
+
+            👤 {{ session["username"] }}
+
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- FORM -->
+
+<div class="container">
+
+
+    <!-- BACK HOME BUTTON -->
+
+    <a href="/dashboard"
+       class="home-button">
+
+        ← Back to Home
+
+    </a>
+
+
+    <h1>
+        🔍 Network Traffic Detection
+    </h1>
+
+
+    <div class="description">
+
+        Enter network traffic information
+        for monitoring.
+
+    </div>
+
+
+    <form method="POST">
+
+
+        <div class="grid">
+
+
+            <div>
+
+                <label>
+                    Duration
+                </label>
+
+                <input
+                    type="number"
+                    step="0.01"
+                    name="duration"
+                    placeholder="Example: 10"
+                    required
+                >
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Protocol Type
+                </label>
+
+                <select name="protocol">
+
+                    <option value="tcp">
+                        TCP
+                    </option>
+
+                    <option value="udp">
+                        UDP
+                    </option>
+
+                    <option value="icmp">
+                        ICMP
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Service
+                </label>
+
+                <input
+                    type="text"
+                    name="service"
+                    placeholder="Example: http"
+                    required
+                >
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Flag
+                </label>
+
+                <select name="flag">
+
+                    <option value="SF">
+                        SF
+                    </option>
+
+                    <option value="S0">
+                        S0
+                    </option>
+
+                    <option value="REJ">
+                        REJ
+                    </option>
+
+                    <option value="RSTO">
+                        RSTO
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Source Bytes
+                </label>
+
+                <input
+                    type="number"
+                    name="src_bytes"
+                    placeholder="Example: 500"
+                    required
+                >
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Destination Bytes
+                </label>
+
+                <input
+                    type="number"
+                    name="dst_bytes"
+                    placeholder="Example: 1200"
+                    required
+                >
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Land
+                </label>
+
+                <select name="land">
+
+                    <option value="0">
+                        0 - No
+                    </option>
+
+                    <option value="1">
+                        1 - Yes
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Wrong Fragment
+                </label>
+
+                <input
+                    type="number"
+                    name="wrong_fragment"
+                    value="0"
+                    min="0"
+                    required
+                >
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Urgent
+                </label>
+
+                <input
+                    type="number"
+                    name="urgent"
+                    value="0"
+                    min="0"
+                    required
+                >
+
+            </div>
+
+
+        </div>
+
+
+        <button type="submit">
+
+            Save Network Traffic
+
+        </button>
+
+
+    </form>
+
+</div>
+
+
+</body>
+
+</html>

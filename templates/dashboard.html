@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Security Dashboard</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+        }
+
+
+        /* ================= NAVBAR ================= */
+
+        .navbar {
+
+            background: #141e30;
+
+            color: white;
+
+            padding: 18px 30px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+        }
+
+
+        .brand {
+
+            font-size: 20px;
+
+            font-weight: bold;
+
+        }
+
+
+        .nav-links {
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+
+        .nav-links > a {
+
+            color: white;
+
+            text-decoration: none;
+
+            margin-left: 20px;
+
+            font-size: 14px;
+
+        }
+
+
+        .nav-links > a:hover {
+
+            text-decoration: underline;
+
+        }
+
+
+        /* ================= USER AREA ================= */
+
+        .user-area {
+
+            position: relative;
+
+            margin-left: 20px;
+
+        }
+
+
+        .user-button {
+
+            background: white;
+
+            color: #243b55;
+
+            border: none;
+
+            padding: 9px 16px;
+
+            border-radius: 20px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            font-size: 14px;
+
+        }
+
+
+        .user-button:hover {
+
+            background: #e8edf2;
+
+        }
+
+
+        /* ================= DROPDOWN ================= */
+
+        .profile-menu {
+
+            display: none;
+
+            position: absolute;
+
+            right: 0;
+
+            top: 48px;
+
+            width: 270px;
+
+            background: white;
+
+            color: #333;
+
+            border-radius: 12px;
+
+            box-shadow:
+                0 8px 25px rgba(0,0,0,0.2);
+
+            padding: 20px;
+
+            z-index: 1000;
+
+        }
+
+
+        .profile-menu.show {
+
+            display: block;
+
+        }
+
+
+        .profile-header {
+
+            text-align: center;
+
+            padding-bottom: 15px;
+
+            border-bottom: 1px solid #ddd;
+
+        }
+
+
+        .profile-icon {
+
+            width: 60px;
+
+            height: 60px;
+
+            background: #243b55;
+
+            color: white;
+
+            border-radius: 50%;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            margin: auto;
+
+            font-size: 28px;
+
+        }
+
+
+        .profile-header h3 {
+
+            margin: 10px 0 5px;
+
+            color: #243b55;
+
+        }
+
+
+        .profile-header p {
+
+            margin: 0;
+
+            color: #777;
+
+            font-size: 13px;
+
+        }
+
+
+        .profile-details {
+
+            padding: 15px 0;
+
+        }
+
+
+        .detail {
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .detail-label {
+
+            display: block;
+
+            font-size: 12px;
+
+            color: #888;
+
+            margin-bottom: 3px;
+
+        }
+
+
+        .detail-value {
+
+            font-size: 14px;
+
+            font-weight: bold;
+
+            color: #333;
+
+            word-break: break-word;
+
+        }
+
+
+        /* ================= LOGOUT ================= */
+
+        .logout-button {
+
+            display: block;
+
+            width: 100%;
+
+            text-align: center;
+
+            background: #e74c3c;
+
+            color: white;
+
+            text-decoration: none;
+
+            padding: 11px;
+
+            border-radius: 7px;
+
+            font-weight: bold;
+
+        }
+
+
+        .logout-button:hover {
+
+            background: #c0392b;
+
+        }
+
+
+        /* ================= SUCCESS ================= */
+
+        .success-message {
+
+            position: fixed;
+
+            top: 80px;
+
+            right: 25px;
+
+            background: #d4edda;
+
+            color: #155724;
+
+            padding: 15px 25px;
+
+            border-radius: 8px;
+
+            box-shadow:
+                0 4px 15px rgba(0,0,0,0.2);
+
+            font-weight: bold;
+
+            z-index: 2000;
+
+        }
+
+
+        /* ================= MAIN ================= */
+
+        .container {
+
+            padding: 35px;
+
+        }
+
+
+        .welcome {
+
+            margin-bottom: 30px;
+
+        }
+
+
+        .welcome h1 {
+
+            margin-bottom: 5px;
+
+            color: #243b55;
+
+        }
+
+
+        .welcome p {
+
+            color: #777;
+
+        }
+
+
+        /* ================= CARDS ================= */
+
+        .cards {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 20px;
+
+        }
+
+
+        .card {
+
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 12px;
+
+            box-shadow:
+                0 3px 12px rgba(0,0,0,0.08);
+
+        }
+
+
+        .card-icon {
+
+            font-size: 30px;
+
+        }
+
+
+        .card h2 {
+
+            font-size: 32px;
+
+            margin: 12px 0;
+
+            color: #243b55;
+
+        }
+
+
+        .card p {
+
+            color: #777;
+
+            margin: 0;
+
+        }
+
+
+        /* ================= QUICK CARDS ================= */
+
+        .quick {
+
+            margin-top: 30px;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 20px;
+
+        }
+
+
+        .quick-card {
+
+            background: white;
+
+            padding: 30px;
+
+            border-radius: 12px;
+
+            text-align: center;
+
+            box-shadow:
+                0 3px 12px rgba(0,0,0,0.08);
+
+        }
+
+
+        .quick-card h3 {
+
+            color: #243b55;
+
+            font-size: 20px;
+
+        }
+
+
+        .quick-card p {
+
+            color: #777;
+
+            min-height: 40px;
+
+        }
+
+
+        .quick-card a {
+
+            display: inline-block;
+
+            background: #243b55;
+
+            color: white;
+
+            padding: 10px 20px;
+
+            border-radius: 6px;
+
+            text-decoration: none;
+
+            margin-top: 10px;
+
+        }
+
+
+        .quick-card a:hover {
+
+            background: #141e30;
+
+        }
+
+
+        /* ================= RESPONSIVE ================= */
+
+        @media(max-width: 1000px) {
+
+            .cards {
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+
+            }
+
+            .quick {
+
+                grid-template-columns: 1fr;
+
+            }
+
+        }
+
+
+        @media(max-width: 700px) {
+
+            .navbar {
+
+                flex-direction: column;
+
+                gap: 15px;
+
+            }
+
+            .nav-links {
+
+                flex-wrap: wrap;
+
+                justify-content: center;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ================= NAVBAR ================= -->
+
+<div class="navbar">
+
+
+    <div class="brand">
+
+        🛡️ Network Intrusion Platform
+
+    </div>
+
+
+    <div class="nav-links">
+
+
+        <a href="/dashboard">
+            Home
+        </a>
+
+
+        <a href="/add-traffic">
+            Network Detection
+        </a>
+
+
+        <a href="/traffic">
+            Traffic Records
+        </a>
+
+
+        <a href="/alerts">
+            Security Alerts
+        </a>
+
+
+        <!-- USERNAME -->
+
+        <div class="user-area">
+
+
+            <button
+                class="user-button"
+                onclick="toggleProfile()">
+
+                👤 {{ user.username }} ▼
+
+            </button>
+
+
+            <!-- PROFILE DROPDOWN -->
+
+            <div
+                class="profile-menu"
+                id="profileMenu">
+
+
+                <div class="profile-header">
+
+
+                    <div class="profile-icon">
+
+                        👤
+
+                    </div>
+
+
+                    <h3>
+
+                        {{ user.username }}
+
+                    </h3>
+
+
+                    <p>
+
+                        {{ user.email }}
+
+                    </p>
+
+
+                </div>
+
+
+                <div class="profile-details">
+
+
+                    <div class="detail">
+
+                        <span class="detail-label">
+                            Username
+                        </span>
+
+                        <span class="detail-value">
+                            {{ user.username }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <span class="detail-label">
+                            Email
+                        </span>
+
+                        <span class="detail-value">
+                            {{ user.email }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <span class="detail-label">
+                            Role
+                        </span>
+
+                        <span class="detail-value">
+                            {{ user.role }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <span class="detail-label">
+                            Account Created
+                        </span>
+
+                        <span class="detail-value">
+                            {{ user.created_at }}
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- LOGOUT -->
+
+                <a
+                    href="/logout"
+                    class="logout-button">
+
+                    🚪 Logout
+
+                </a>
+
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<!-- ================= LOGIN SUCCESS ================= -->
+
+{% if login_success %}
+
+<div
+    class="success-message"
+    id="loginSuccess">
+
+    ✅ Login Successful!
+
+</div>
+
+
+<script>
+
+    setTimeout(function() {
+
+        var message =
+            document.getElementById("loginSuccess");
+
+        if (message) {
+
+            message.style.display = "none";
+
+        }
+
+    }, 5000);
+
+</script>
+
+{% endif %}
+
+
+<!-- ================= DASHBOARD ================= -->
+
+<div class="container">
+
+
+    <div class="welcome">
+
+        <h1>
+            Security Dashboard
+        </h1>
+
+        <p>
+
+            Welcome,
+
+            <strong>
+                {{ user.username }}
+            </strong>.
+
+            Monitor network traffic and security activity.
+
+        </p>
+
+    </div>
+
+
+    <!-- STATISTICS -->
+
+    <div class="cards">
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                🌐
+            </div>
+
+            <h2>
+                {{ total }}
+            </h2>
+
+            <p>
+                Total Traffic Records
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                ✅
+            </div>
+
+            <h2>
+                {{ normal }}
+            </h2>
+
+            <p>
+                Normal Traffic
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                ⚠️
+            </div>
+
+            <h2>
+                {{ anomalies }}
+            </h2>
+
+            <p>
+                Anomalies Detected
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                🚨
+            </div>
+
+            <h2>
+                {{ alerts }}
+            </h2>
+
+            <p>
+                Security Alerts
+            </p>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- QUICK ACCESS -->
+
+    <div class="quick">
+
+
+        <div class="quick-card">
+
+            <h3>
+                🔍 Network Detection
+            </h3>
+
+            <p>
+                Enter network traffic data
+                for monitoring.
+            </p>
+
+            <a href="/add-traffic">
+
+                Open Detection
+
+            </a>
+
+        </div>
+
+
+        <div class="quick-card">
+
+            <h3>
+                🌐 Traffic Records
+            </h3>
+
+            <p>
+                View all recorded
+                network traffic.
+            </p>
+
+            <a href="/traffic">
+
+                View Records
+
+            </a>
+
+        </div>
+
+
+        <div class="quick-card">
+
+            <h3>
+                🚨 Security Alerts
+            </h3>
+
+            <p>
+                View suspicious
+                network activity.
+            </p>
+
+            <a href="/alerts">
+
+                View Alerts
+
+            </a>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+<!-- ================= PROFILE JAVASCRIPT ================= -->
+
+<script>
+
+function toggleProfile() {
+
+    var menu =
+        document.getElementById("profileMenu");
+
+    menu.classList.toggle("show");
+
+}
+
+
+/* Close when clicking outside */
+
+document.addEventListener(
+    "click",
+    function(event) {
+
+        var profile =
+            document.querySelector(".user-area");
+
+        var menu =
+            document.getElementById("profileMenu");
+
+        if (
+            profile &&
+            !profile.contains(event.target)
+        ) {
+
+            menu.classList.remove("show");
+
+        }
+
+    }
+);
+
+</script>
+
+
+</body>
+
+</html>
