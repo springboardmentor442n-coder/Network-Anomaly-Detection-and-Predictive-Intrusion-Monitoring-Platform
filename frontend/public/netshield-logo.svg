@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="50%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <linearGradient id="coreGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#818cf8" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Outer Shield Contour -->
+  <path d="M50 8 L85 24 V50 C85 71.5 69.8 89.2 50 94 C30.2 89.2 15 71.5 15 50 V24 L50 8 Z" 
+        fill="url(#shieldGrad)" fill-opacity="0.15" stroke="url(#shieldGrad)" stroke-width="3" filter="url(#glow)"/>
+
+  <!-- Inner Shield Circuit Line -->
+  <path d="M50 16 L77 29 V50 C77 67 65.5 81 50 85 C34.5 81 23 67 23 50 V29 L50 16 Z" 
+        stroke="#818cf8" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.6"/>
+
+  <!-- Neural Core Nodes -->
+  <circle cx="50" cy="35" r="4" fill="url(#coreGrad)"/>
+  <circle cx="36" cy="52" r="3.5" fill="url(#coreGrad)"/>
+  <circle cx="64" cy="52" r="3.5" fill="url(#coreGrad)"/>
+  <circle cx="50" cy="68" r="4" fill="url(#coreGrad)"/>
+
+  <!-- Node Connector Lattice Lines -->
+  <line x1="50" y1="35" x2="36" y2="52" stroke="#38bdf8" stroke-width="2" opacity="0.8"/>
+  <line x1="50" y1="35" x2="64" y2="52" stroke="#38bdf8" stroke-width="2" opacity="0.8"/>
+  <line x1="36" y1="52" x2="50" y2="68" stroke="#38bdf8" stroke-width="2" opacity="0.8"/>
+  <line x1="64" y1="52" x2="50" y2="68" stroke="#38bdf8" stroke-width="2" opacity="0.8"/>
+  <line x1="36" y1="52" x2="64" y2="52" stroke="#818cf8" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- Central Pulse Ring -->
+  <circle cx="50" cy="51.5" r="8" stroke="#38bdf8" stroke-width="1.5" opacity="0.9"/>
+  <circle cx="50" cy="51.5" r="3" fill="#ffffff"/>
+</svg>

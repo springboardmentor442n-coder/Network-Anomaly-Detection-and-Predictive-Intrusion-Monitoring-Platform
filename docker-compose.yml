@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # NetShield AI FastAPI Backend Container
+  netshield-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: netshield-backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - HOST=0.0.0.0
+      - SECRET_KEY=netshield_production_jwt_secret_key_2026
+    networks:
+      - netshield-network
+
+  # NetShield AI React Nginx Frontend Container
+  netshield-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: netshield-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - netshield-backend
+    networks:
+      - netshield-network
+
+networks:
+  netshield-network:
+    driver: bridge
