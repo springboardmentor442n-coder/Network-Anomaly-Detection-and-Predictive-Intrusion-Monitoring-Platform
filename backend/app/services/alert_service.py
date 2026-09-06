@@ -6,26 +6,55 @@ alerts = []
 alert_counter = 1
 
 
+def get_priority(risk_level):
+    """
+    Convert risk level into security priority.
+    """
+
+    priority_map = {
+        "CRITICAL": "P1",
+        "HIGH": "P2",
+        "MEDIUM": "P3",
+        "LOW": "P4"
+    }
+
+    return priority_map.get(
+        risk_level.upper(),
+        "P4"
+    )
+
+
 def create_alert(alert_data):
     global alert_counter
 
-    # Only create alerts for suspicious traffic
+    # Do not create alerts for benign low-risk traffic
     if (
         alert_data["prediction"] == "BENIGN"
         and alert_data["risk_level"] == "LOW"
     ):
         return None
 
+    risk_level = alert_data["risk_level"].upper()
+
+    priority = get_priority(
+        risk_level
+    )
+
     alert = {
         "alert_id": alert_counter,
         "timestamp": datetime.utcnow().isoformat(),
+
         "prediction": alert_data["prediction"],
         "attack_probability": alert_data["attack_probability"],
         "anomaly": alert_data["anomaly"],
+
         "risk_score": alert_data["risk_score"],
-        "risk_level": alert_data["risk_level"],
+        "risk_level": risk_level,
+        "priority": priority,
+
         "source": alert_data.get("source"),
         "destination": alert_data.get("destination"),
+
         "status": "OPEN"
     }
 
