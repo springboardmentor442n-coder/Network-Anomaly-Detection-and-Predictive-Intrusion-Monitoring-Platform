@@ -29,11 +29,10 @@ API_URL = "http://127.0.0.1:8000/api/prediction/predict"
 # ============================================================
 
 print("Loading dataset...")
-
-data = pd.read_csv(DATA_PATH)
+data = pd.read_csv(DATA_PATH, nrows=30000)
 
 print("Dataset loaded successfully!")
-print("Dataset shape:", data.shape)
+print("Test dataset shape:", data.shape)
 
 
 # ============================================================
