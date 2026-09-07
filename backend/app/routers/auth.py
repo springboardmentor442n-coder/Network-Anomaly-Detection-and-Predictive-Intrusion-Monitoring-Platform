@@ -119,3 +119,25 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         return {"email": u["email"], "full_name": u["full_name"], "role": u["role"]}
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+@router.get("/users")
+def get_all_users():
+    """Lists all active SOC users with RBAC roles."""
+    result = []
+    for idx, (email, u) in enumerate(users_db.items(), start=1):
+        role = u.get("role", "Security Analyst")
+        privileges = "Traffic, AI Inference & IP Blocking"
+        if role == "Admin":
+            privileges = "Full System & RBAC Control (All Tabs & Features)"
+        elif role == "SOC Operator":
+            privileges = "Read-Only Traffic & Threat Monitoring"
+            
+        result.append({
+            "id": str(idx),
+            "email": u.get("email", email),
+            "full_name": u.get("full_name", "SOC User"),
+            "role": role,
+            "privileges": privileges,
+            "status": "ACTIVE"
+        })
+    return result

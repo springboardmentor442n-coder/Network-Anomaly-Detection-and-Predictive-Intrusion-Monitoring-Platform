@@ -25,21 +25,24 @@ class NetShieldAnomalyDetector:
 
     def load_models(self):
         """Loads all 7 model artifacts from disk."""
-        try:
-            # CICIDS2017 Stack
-            self.cic_model = joblib.load(os.path.join(self.models_dir, "cicids2017_xgboost_model.joblib"))
-            self.cic_scaler = joblib.load(os.path.join(self.models_dir, "cicids2017_scaler.joblib"))
-            self.cic_features = joblib.load(os.path.join(self.models_dir, "cicids2017_features.joblib"))
-            
-            # UNSW-NB15 Stack
-            self.unsw_model = joblib.load(os.path.join(self.models_dir, "unsw_nb15_xgboost_model.joblib"))
-            self.unsw_scaler = joblib.load(os.path.join(self.models_dir, "unsw_nb15_scaler.joblib"))
-            self.unsw_encoders = joblib.load(os.path.join(self.models_dir, "unsw_nb15_encoders.joblib"))
-            self.unsw_features = joblib.load(os.path.join(self.models_dir, "unsw_nb15_features.joblib"))
-            
-            print(f"[NetShield ML] Successfully loaded dual AI model engines from {self.models_dir}")
-        except Exception as e:
-            print(f"[NetShield ML] Warning: Error loading model artifacts: {e}")
+        import warnings
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore")
+            try:
+                # CICIDS2017 Stack
+                self.cic_model = joblib.load(os.path.join(self.models_dir, "cicids2017_xgboost_model.joblib"))
+                self.cic_scaler = joblib.load(os.path.join(self.models_dir, "cicids2017_scaler.joblib"))
+                self.cic_features = joblib.load(os.path.join(self.models_dir, "cicids2017_features.joblib"))
+                
+                # UNSW-NB15 Stack
+                self.unsw_model = joblib.load(os.path.join(self.models_dir, "unsw_nb15_xgboost_model.joblib"))
+                self.unsw_scaler = joblib.load(os.path.join(self.models_dir, "unsw_nb15_scaler.joblib"))
+                self.unsw_encoders = joblib.load(os.path.join(self.models_dir, "unsw_nb15_encoders.joblib"))
+                self.unsw_features = joblib.load(os.path.join(self.models_dir, "unsw_nb15_features.joblib"))
+                
+                print(f"[NetShield ML] Successfully loaded dual AI model engines from {self.models_dir}")
+            except Exception as e:
+                print(f"[NetShield ML] Warning: Error loading model artifacts: {e}")
 
     def predict_cicids(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """Predicts anomaly using CICIDS2017 flow model."""

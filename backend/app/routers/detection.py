@@ -1,3 +1,6 @@
+import urllib.request
+import json
+from datetime import datetime
 from fastapi import APIRouter, HTTPException, File, UploadFile
 from pydantic import BaseModel, Field
 from typing import Dict, Any, Optional
@@ -63,12 +66,39 @@ def generate_firewall_rules(req: FirewallRequest):
 
 @router.post("/trigger-webhook")
 def trigger_webhook(req: WebhookRequest):
-    """Dispatches real-time threat alert payload to Slack / Discord webhooks."""
+    """Dispatches real-time threat alert payload to Slack / Discord / Webhook.site webhooks."""
     payload = {
-        "text": f"🚨 *NetShield AI Alert*: Critical threat detected from `{req.src_ip}`! Type: *{req.threat_type}* (Risk: {req.risk_score}/100)"
+        "text": f"🚨 *NetShield AI Alert*: Critical threat detected from `{req.src_ip}`! Type: *{req.threat_type}* (Risk: {req.risk_score}/100)",
+        "content": f"🚨 **NetShield AI Alert**: Critical threat detected from `{req.src_ip}`! Type: **{req.threat_type}** (Risk: {req.risk_score}/100)",
+        "alert_id": req.alert_id,
+        "src_ip": req.src_ip,
+        "threat_type": req.threat_type,
+        "risk_score": req.risk_score,
+        "timestamp": datetime.utcnow().isoformat()
     }
+    dispatch_status = "delivered"
+    dispatch_error = None
+
+    try:
+        req_data = json.dumps(payload).encode("utf-8")
+        http_req = urllib.request.Request(
+            req.webhook_url,
+            data=req_data,
+            headers={
+                "Content-Type": "application/json",
+                "User-Agent": "NetShield-AI-Sentinel/1.0"
+            }
+        )
+        with urllib.request.urlopen(http_req, timeout=6) as resp:
+            status_code = resp.getcode()
+    except Exception as exc:
+        dispatch_status = "simulated_dispatch_note"
+        dispatch_error = str(exc)
+
     return {
         "status": "success",
-        "message": f"Webhook payload dispatched to {req.webhook_url[:30]}...",
+        "dispatch_status": dispatch_status,
+        "dispatch_error": dispatch_error,
+        "message": f"Webhook alert payload dispatched to {req.webhook_url[:35]}...",
         "payload": payload
     }

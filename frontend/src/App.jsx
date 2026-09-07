@@ -186,6 +186,19 @@ export default function App() {
     return () => clearInterval(interval);
   }, [user]);
 
+  // Sync registered SOC users from backend database
+  useEffect(() => {
+    if (!user) return;
+    fetch(`${API_BASE}/auth/users`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setSocUsers(data);
+        }
+      })
+      .catch(() => {});
+  }, [user]);
+
   // STRICT LEGITIMATE LOGIN HANDLER (Backend Validated)
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -239,19 +252,50 @@ export default function App() {
     if (newUserForm.role === 'Admin') privilegesText = 'Full System & RBAC Control (All Tabs & Features)';
     if (newUserForm.role === 'SOC Operator') privilegesText = 'Read-Only Traffic & Threat Monitoring';
 
-    const newUserObj = {
-      id: String(socUsers.length + 1),
-      full_name: newUserForm.full_name,
-      email: newUserForm.email,
-      role: newUserForm.role,
-      privileges: privilegesText,
-      status: 'ACTIVE'
-    };
-    setSocUsers(prev => [...prev, newUserObj]);
-    showToast(`User ${newUserForm.full_name} (${newUserForm.role}) registered!`);
-    setIsAddUserOpen(false);
-    setNewUserForm({ full_name: '', email: '', password: '', role: 'Security Analyst' });
-    setIsSubmittingUser(false);
+    try {
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: newUserForm.email,
+          password: newUserForm.password || 'Netshield@123',
+          full_name: newUserForm.full_name,
+          role: newUserForm.role
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        showToast(data.detail || 'Failed to register user on authentication backend', 'error');
+      } else {
+        const newUserObj = {
+          id: String(socUsers.length + 1),
+          full_name: newUserForm.full_name,
+          email: newUserForm.email,
+          role: newUserForm.role,
+          privileges: privilegesText,
+          status: 'ACTIVE'
+        };
+        setSocUsers(prev => [...prev, newUserObj]);
+        showToast(`User ${newUserForm.full_name} (${newUserForm.role}) registered and activated!`, 'success');
+        setIsAddUserOpen(false);
+        setNewUserForm({ full_name: '', email: '', password: '', role: 'Security Analyst' });
+      }
+    } catch (err) {
+      const newUserObj = {
+        id: String(socUsers.length + 1),
+        full_name: newUserForm.full_name,
+        email: newUserForm.email,
+        role: newUserForm.role,
+        privileges: privilegesText,
+        status: 'ACTIVE'
+      };
+      setSocUsers(prev => [...prev, newUserObj]);
+      showToast(`User ${newUserForm.full_name} added to session (offline mode)`, 'info');
+      setIsAddUserOpen(false);
+      setNewUserForm({ full_name: '', email: '', password: '', role: 'Security Analyst' });
+    } finally {
+      setIsSubmittingUser(false);
+    }
   };
 
   const handlePredict = async (e) => {
