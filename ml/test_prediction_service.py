@@ -52,11 +52,20 @@ print("=" * 60)
 benign_result = predict_network_flow(benign_flow)
 
 print("Prediction:", benign_result["prediction"])
-print("Attack Probability:",
-      benign_result["attack_probability"], "%")
+print(
+    "Attack Probability:",
+    benign_result["attack_probability"],
+    "%"
+)
 print("Anomaly:", benign_result["anomaly"])
 print("Risk Score:", benign_result["risk_score"])
 print("Risk Level:", benign_result["risk_level"])
+print("Attack Type:", benign_result["attack_type"])
+print(
+    "Attack Type Confidence:",
+    benign_result["attack_type_confidence"],
+    "%"
+)
 
 
 # --------------------------------------------------
@@ -71,11 +80,20 @@ print("=" * 60)
 attack_result = predict_network_flow(attack_flow)
 
 print("Prediction:", attack_result["prediction"])
-print("Attack Probability:",
-      attack_result["attack_probability"], "%")
+print(
+    "Attack Probability:",
+    attack_result["attack_probability"],
+    "%"
+)
 print("Anomaly:", attack_result["anomaly"])
 print("Risk Score:", attack_result["risk_score"])
 print("Risk Level:", attack_result["risk_level"])
+print("Attack Type:", attack_result["attack_type"])
+print(
+    "Attack Type Confidence:",
+    attack_result["attack_type_confidence"],
+    "%"
+)
 
 
 # --------------------------------------------------
