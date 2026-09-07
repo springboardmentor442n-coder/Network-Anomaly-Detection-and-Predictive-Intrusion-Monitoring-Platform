@@ -35,14 +35,39 @@ def generate_alert(alert: AlertCreate):
         "alert": result
     }
 
-
 @router.get("/")
-def list_alerts():
+def list_alerts(
+    risk_level: str = None,
+    status: str = None,
+    priority: str = None
+):
+    alerts = get_alerts()
+
+    # Filter by risk level
+    if risk_level:
+        alerts = [
+            alert for alert in alerts
+            if alert["risk_level"] == risk_level.upper()
+        ]
+
+    # Filter by status
+    if status:
+        alerts = [
+            alert for alert in alerts
+            if alert["status"] == status.upper()
+        ]
+
+    # Filter by priority
+    if priority:
+        alerts = [
+            alert for alert in alerts
+            if alert["priority"] == priority.upper()
+        ]
 
     return {
         "success": True,
-        "count": len(get_alerts()),
-        "alerts": get_alerts()
+        "count": len(alerts),
+        "alerts": alerts
     }
 
 

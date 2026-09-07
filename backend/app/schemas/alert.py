@@ -15,6 +15,18 @@ class AlertCreate(BaseModel):
         description="Predicted attack probability percentage"
     )
 
+    attack_type: str = Field(
+        ...,
+        description="Detected attack type such as DDoS, PortScan, or BENIGN"
+    )
+
+    attack_type_confidence: Optional[float] = Field(
+        default=None,
+        ge=0,
+        le=100,
+        description="Confidence of the detected attack type"
+    )
+
     anomaly: str = Field(
         ...,
         description="Whether the flow was detected as anomalous"

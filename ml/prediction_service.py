@@ -3,37 +3,43 @@ import numpy as np
 import pandas as pd
 import joblib
 
-
-# ---------------------------------------------------------
-# Model paths
-# ---------------------------------------------------------
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# --------------------------------------------------
+# Load binary attack detection model
+# --------------------------------------------------
+
 RF_MODEL_PATH = os.path.join(
-    BASE_DIR,
-    "models",
-    "random_forest_baseline.joblib"
+    BASE_DIR, "models", "random_forest_baseline.joblib"
 )
 
 ISOLATION_MODEL_PATH = os.path.join(
-    BASE_DIR,
-    "models",
-    "isolation_forest_anomaly.joblib"
+    BASE_DIR, "models", "isolation_forest_anomaly.joblib"
 )
-
-
-# ---------------------------------------------------------
-# Load models
-# ---------------------------------------------------------
 
 rf_model = joblib.load(RF_MODEL_PATH)
 isolation_model = joblib.load(ISOLATION_MODEL_PATH)
 
 
-# ---------------------------------------------------------
-# Model feature names
-# ---------------------------------------------------------
+# --------------------------------------------------
+# Load attack-type classification model
+# --------------------------------------------------
+
+ATTACK_TYPE_MODEL_PATH = os.path.join(
+    BASE_DIR, "models", "attack_type_random_forest.joblib"
+)
+
+ATTACK_TYPE_ENCODER_PATH = os.path.join(
+    BASE_DIR, "models", "attack_type_label_encoder.joblib"
+)
+
+attack_type_model = joblib.load(ATTACK_TYPE_MODEL_PATH)
+attack_type_encoder = joblib.load(ATTACK_TYPE_ENCODER_PATH)
+
+
+# --------------------------------------------------
+# Load feature structure
+# --------------------------------------------------
 
 FEATURES_PATH = os.path.join(
     BASE_DIR,
@@ -64,9 +70,9 @@ FEATURE_COLUMNS = [
 ]
 
 
-# ---------------------------------------------------------
-# Risk level
-# ---------------------------------------------------------
+# --------------------------------------------------
+# Risk level calculation
+# --------------------------------------------------
 
 def get_risk_level(score):
 
@@ -83,33 +89,41 @@ def get_risk_level(score):
         return "CRITICAL"
 
 
-# ---------------------------------------------------------
-# Prediction function
-# ---------------------------------------------------------
+# --------------------------------------------------
+# Network flow prediction
+# --------------------------------------------------
 
 def predict_network_flow(flow_data):
 
+    # Convert input into DataFrame
     if isinstance(flow_data, dict):
+
         flow_data = pd.DataFrame([flow_data])
 
     elif isinstance(flow_data, pd.Series):
+
         flow_data = flow_data.to_frame().T
 
+
+    # Copy input
     flow = flow_data.copy()
 
-    # Remove non-model columns if present
+
+    # Remove unnecessary columns
     flow = flow.drop(
         columns=columns_to_drop,
         errors="ignore"
     )
 
-    # Ensure correct feature order
+
+    # Make sure feature order matches training data
     flow = flow.reindex(
         columns=FEATURE_COLUMNS,
         fill_value=0
     )
 
-    # Handle invalid values
+
+    # Clean invalid values
     flow = flow.replace(
         [np.inf, -np.inf],
         np.nan
@@ -117,61 +131,87 @@ def predict_network_flow(flow_data):
 
     flow = flow.fillna(0)
 
-    # -----------------------------------------------------
-    # Random Forest
-    # -----------------------------------------------------
 
-    attack_probability = rf_model.predict_proba(
-        flow
-    )[:, 1][0]
+    # --------------------------------------------------
+    # Binary attack detection
+    # --------------------------------------------------
 
-    prediction = rf_model.predict(
-        flow
-    )[0]
+    attack_probability = rf_model.predict_proba(flow)[:, 1][0]
 
-    # -----------------------------------------------------
-    # Isolation Forest
-    # -----------------------------------------------------
+    prediction = rf_model.predict(flow)[0]
 
-    isolation_prediction = isolation_model.predict(
-        flow
-    )[0]
+
+    # --------------------------------------------------
+    # Anomaly detection
+    # --------------------------------------------------
+
+    isolation_prediction = isolation_model.predict(flow)[0]
 
     anomaly_flag = (
-        1
-        if isolation_prediction == -1
-        else 0
+        1 if isolation_prediction == -1 else 0
     )
 
-    # -----------------------------------------------------
+
+    # --------------------------------------------------
     # Risk score
-    # -----------------------------------------------------
+    # --------------------------------------------------
 
     attack_score = attack_probability * 100
 
     risk_score = (
         0.70 * attack_score
-        +
-        0.30 * (anomaly_flag * 100)
+        + 0.30 * (anomaly_flag * 100)
     )
 
     risk_score = float(
-        np.clip(
-            risk_score,
-            0,
-            100
+        np.clip(risk_score, 0, 100)
+    )
+
+    risk_level = get_risk_level(risk_score)
+
+
+    # --------------------------------------------------
+    # Attack-type classification
+    # --------------------------------------------------
+
+    if prediction == 1:
+
+        attack_type_prediction = (
+            attack_type_model.predict(flow)[0]
         )
-    )
 
-    risk_level = get_risk_level(
-        risk_score
-    )
+        attack_type = (
+            attack_type_encoder
+            .inverse_transform(
+                [attack_type_prediction]
+            )[0]
+        )
 
-    # -----------------------------------------------------
-    # Final result
-    # -----------------------------------------------------
+        attack_type_probabilities = (
+            attack_type_model
+            .predict_proba(flow)[0]
+        )
+
+        attack_type_confidence = (
+            float(
+                np.max(
+                    attack_type_probabilities
+                )
+            ) * 100
+        )
+
+    else:
+
+        attack_type = "BENIGN"
+        attack_type_confidence = None
+
+
+    # --------------------------------------------------
+    # Final prediction result
+    # --------------------------------------------------
 
     result = {
+
         "prediction": (
             "ATTACK"
             if prediction == 1
@@ -181,6 +221,17 @@ def predict_network_flow(flow_data):
         "attack_probability": round(
             attack_probability * 100,
             2
+        ),
+
+        "attack_type": attack_type,
+
+        "attack_type_confidence": (
+            round(
+                attack_type_confidence,
+                2
+            )
+            if attack_type_confidence is not None
+            else None
         ),
 
         "anomaly": (

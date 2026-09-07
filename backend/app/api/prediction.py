@@ -15,17 +15,17 @@ router = APIRouter(
 def predict_network_traffic(flow: NetworkFlowRequest):
 
     try:
-        # Run the ML prediction
+        # Run ML prediction
         result = predict_flow(flow.features)
 
-        # Add source and destination information
+        # Prepare alert information
         alert_data = {
             **result,
             "source": flow.features.get("Source IP"),
             "destination": flow.features.get("Destination IP")
         }
 
-        # Automatically create an alert for suspicious traffic
+        # Create alert when required
         alert = create_alert(alert_data)
 
         return {
@@ -36,6 +36,7 @@ def predict_network_traffic(flow: NetworkFlowRequest):
         }
 
     except Exception as e:
+
         raise HTTPException(
             status_code=500,
             detail=str(e)
