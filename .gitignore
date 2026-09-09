@@ -1,1 +1,8 @@
 CICIDS2017_improved/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+netshield.db
+models/
+data/processed/
+.env

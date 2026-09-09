@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NetShield AI</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar"><div class="brand"><span class="brand-mark">N</span><span>NetShield <b>AI</b></span></div><div id="connection" class="status">Offline</div></header>
+  <main class="shell">
+    <section class="intro"><div><p class="eyebrow">THREAT MONITORING / LOCAL CONSOLE</p><h1>Network intelligence, grounded in evidence.</h1><p class="subcopy">Live analytics from the local CICIDS2017 flow corpus and trained detection models.</p></div><form id="auth-form" class="auth-form"><input id="email" type="email" placeholder="analyst@example.com" required><input id="password" type="password" placeholder="Password (8+ characters)" minlength="8" required><button>Sign in / register</button><small id="auth-message"></small></form></section>
+    <div id="error" class="error" hidden></div>
+    <section id="dashboard" hidden>
+      <div class="section-heading"><div><p class="eyebrow">OBSERVATORY</p><h2>Traffic posture</h2></div><button id="refresh" class="quiet">Refresh data</button></div>
+      <div class="metrics"><article><span>Records sampled</span><strong id="total">—</strong></article><article><span>Normal flow</span><strong id="normal">—</strong></article><article><span>Anomalous flow</span><strong id="anomalous">—</strong></article><article><span>Model status</span><strong id="model">—</strong></article></div>
+      <div class="grid"><article class="panel"><div class="panel-title"><h3>Attack distribution</h3><span>observed labels</span></div><div id="attacks" class="bars"></div></article><article class="panel"><div class="panel-title"><h3>Protocol mix</h3><span>flow metadata</span></div><div id="protocols" class="bars"></div></article></div>
+      <div class="panel lower"><div class="panel-title"><h3>Detection readiness</h3><span id="dataset-status">Waiting for data</span></div><p>Models are trained from local files only. Prediction routes remain unavailable until a model artifact has been created with the training command.</p></div>
+    </section>
+    <section id="loading" class="empty">Authenticate to load the monitoring console.</section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
