@@ -2,11 +2,21 @@
 <html>
 <head>
   <title>NetShield AI - Dashboard</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>NetShield AI Dashboard</h2>
-  <p id="welcome">Loading...</p>
-  <div id="stats"></div>
+  <div class="navbar">
+    <h2>NetShield AI Dashboard</h2>
+  </div>
+
+  <div class="dashboard-content">
+    <p id="welcome">Loading...</p>
+    <div class="stats-grid" id="stats-grid"></div>
+    <div class="attack-list">
+      <h3>Top Attack Types</h3>
+      <ul id="attack-list"></ul>
+    </div>
+  </div>
 
   <script>
     async function loadDashboard() {
@@ -19,13 +29,16 @@
 
       const res2 = await fetch('http://127.0.0.1:8000/traffic-stats', { headers: { 'Authorization': 'Bearer ' + token } });
       const stats = await res2.json();
-      document.getElementById('stats').innerHTML =
-        '<p>Total flows analyzed: ' + stats.total_flows + '</p>' +
-        '<p>Benign traffic: ' + stats.benign_count + '</p>' +
-        '<p>Attacks detected: ' + stats.attack_count + '</p>' +
-        '<h3>Top attack types:</h3><ul>' +
-        Object.entries(stats.top_attack_types).map(([k, v]) => '<li>' + k + ': ' + v + '</li>').join('') +
-        '</ul>';
+
+      document.getElementById('stats-grid').innerHTML =
+        '<div class="stat-card"><div class="label">Total Flows Analyzed</div><div class="value">' + stats.total_flows.toLocaleString() + '</div></div>' +
+        '<div class="stat-card"><div class="label">Benign Traffic</div><div class="value">' + stats.benign_count.toLocaleString() + '</div></div>' +
+        '<div class="stat-card"><div class="label">Attacks Detected</div><div class="value">' + stats.attack_count.toLocaleString() + '</div></div>';
+
+      document.getElementById('attack-list').innerHTML =
+        Object.entries(stats.top_attack_types).map(([k, v]) =>
+          '<li><span>' + k + '</span><span>' + v.toLocaleString() + '</span></li>'
+        ).join('');
     }
     loadDashboard();
   </script>

@@ -2,13 +2,18 @@
 <html>
 <head>
   <title>NetShield AI - Login</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>NetShield AI Login</h2>
-  <input type="text" id="username" placeholder="Username"><br><br>
-  <input type="password" id="password" placeholder="Password"><br><br>
-  <button onclick="login()">Login</button>
-  <p id="error" style="color:red;"></p>
+  <div class="login-container">
+    <div class="login-card">
+      <h2>NetShield AI</h2>
+      <input type="text" id="username" placeholder="Username">
+      <input type="password" id="password" placeholder="Password">
+      <button onclick="login()">Login</button>
+      <p id="error"></p>
+    </div>
+  </div>
 
   <script>
     async function login() {
