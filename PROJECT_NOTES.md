@@ -63,3 +63,9 @@ access.
 1. cd backend, activate venv, run: uvicorn main:app --reload
 2. Open frontend/login.html with VS Code's Live Server
 3. Log in with analyst1 / password123
+
+## 8. UI Design
+The dashboard uses a light, off-white background with emerald green
+accents for readability and a calm, professional look. Key stats are
+shown as individual cards, and attack types are listed with a green
+accent border for quick visual scanning.
