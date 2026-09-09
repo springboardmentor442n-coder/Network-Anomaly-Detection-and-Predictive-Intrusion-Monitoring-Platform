@@ -1,0 +1,12 @@
+{
+  "total_flows": 2099971,
+  "benign_count": 1594540,
+  "attack_count": 505431,
+  "top_attack_types": {
+    "Portscan": 159066,
+    "DoS Hulk": 158468,
+    "DDoS": 95144,
+    "Infiltration - Portscan": 71767,
+    "DoS GoldenEye": 7567
+  }
+}

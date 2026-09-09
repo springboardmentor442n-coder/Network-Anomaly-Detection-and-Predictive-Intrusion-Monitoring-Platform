@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
+import json
 
 app = FastAPI()
 
@@ -65,3 +66,9 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 @app.get('/dashboard')
 def dashboard(current_user: dict = Depends(get_current_user)):
     return {"message": f"Welcome {current_user['username']}, role: {current_user['role']}"}
+
+@app.get('/traffic-stats')
+def traffic_stats(current_user: dict = Depends(get_current_user)):
+    with open('traffic_summary.json') as f:
+        data = json.load(f)
+    return data

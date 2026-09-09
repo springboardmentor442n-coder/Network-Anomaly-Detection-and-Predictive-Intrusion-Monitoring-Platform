@@ -6,27 +6,27 @@
 <body>
   <h2>NetShield AI Dashboard</h2>
   <p id="welcome">Loading...</p>
+  <div id="stats"></div>
 
   <script>
     async function loadDashboard() {
       const token = localStorage.getItem('token');
-      if (!token) {
-        window.location.href = 'login.html';
-        return;
-      }
+      if (!token) { window.location.href = 'login.html'; return; }
 
-      const response = await fetch('http://127.0.0.1:8000/dashboard', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res1 = await fetch('http://127.0.0.1:8000/dashboard', { headers: { 'Authorization': 'Bearer ' + token } });
+      const data1 = await res1.json();
+      document.getElementById('welcome').innerText = data1.message;
 
-      if (response.ok) {
-        const data = await response.json();
-        document.getElementById('welcome').innerText = data.message;
-      } else {
-        document.getElementById('welcome').innerText = 'Session expired. Please log in again.';
-      }
+      const res2 = await fetch('http://127.0.0.1:8000/traffic-stats', { headers: { 'Authorization': 'Bearer ' + token } });
+      const stats = await res2.json();
+      document.getElementById('stats').innerHTML =
+        '<p>Total flows analyzed: ' + stats.total_flows + '</p>' +
+        '<p>Benign traffic: ' + stats.benign_count + '</p>' +
+        '<p>Attacks detected: ' + stats.attack_count + '</p>' +
+        '<h3>Top attack types:</h3><ul>' +
+        Object.entries(stats.top_attack_types).map(([k, v]) => '<li>' + k + ': ' + v + '</li>').join('') +
+        '</ul>';
     }
-
     loadDashboard();
   </script>
 </body>
