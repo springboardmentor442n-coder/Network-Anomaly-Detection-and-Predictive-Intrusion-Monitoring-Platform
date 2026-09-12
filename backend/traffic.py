@@ -20,14 +20,17 @@ attack_types = {}
 for file in files:
     df = pd.read_csv(file, low_memory=False)
 
+    df.columns = df.columns.str.strip()
+
     total_records += len(df)
 
     if "Label" in df.columns:
-        labels = df["Label"].astype(str).str.strip()
+        labels = df["Label"].astype(str).str.strip().str.upper()
 
         benign_records += (labels == "BENIGN").sum()
 
         attacks = labels[labels != "BENIGN"]
+
         attack_records += len(attacks)
 
         for attack in attacks:
@@ -39,5 +42,6 @@ print("Benign Traffic:", benign_records)
 print("Attack Traffic:", attack_records)
 
 print("\nAttack Types:")
+
 for attack, count in attack_types.items():
     print(attack, ":", count)
