@@ -7,6 +7,11 @@ from scapy.all import sniff, IP, TCP, UDP, ICMP
 
 class TrafficAnalyzer:
     def __init__(self):
+        self.reset()
+
+    def reset(self):
+        """Reset all traffic statistics for a new capture."""
+
         self.total_packets = 0
         self.total_bytes = 0
         self.protocol_counts = Counter()
@@ -66,17 +71,57 @@ class TrafficAnalyzer:
         )
 
         return {
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "capture_duration_seconds": round(duration, 2),
+            "timestamp": datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            ),
+            "capture_duration_seconds": round(
+                duration,
+                2,
+            ),
             "total_packets": self.total_packets,
             "total_bytes": self.total_bytes,
-            "average_packet_size": round(average_packet_size, 2),
-            "packets_per_second": round(packets_per_second, 2),
-            "bytes_per_second": round(bytes_per_second, 2),
-            "protocol_counts": dict(self.protocol_counts),
-            "top_source_ips": self.source_ips.most_common(5),
-            "top_destination_ips": self.destination_ips.most_common(5),
+            "average_packet_size": round(
+                average_packet_size,
+                2,
+            ),
+            "packets_per_second": round(
+                packets_per_second,
+                2,
+            ),
+            "bytes_per_second": round(
+                bytes_per_second,
+                2,
+            ),
+            "protocol_counts": dict(
+                self.protocol_counts
+            ),
+            "top_source_ips": self.source_ips.most_common(
+                5
+            ),
+            "top_destination_ips": self.destination_ips.most_common(
+                5
+            ),
         }
+
+    def capture_and_analyze(self, duration=5):
+        """
+        Capture live traffic for the specified duration
+        and return the analytics report.
+        """
+
+        self.reset()
+
+        start_time = time.time()
+
+        sniff(
+            timeout=duration,
+            prn=self.process_packet,
+            store=False,
+        )
+
+        elapsed_time = time.time() - start_time
+
+        return self.get_report(elapsed_time)
 
     def print_report(self, report):
         """Display the traffic analytics report."""
@@ -85,34 +130,68 @@ class TrafficAnalyzer:
         print("NetShield AI - Traffic Analytics Report")
         print("=" * 70)
 
-        print(f"Timestamp:              {report['timestamp']}")
         print(
-            f"Capture duration:      "
+            f"Timestamp:              "
+            f"{report['timestamp']}"
+        )
+
+        print(
+            f"Capture duration:       "
             f"{report['capture_duration_seconds']} seconds"
         )
-        print(f"Total packets:          {report['total_packets']}")
-        print(f"Total bytes:            {report['total_bytes']}")
-        print(f"Average packet size:    {report['average_packet_size']} bytes")
-        print(f"Packets per second:     {report['packets_per_second']}")
-        print(f"Bytes per second:       {report['bytes_per_second']}")
+
+        print(
+            f"Total packets:          "
+            f"{report['total_packets']}"
+        )
+
+        print(
+            f"Total bytes:            "
+            f"{report['total_bytes']}"
+        )
+
+        print(
+            f"Average packet size:    "
+            f"{report['average_packet_size']} bytes"
+        )
+
+        print(
+            f"Packets per second:     "
+            f"{report['packets_per_second']}"
+        )
+
+        print(
+            f"Bytes per second:       "
+            f"{report['bytes_per_second']}"
+        )
 
         print("\nProtocol Distribution")
         print("-" * 70)
 
-        for protocol, count in self.protocol_counts.most_common():
-            print(f"{protocol:<15} {count}")
+        for protocol, count in sorted(
+            report["protocol_counts"].items(),
+            key=lambda item: item[1],
+            reverse=True,
+        ):
+            print(
+                f"{protocol:<15} {count}"
+            )
 
         print("\nTop Source IPs")
         print("-" * 70)
 
-        for ip, count in self.source_ips.most_common(5):
-            print(f"{ip:<25} {count} packets")
+        for ip, count in report["top_source_ips"]:
+            print(
+                f"{ip:<25} {count} packets"
+            )
 
         print("\nTop Destination IPs")
         print("-" * 70)
 
-        for ip, count in self.destination_ips.most_common(5):
-            print(f"{ip:<25} {count} packets")
+        for ip, count in report["top_destination_ips"]:
+            print(
+                f"{ip:<25} {count} packets"
+            )
 
         print("=" * 70)
 
@@ -125,21 +204,23 @@ def start_traffic_analysis(duration=15):
     print("=" * 70)
     print("NetShield AI - Live Traffic Analytics")
     print("=" * 70)
-    print(f"Capturing live traffic for {duration} seconds...")
-    print("Generate some normal network activity during the capture.")
-    print("-" * 70)
 
-    start_time = time.time()
-
-    sniff(
-        timeout=duration,
-        prn=analyzer.process_packet,
-        store=False
+    print(
+        f"Capturing live traffic for "
+        f"{duration} seconds..."
     )
 
-    elapsed_time = time.time() - start_time
+    print(
+        "Generate some normal network activity "
+        "during the capture."
+    )
 
-    report = analyzer.get_report(elapsed_time)
+    print("-" * 70)
+
+    report = analyzer.capture_and_analyze(
+        duration
+    )
+
     analyzer.print_report(report)
 
 
