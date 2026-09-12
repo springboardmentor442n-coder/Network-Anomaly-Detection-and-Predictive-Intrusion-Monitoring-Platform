@@ -1,126 +1,145 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
-from app.schemas.alert import AlertCreate
-from app.services.alert_service import (
-    create_alert,
-    get_alerts,
-    get_alert_by_id,
-    update_alert_status
-)
+from backend.app.core.auth import get_current_user
+from backend.app.core.database import get_db
+from backend.app.models.alert import Alert
+from backend.app.schemas.alert import AlertCreate, AlertResponse
 
 
 router = APIRouter(
-    prefix="/api/alerts",
-    tags=["Alerts"]
+    prefix="/alerts",
+    tags=["Alerts"],
 )
 
 
-@router.post("/")
-def generate_alert(alert: AlertCreate):
+@router.post(
+    "",
+    response_model=AlertResponse,
+)
+def create_alert(
+    alert_data: AlertCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Create and store a security alert.
+    """
 
-    result = create_alert(
-        alert.model_dump()
+    alert = Alert(
+        prediction=alert_data.prediction,
+        attack_probability=alert_data.attack_probability,
+        attack_type=alert_data.attack_type,
+        attack_type_confidence=alert_data.attack_type_confidence,
+        anomaly=alert_data.anomaly,
+        risk_score=alert_data.risk_score,
+        risk_level=alert_data.risk_level,
+        source=alert_data.source,
+        destination=alert_data.destination,
+        status="OPEN",
     )
 
-    if result is None:
-        return {
-            "success": True,
-            "alert_created": False,
-            "message": "No alert generated for benign low-risk traffic"
+    db.add(alert)
+    db.commit()
+    db.refresh(alert)
+
+    return AlertResponse(
+        alert_id=alert.alert_id,
+        prediction=alert.prediction,
+        attack_probability=alert.attack_probability,
+        attack_type=alert.attack_type,
+        attack_type_confidence=alert.attack_type_confidence,
+        anomaly=alert.anomaly,
+        risk_score=alert.risk_score,
+        risk_level=alert.risk_level,
+        source=alert.source,
+        destination=alert.destination,
+        status=alert.status,
+        message="Alert created successfully",
+    )
+
+
+@router.get("")
+def get_alerts(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Return all security alerts.
+    """
+
+    alerts = (
+        db.query(Alert)
+        .order_by(Alert.alert_id.desc())
+        .all()
+    )
+
+    return [
+        {
+            "alert_id": alert.alert_id,
+            "prediction": alert.prediction,
+            "attack_probability": alert.attack_probability,
+            "attack_type": alert.attack_type,
+            "attack_type_confidence": alert.attack_type_confidence,
+            "anomaly": alert.anomaly,
+            "risk_score": alert.risk_score,
+            "risk_level": alert.risk_level,
+            "source": alert.source,
+            "destination": alert.destination,
+            "status": alert.status,
+            "created_at": alert.created_at,
         }
-
-    return {
-        "success": True,
-        "alert_created": True,
-        "alert": result
-    }
-
-@router.get("/")
-def list_alerts(
-    risk_level: str = None,
-    status: str = None,
-    priority: str = None
-):
-    alerts = get_alerts()
-
-    # Filter by risk level
-    if risk_level:
-        alerts = [
-            alert for alert in alerts
-            if alert["risk_level"] == risk_level.upper()
-        ]
-
-    # Filter by status
-    if status:
-        alerts = [
-            alert for alert in alerts
-            if alert["status"] == status.upper()
-        ]
-
-    # Filter by priority
-    if priority:
-        alerts = [
-            alert for alert in alerts
-            if alert["priority"] == priority.upper()
-        ]
-
-    return {
-        "success": True,
-        "count": len(alerts),
-        "alerts": alerts
-    }
-
-
-@router.get("/{alert_id}")
-def get_single_alert(alert_id: int):
-
-    alert = get_alert_by_id(alert_id)
-
-    if alert is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Alert not found"
-        )
-
-    return {
-        "success": True,
-        "alert": alert
-    }
-
-
-@router.put("/{alert_id}/status")
-def change_alert_status(
-    alert_id: int,
-    status: str
-):
-
-    allowed_statuses = [
-        "OPEN",
-        "INVESTIGATING",
-        "RESOLVED"
+        for alert in alerts
     ]
 
-    status = status.upper()
 
-    if status not in allowed_statuses:
+@router.patch("/{alert_id}/status")
+def update_alert_status(
+    alert_id: int,
+    new_status: str,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Update the status of an existing alert.
+    """
+
+    allowed_statuses = {
+        "OPEN",
+        "ACKNOWLEDGED",
+        "RESOLVED",
+    }
+
+    new_status = new_status.upper()
+
+    if new_status not in allowed_statuses:
         raise HTTPException(
-            status_code=400,
-            detail=f"Invalid status. Use one of: {allowed_statuses}"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Invalid status. "
+                "Use OPEN, ACKNOWLEDGED, or RESOLVED."
+            ),
         )
 
-    alert = update_alert_status(
-        alert_id,
-        status
+    alert = (
+        db.query(Alert)
+        .filter(Alert.alert_id == alert_id)
+        .first()
     )
 
     if alert is None:
         raise HTTPException(
-            status_code=404,
-            detail="Alert not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Alert not found",
         )
 
+    alert.status = new_status
+
+    db.commit()
+    db.refresh(alert)
+
     return {
-        "success": True,
-        "message": "Alert status updated",
-        "alert": alert
+        "message": "Alert status updated successfully",
+        "alert_id": alert.alert_id,
+        "status": alert.status,
     }

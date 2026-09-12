@@ -1,19 +1,40 @@
 # Python
-.venv/
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
 
-# Large ML datasets
-ml/data/CICIDS2017/
-ml/data/UNSW-NB15/
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+.env.*
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Node
+node_modules/
+frontend/dist/
+
+# Vite
+.vite/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
 
 # Jupyter
 .ipynb_checkpoints/
 
-# Model files
-ml/models/*.pkl
-ml/models/*.joblib
-
-# Temporary files
-*.tmp
-*.log
+# Large ML datasets - keep locally, download from official sources
+ml/data/CICIDS2017/raw/
+ml/data/CICIDS2017/processed/
+ml/data/UNSW-NB15/raw/
