@@ -25,8 +25,9 @@ BASE_URL = "http://127.0.0.1:8000"
 
 LOGIN_URL = f"{BASE_URL}/auth/login"
 PREDICTION_URL = f"{BASE_URL}/prediction"
+
 USERNAME = "admin"
-PASSWORD = input("Enter admin password: ")
+PASSWORD = None
 
 
 # ============================================================
@@ -95,7 +96,6 @@ print(
 # ============================================================
 
 benign_flow = data.iloc[benign_index]
-
 attack_flow = data.iloc[attack_index]
 
 
@@ -111,7 +111,6 @@ print(
     "Binary_Label:",
     benign_flow["Binary_Label"],
 )
-
 
 print("\n" + "=" * 60)
 print("ATTACK ROW CHECK")
@@ -233,9 +232,7 @@ def run_flow_api_test(
     ).to_dict()
 
     headers = {
-        "Authorization": (
-            f"Bearer {access_token}"
-        )
+        "Authorization": f"Bearer {access_token}"
     }
 
     try:
@@ -254,9 +251,9 @@ def run_flow_api_test(
         )
 
         if response.status_code == 200:
-            print("API Response:")
-
             result = response.json()
+
+            print("API Response:")
 
             print(
                 "Prediction:",
@@ -317,7 +314,7 @@ def run_flow_api_test(
 
     except requests.exceptions.Timeout:
         print(
-            "ERROR: Prediction request timed out."
+            "ERROR: FastAPI request timed out."
         )
 
     except requests.exceptions.RequestException as error:
@@ -330,47 +327,54 @@ def run_flow_api_test(
 
 
 # ============================================================
-# MAIN TEST FLOW
+# MAIN PROGRAM
 # ============================================================
 
-access_token = get_access_token()
+if __name__ == "__main__":
 
-if access_token is None:
-    print("\n" + "=" * 60)
-    print("FASTAPI + ML END-TO-END TEST STOPPED")
-    print("=" * 60)
-    print(
-        "Authentication failed, so prediction tests were skipped."
+    PASSWORD = input(
+        "Enter admin password: "
     )
-    raise SystemExit(1)
 
+    access_token = get_access_token()
 
-# ============================================================
-# TEST BENIGN FLOW
-# ============================================================
+    if access_token is None:
+        print("\n" + "=" * 60)
+        print(
+            "FASTAPI + ML END-TO-END TEST STOPPED"
+        )
+        print("=" * 60)
+        print(
+            "Authentication failed, so prediction tests were skipped."
+        )
+        raise SystemExit(1)
 
-run_flow_api_test(
-    benign_flow,
-    "BENIGN FLOW API TEST",
-    access_token,
-)
+    # --------------------------------------------------------
+    # TEST BENIGN FLOW
+    # --------------------------------------------------------
 
+    run_flow_api_test(
+        benign_flow,
+        "BENIGN FLOW API TEST",
+        access_token,
+    )
 
-# ============================================================
-# TEST ATTACK FLOW
-# ============================================================
+    # --------------------------------------------------------
+    # TEST ATTACK FLOW
+    # --------------------------------------------------------
 
-run_flow_api_test(
-    attack_flow,
-    "ATTACK FLOW API TEST",
-    access_token,
-)
+    run_flow_api_test(
+        attack_flow,
+        "ATTACK FLOW API TEST",
+        access_token,
+    )
 
+    # --------------------------------------------------------
+    # FINAL MESSAGE
+    # --------------------------------------------------------
 
-# ============================================================
-# FINAL MESSAGE
-# ============================================================
-
-print("\n" + "=" * 60)
-print("FASTAPI + ML END-TO-END TEST COMPLETED")
-print("=" * 60)
+    print("\n" + "=" * 60)
+    print(
+        "FASTAPI + ML END-TO-END TEST COMPLETED"
+    )
+    print("=" * 60)
