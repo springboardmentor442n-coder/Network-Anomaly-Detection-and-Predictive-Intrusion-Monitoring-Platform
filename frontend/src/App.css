@@ -771,3 +771,164 @@ input {
     padding: 28px 22px;
   }
 }
+/* ============================= */
+/* SIDEBAR USER / LOGOUT POLISH */
+/* ============================= */
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  flex-shrink: 0;
+}
+
+.user-details {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.user-details strong {
+  display: block;
+  color: #ffffff;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.role-badge {
+  display: inline-block;
+  width: fit-content;
+  color: #93c5fd;
+  background: rgba(37, 99, 235, 0.2);
+  border-radius: 10px;
+  padding: 2px 7px;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.logout-button {
+  flex-shrink: 0;
+  margin-left: auto;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid #344054;
+  background: #1d2939;
+  color: #d0d5dd;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 17px;
+}
+
+.logout-button:hover {
+  background: #344054;
+  color: #ffffff;
+}
+
+/* ============================= */
+/* FINAL SIDEBAR USER LAYOUT */
+/* ============================= */
+
+.sidebar-user {
+  margin-top: auto;
+  padding: 16px 10px 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  row-gap: 4px;
+  align-items: center;
+}
+
+.sidebar-user .user-avatar {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  flex-shrink: 0;
+}
+
+.sidebar-user .user-details {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+
+  padding-right: 42px;
+}
+
+.sidebar-user .user-details strong {
+  display: block;
+  color: #ffffff;
+  font-size: 13px;
+  line-height: 1.2;
+
+  max-width: 110px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-user .role-badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 3px 8px;
+
+  border-radius: 999px;
+
+  background: rgba(37, 99, 235, 0.18);
+  color: #93c5fd;
+
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.sidebar-user .logout-button {
+  position: absolute;
+
+  right: 10px;
+  bottom: 6px;
+
+  width: 34px;
+  height: 34px;
+
+  margin: 0;
+  padding: 0;
+
+  border: 1px solid #344054;
+  border-radius: 7px;
+
+  background: #1d2939;
+  color: #d0d5dd;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  font-size: 17px;
+}
+
+.sidebar-user .logout-button:hover {
+  background: #344054;
+  color: #ffffff;
+}
