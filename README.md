@@ -1,57 +1,73 @@
-## Contributing Guidelines (For Interns / Collaborators)
+# NetShield AI
 
-All interns added as collaborators to this repository must follow the branch workflow below. **Direct commits or pushes to the `main` branch are not allowed.**
+## AI-Powered Network Anomaly Detection and Predictive Intrusion Monitoring Platform
 
-> Note: `main` only contains the `LICENSE` and `README.md` — it is not used for active development. There is no need to pull the latest `main` into your branch at any point.
+NetShield AI is a network-security monitoring platform that combines live network traffic analysis with machine-learning-based attack detection, anomaly detection, risk scoring, attack classification, and security alert management.
 
-### 1. Branch Naming
+The system is designed as a development and demonstration platform for monitoring network behavior and identifying potentially malicious activity.
 
-- Every intern must create their own branch off `main`, named after themselves.
-- Suggested naming convention: `firstname-lastname` (all lowercase, hyphen-separated).
-  - Example: `john-doe`, `aisha-khan`
+---
 
-### 2. How to Create Your Branch
+## 1. Key Features
 
-**Option A — Clone and push (recommended)**
+- Live network packet capture using Scapy/Npcap
+- Network traffic and protocol analysis
+- Real-time flow feature extraction
+- Random Forest attack detection
+- Isolation Forest anomaly detection
+- Attack-type classification
+- Risk scoring from 0 to 100
+- Risk levels: LOW, MEDIUM, HIGH, CRITICAL
+- Automatic security-alert generation
+- Alert lifecycle management
+- JWT authentication
+- Role-based access control
+- SQLite database persistence
+- FastAPI backend
+- React/Vite frontend
+- Real-time monitoring dashboard
+- Automated pytest tests
+- End-to-end API and ML validation
 
-```bash
-# Clone the repository
-git clone https://github.com/springboardmentor442n-coder/Network-Anomaly-Detection-and-Predictive-Intrusion-Monitoring-Platform.git
+---
 
-# Move into the project folder
-cd Network-Anomaly-Detection-and-Predictive-Intrusion-Monitoring-Platform
+## 2. System Architecture
 
-# Create and switch to your own branch (off main)
-git checkout -b your-name
-
-# ... make your changes ...
-
-# Stage, commit, and push your changes to YOUR branch only
-git add .
-git commit -m "Describe your change here"
-git push origin your-name
-```
-
-**Option B — GitHub UI upload**
-
-1. Go to the repository on GitHub.
-2. Switch the branch dropdown from `main` to your own branch (create it first via **Branch: main → View all branches → New branch**, named after yourself).
-3. Once on your branch, use **Add file → Upload files** to upload your code.
-4. Commit directly to your branch (not `main`).
-
-### 3. Rules
-
-- ❌ Do **not** push or upload code directly to `main`.
-- ❌ Do **not** push code to another intern's branch.
-- ✅ Only push/upload code to the branch that carries your own name.
-- Keep uploading/pushing your code to your branch regularly as you make progress. No pull requests are required — your branch itself is the deliverable.
-
-### 4. Summary
-
-| Action | Allowed? |
-|---|---|
-| Push to `main` directly | ❌ No |
-| Create your own branch from `main` | ✅ Yes |
-| Push/upload code to your own branch | ✅ Yes |
-| Push/upload code to someone else's branch | ❌ No |
-| Open a Pull Request | Not required |
+```text
+Network Traffic
+       |
+       v
+Packet Capture
+       |
+       v
+Packet Processing
+       |
+       v
+Traffic Analytics
+       |
+       v
+Real-Time Flow Feature Extraction
+       |
+       v
++-------------------------------+
+|        ML Prediction          |
+|                               |
+| Random Forest Attack Detection|
+| Isolation Forest Anomaly      |
+| Attack-Type Classification    |
++---------------+---------------+
+                |
+                v
+           Risk Scoring
+                |
+                v
+          Alert Generation
+                |
+                v
+        SQLite Persistence
+                |
+                v
+        FastAPI Backend
+                |
+                v
+        React Dashboard
