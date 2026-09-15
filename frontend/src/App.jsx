@@ -16,6 +16,10 @@ function App() {
   const [traffic, setTraffic] = useState(null);
   const [trafficLoading, setTrafficLoading] = useState(false);
 
+  // ==========================================
+  // USERS
+  // ==========================================
+
   const users = [
     {
       username: "admin",
@@ -34,6 +38,10 @@ function App() {
     },
   ];
 
+  // ==========================================
+  // LOGIN
+  // ==========================================
+
   const login = () => {
     setAuthError("");
 
@@ -51,6 +59,10 @@ function App() {
     }
   };
 
+  // ==========================================
+  // REGISTER
+  // ==========================================
+
   const register = () => {
     setAuthError("");
 
@@ -63,9 +75,15 @@ function App() {
     setShowRegister(false);
   };
 
+  // ==========================================
+  // URL SECURITY SCANNER
+  // ==========================================
+
   const scanUrl = async () => {
     if (!url) {
-      setResult({ error: "Please enter a URL" });
+      setResult({
+        error: "Please enter a URL",
+      });
       return;
     }
 
@@ -80,11 +98,14 @@ function App() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ url }),
+          body: JSON.stringify({
+            url: url,
+          }),
         }
       );
 
       const data = await response.json();
+
       setResult(data);
     } catch (error) {
       setResult({
@@ -95,6 +116,10 @@ function App() {
     setLoading(false);
   };
 
+  // ==========================================
+  // LOAD TRAFFIC ANALYTICS
+  // ==========================================
+
   const loadTraffic = async () => {
     setTrafficLoading(true);
 
@@ -104,6 +129,7 @@ function App() {
       );
 
       const data = await response.json();
+
       setTraffic(data);
     } catch (error) {
       setTraffic({
@@ -114,11 +140,19 @@ function App() {
     setTrafficLoading(false);
   };
 
+  // ==========================================
+  // LOAD DATA AFTER LOGIN
+  // ==========================================
+
   useEffect(() => {
     if (isLoggedIn) {
       loadTraffic();
     }
   }, [isLoggedIn]);
+
+  // ==========================================
+  // LOGIN PAGE
+  // ==========================================
 
   if (!isLoggedIn) {
     return (
@@ -149,14 +183,18 @@ function App() {
           </p>
 
           <h2>
-            {showRegister ? "Create Account" : "Login"}
+            {showRegister
+              ? "Create Account"
+              : "Login"}
           </h2>
 
           <input
             type="text"
             placeholder="Username"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) =>
+              setUsername(e.target.value)
+            }
             style={{
               width: "90%",
               padding: "12px",
@@ -170,7 +208,9 @@ function App() {
             type="password"
             placeholder="Password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
             style={{
               width: "90%",
               padding: "12px",
@@ -181,7 +221,9 @@ function App() {
           />
 
           <button
-            onClick={showRegister ? register : login}
+            onClick={
+              showRegister ? register : login
+            }
             style={{
               padding: "12px 30px",
               margin: "15px",
@@ -190,7 +232,9 @@ function App() {
               cursor: "pointer",
             }}
           >
-            {showRegister ? "Register" : "Login"}
+            {showRegister
+              ? "Register"
+              : "Login"}
           </button>
 
           {authError && (
@@ -217,7 +261,9 @@ function App() {
               cursor: "pointer",
             }}
           >
-            {showRegister ? "Go to Login" : "Create Account"}
+            {showRegister
+              ? "Go to Login"
+              : "Create Account"}
           </button>
 
           {!showRegister && (
@@ -227,7 +273,9 @@ function App() {
               </p>
 
               <p>Admin: admin / admin123</p>
-              <p>Analyst: analyst / analyst123</p>
+              <p>
+                Analyst: analyst / analyst123
+              </p>
               <p>User: user / user123</p>
             </div>
           )}
@@ -236,27 +284,37 @@ function App() {
     );
   }
 
+  // ==========================================
+  // TRAFFIC VALUES
+  // ==========================================
+
   const total =
-    traffic?.total ??
     traffic?.total_traffic ??
+    traffic?.total ??
     0;
 
+  // FIXED: backend sends normal_traffic
   const benign =
+    traffic?.normal_traffic ??
     traffic?.benign ??
     traffic?.normal ??
     traffic?.benign_traffic ??
     0;
 
   const attacks =
+    traffic?.attack_traffic ??
     traffic?.attacks ??
     traffic?.attack ??
-    traffic?.attack_traffic ??
     0;
 
   const attackTypes =
     traffic?.attack_types ??
     traffic?.examples ??
     {};
+
+  // ==========================================
+  // DASHBOARD
+  // ==========================================
 
   return (
     <div
@@ -267,6 +325,8 @@ function App() {
         color: "#0f172a",
       }}
     >
+      {/* HEADER */}
+
       <header
         style={{
           background: "#0f172a",
@@ -289,6 +349,7 @@ function App() {
 
         <div>
           <b>{username}</b>
+
           <span style={{ marginLeft: "15px" }}>
             {role}
           </span>
@@ -313,7 +374,13 @@ function App() {
         </div>
       </header>
 
-      <main style={{ padding: "30px 40px" }}>
+      {/* MAIN */}
+
+      <main
+        style={{
+          padding: "30px 40px",
+        }}
+      >
         <h2>Security Overview</h2>
 
         {trafficLoading ? (
@@ -324,6 +391,8 @@ function App() {
           </p>
         ) : (
           <>
+            {/* SECURITY CARDS */}
+
             <div
               style={{
                 display: "grid",
@@ -332,6 +401,8 @@ function App() {
                 gap: "20px",
               }}
             >
+              {/* TOTAL TRAFFIC */}
+
               <div
                 style={{
                   background: "white",
@@ -342,8 +413,13 @@ function App() {
                 }}
               >
                 <h3>Total Traffic</h3>
-                <h1>{total.toLocaleString()}</h1>
+
+                <h1>
+                  {total.toLocaleString()}
+                </h1>
               </div>
+
+              {/* NORMAL TRAFFIC */}
 
               <div
                 style={{
@@ -355,8 +431,13 @@ function App() {
                 }}
               >
                 <h3>Normal Traffic</h3>
-                <h1>{benign.toLocaleString()}</h1>
+
+                <h1>
+                  {benign.toLocaleString()}
+                </h1>
               </div>
+
+              {/* ATTACKS */}
 
               <div
                 style={{
@@ -368,9 +449,14 @@ function App() {
                 }}
               >
                 <h3>Attacks Detected</h3>
-                <h1>{attacks.toLocaleString()}</h1>
+
+                <h1>
+                  {attacks.toLocaleString()}
+                </h1>
               </div>
             </div>
+
+            {/* ATTACK TYPES */}
 
             <div
               style={{
@@ -384,8 +470,12 @@ function App() {
             >
               <h2>Attack Types</h2>
 
-              {Object.keys(attackTypes).length === 0 ? (
-                <p>No attack type information available.</p>
+              {Object.keys(attackTypes).length ===
+              0 ? (
+                <p>
+                  No attack type information
+                  available.
+                </p>
               ) : (
                 Object.entries(attackTypes).map(
                   ([name, count]) => (
@@ -401,8 +491,11 @@ function App() {
                       }}
                     >
                       <b>{name}</b>
+
                       <span>
-                        {Number(count).toLocaleString()}
+                        {Number(
+                          count
+                        ).toLocaleString()}
                       </span>
                     </div>
                   )
@@ -411,6 +504,8 @@ function App() {
             </div>
           </>
         )}
+
+        {/* URL SECURITY SCANNER */}
 
         <div
           style={{
@@ -435,7 +530,8 @@ function App() {
               padding: "12px",
               width: "60%",
               borderRadius: "7px",
-              border: "1px solid #cbd5e1",
+              border:
+                "1px solid #cbd5e1",
             }}
           />
 
@@ -451,8 +547,12 @@ function App() {
               color: "white",
             }}
           >
-            {loading ? "Scanning..." : "Scan URL"}
+            {loading
+              ? "Scanning..."
+              : "Scan URL"}
           </button>
+
+          {/* SCAN RESULT */}
 
           {result && (
             <div
@@ -472,25 +572,31 @@ function App() {
                   <h3>Scan Result</h3>
 
                   <p>
-                    <b>URL:</b> {result.url}
+                    <b>URL:</b>{" "}
+                    {result.url}
                   </p>
 
                   <p>
                     <b>Risk Level:</b>{" "}
-                    {result.risk}
+                    {result.risk_level}
                   </p>
 
                   <p>
-                    <b>Score:</b> {result.score}
+                    <b>Score:</b>{" "}
+                    {result.score}
                   </p>
 
                   {result.warnings &&
-                    result.warnings.length > 0 && (
+                    result.warnings.length >
+                      0 && (
                       <div>
                         <h4>Warnings</h4>
 
                         {result.warnings.map(
-                          (warning, index) => (
+                          (
+                            warning,
+                            index
+                          ) => (
                             <p key={index}>
                               ⚠️ {warning}
                             </p>

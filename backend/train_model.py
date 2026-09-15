@@ -6,7 +6,11 @@ import joblib
 
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    confusion_matrix
+)
 
 
 # ==========================================
@@ -16,11 +20,15 @@ from sklearn.metrics import accuracy_score, classification_report
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 CICIDS_DIR = os.path.join(
-    BASE_DIR, "data", "MachineLearningCVE"
+    BASE_DIR,
+    "data",
+    "MachineLearningCVE"
 )
 
 UNSW_DIR = os.path.join(
-    BASE_DIR, "data", "UNSW-NB15"
+    BASE_DIR,
+    "data",
+    "UNSW-NB15"
 )
 
 
@@ -37,6 +45,7 @@ cicids_files = glob.glob(
 cicids_list = []
 
 for file in cicids_files:
+
     print("Reading:", os.path.basename(file))
 
     df = pd.read_csv(
@@ -49,6 +58,7 @@ for file in cicids_files:
 
     # Take a manageable sample
     if len(df) > 10000:
+
         df = df.sample(
             n=10000,
             random_state=42
@@ -57,12 +67,23 @@ for file in cicids_files:
     cicids_list.append(df)
 
 
+# Check files
+if not cicids_list:
+
+    raise Exception(
+        "No CICIDS2017 CSV files found!"
+    )
+
+
 cicids = pd.concat(
     cicids_list,
     ignore_index=True
 )
 
-print("CICIDS samples:", len(cicids))
+print(
+    "CICIDS samples:",
+    len(cicids)
+)
 
 
 # ==========================================
@@ -72,16 +93,24 @@ print("CICIDS samples:", len(cicids))
 label_column = None
 
 for col in cicids.columns:
+
     if col.lower() == "label":
+
         label_column = col
         break
 
+
 if label_column is None:
+
     raise Exception(
         "Label column not found in CICIDS dataset"
     )
 
-print("Label column:", label_column)
+
+print(
+    "Label column:",
+    label_column
+)
 
 
 # ==========================================
@@ -95,9 +124,12 @@ cicids[label_column] = (
 )
 
 
-# Convert labels:
+# ==========================================
+# CONVERT LABELS
+# ==========================================
+
 # BENIGN = 0
-# Attack = 1
+# ATTACK = 1
 
 cicids["target"] = (
     cicids[label_column]
@@ -115,26 +147,38 @@ X = cicids.select_dtypes(
     include=["number"]
 ).copy()
 
+
 # Remove target from features
+
 if "target" in X.columns:
-    X = X.drop(columns=["target"])
+
+    X = X.drop(
+        columns=["target"]
+    )
 
 
 y = cicids["target"]
 
 
-# Replace infinity values
+# ==========================================
+# HANDLE INFINITY VALUES
+# ==========================================
+
 X = X.replace(
     [float("inf"), float("-inf")],
     0
 )
 
-# Replace missing values
+
+# ==========================================
+# HANDLE MISSING VALUES
+# ==========================================
+
 X = X.fillna(0)
 
 
 # ==========================================
-# REMOVE CONSTANT / INVALID COLUMNS
+# REMOVE CONSTANT COLUMNS
 # ==========================================
 
 X = X.loc[
@@ -143,19 +187,39 @@ X = X.loc[
 ]
 
 
-print("Features used:", len(X.columns))
+print(
+    "Features used:",
+    len(X.columns)
+)
 
 
 # ==========================================
 # TRAIN / TEST SPLIT
 # ==========================================
 
+print("\nSplitting dataset...")
+
 X_train, X_test, y_train, y_test = train_test_split(
+
     X,
     y,
+
     test_size=0.2,
+
     random_state=42,
+
     stratify=y
+)
+
+
+print(
+    "Training samples:",
+    len(X_train)
+)
+
+print(
+    "Testing samples:",
+    len(X_test)
 )
 
 
@@ -163,14 +227,21 @@ X_train, X_test, y_train, y_test = train_test_split(
 # TRAIN RANDOM FOREST
 # ==========================================
 
-print("\nTraining Random Forest...")
+print(
+    "\nTraining Random Forest..."
+)
 
 model = RandomForestClassifier(
+
     n_estimators=100,
+
     random_state=42,
+
     n_jobs=-1,
+
     class_weight="balanced"
 )
+
 
 model.fit(
     X_train,
@@ -178,26 +249,110 @@ model.fit(
 )
 
 
+print(
+    "Training completed!"
+)
+
+
 # ==========================================
-# EVALUATION
+# MODEL PREDICTION
 # ==========================================
 
-predictions = model.predict(X_test)
+print(
+    "\nGenerating predictions..."
+)
+
+predictions = model.predict(
+    X_test
+)
+
+
+# ==========================================
+# ACCURACY
+# ==========================================
 
 accuracy = accuracy_score(
     y_test,
     predictions
 )
 
-print("\nModel Accuracy:",
-      round(accuracy * 100, 2), "%")
 
-print("\nClassification Report:")
+# ==========================================
+# CLASSIFICATION REPORT
+# ==========================================
+
+report = classification_report(
+
+    y_test,
+
+    predictions,
+
+    target_names=[
+        "Normal",
+        "Attack"
+    ]
+)
+
+
+# ==========================================
+# CONFUSION MATRIX
+# ==========================================
+
+cm = confusion_matrix(
+
+    y_test,
+
+    predictions
+)
+
+
+# ==========================================
+# DISPLAY RESULTS
+# ==========================================
+
 print(
-    classification_report(
-        y_test,
-        predictions
-    )
+    "\n=========================================="
+)
+
+print(
+    "        MODEL EVALUATION RESULTS"
+)
+
+print(
+    "=========================================="
+)
+
+
+print(
+    "\nAccuracy:",
+    round(
+        accuracy * 100,
+        2
+    ),
+    "%"
+)
+
+
+print(
+    "\nClassification Report:"
+)
+
+print(
+    report
+)
+
+
+print(
+    "Confusion Matrix:"
+)
+
+print(
+    cm
+)
+
+
+print(
+    "\n=========================================="
 )
 
 
@@ -206,27 +361,64 @@ print(
 # ==========================================
 
 model_path = os.path.join(
+
     BASE_DIR,
+
     "netshield_model.pkl"
 )
 
+
 joblib.dump(
+
     model,
+
     model_path
 )
 
-# Save feature names
+
+# ==========================================
+# SAVE FEATURE NAMES
+# ==========================================
+
 feature_path = os.path.join(
+
     BASE_DIR,
+
     "model_features.pkl"
 )
 
+
 joblib.dump(
+
     list(X.columns),
+
     feature_path
 )
 
 
-print("\nModel saved successfully!")
-print("Model:", model_path)
-print("Features:", feature_path)
+# ==========================================
+# FINAL INFORMATION
+# ==========================================
+
+print(
+    "\nModel saved successfully!"
+)
+
+print(
+    "Model:",
+    model_path
+)
+
+print(
+    "Features:",
+    feature_path
+)
+
+print(
+    "Number of features:",
+    len(X.columns)
+)
+
+print(
+    "\nMilestone 2 - Step 2 completed!"
+)
