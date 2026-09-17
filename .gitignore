@@ -1,8 +1,45 @@
+# Raw dataset (large; see data/README.md)
 CICIDS2017_improved/
+UNSW-NB15/
+UNSW_NB15/
+data/processed/
+
+# Python
 __pycache__/
 *.py[cod]
+*.egg-info/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Local database
 netshield.db
+*.sqlite
+*.sqlite3
+
+# Trained model artifacts
 models/
-data/processed/
+
+# Secrets - never commit a populated environment file
 .env
+.env.*
+!.env.example
+
+# Node / frontend build output
+node_modules/
+frontend/node_modules/
+frontend/dist/
+npm-debug.log*
+yarn-error.log*
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Working notes
+IMPLEMENTATION_PLAN.md

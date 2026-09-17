@@ -1,0 +1,92 @@
+# NetShield AI - local/production-oriented compose stack.
+#
+# No secrets are defined in this file. Every credential is read from a .env
+# file that is not committed (copy .env.example to .env first).
+#
+#   docker compose up --build
+#
+# The dataset and trained models are bind-mounted rather than baked into the
+# image, because both are large and environment-specific.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: netshield-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-netshield}
+      POSTGRES_USER: ${POSTGRES_USER:-netshield}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-netshield} -d ${POSTGRES_DB:-netshield}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks: [netshield]
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: netshield-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NETSHIELD_ENV: ${NETSHIELD_ENV:-production}
+      NETSHIELD_DATABASE_URL: >-
+        postgresql+psycopg2://${POSTGRES_USER:-netshield}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-netshield}
+      NETSHIELD_JWT_SECRET: ${NETSHIELD_JWT_SECRET:?NETSHIELD_JWT_SECRET must be set in .env}
+      NETSHIELD_JWT_EXPIRY_MINUTES: ${NETSHIELD_JWT_EXPIRY_MINUTES:-120}
+      NETSHIELD_CORS_ORIGINS: ${NETSHIELD_CORS_ORIGINS:-http://localhost:8080}
+      NETSHIELD_RATE_LIMIT_ENABLED: ${NETSHIELD_RATE_LIMIT_ENABLED:-true}
+      NETSHIELD_ALERT_MIN_RISK_SCORE: ${NETSHIELD_ALERT_MIN_RISK_SCORE:-65}
+      NETSHIELD_NOTIFY_SEVERITIES: ${NETSHIELD_NOTIFY_SEVERITIES:-CRITICAL}
+      NETSHIELD_DATA_ROOT: /app
+      NETSHIELD_MODEL_ROOT: /app/models
+      # Optional integrations - unset means "not configured", not broken.
+      NETSHIELD_SMTP_HOST: ${NETSHIELD_SMTP_HOST:-}
+      NETSHIELD_SMTP_PORT: ${NETSHIELD_SMTP_PORT:-587}
+      NETSHIELD_SMTP_USERNAME: ${NETSHIELD_SMTP_USERNAME:-}
+      NETSHIELD_SMTP_PASSWORD: ${NETSHIELD_SMTP_PASSWORD:-}
+      NETSHIELD_ALERT_EMAIL: ${NETSHIELD_ALERT_EMAIL:-}
+      NETSHIELD_SLACK_WEBHOOK_URL: ${NETSHIELD_SLACK_WEBHOOK_URL:-}
+      NETSHIELD_WEBHOOK_URL: ${NETSHIELD_WEBHOOK_URL:-}
+      THREAT_INTEL_PROVIDER: ${THREAT_INTEL_PROVIDER:-local}
+      THREAT_INTEL_API_KEY: ${THREAT_INTEL_API_KEY:-}
+      THREAT_INTEL_BASE_URL: ${THREAT_INTEL_BASE_URL:-}
+      # Live capture is not supported inside this container by default; it needs
+      # host networking plus NET_RAW. See docs/deployment.md.
+      NETSHIELD_CAPTURE_ENABLED: "false"
+    volumes:
+      # Read-only dataset mount - the app never writes to the corpus.
+      - ./CICIDS2017_improved:/app/CICIDS2017_improved:ro
+      - ./models:/app/models:ro
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    networks: [netshield]
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: netshield-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    networks: [netshield]
+
+volumes:
+  postgres-data:
+
+networks:
+  netshield:
+    driver: bridge

@@ -1,12 +1,52 @@
 from datetime import datetime, timedelta, timezone
+from typing import List
 import base64
 import hashlib
 import hmac
 import os
+import re
 
 import jwt
 
 from .config import settings
+
+
+# Rejected outright regardless of length/composition.
+_COMMON_PASSWORDS = {
+    "password",
+    "password1",
+    "password123",
+    "12345678",
+    "123456789",
+    "qwertyui",
+    "letmein1",
+    "changeme",
+    "admin123",
+    "netshield",
+    "welcome1",
+}
+
+
+def validate_password_strength(password: str) -> List[str]:
+    """
+    Return a list of problems with a password. Empty list means acceptable.
+
+    Rules: minimum length (configurable), at least one letter, at least one
+    digit, and not a well-known weak password.
+    """
+    problems: List[str] = []
+    minimum = settings.password_min_length
+
+    if len(password) < minimum:
+        problems.append(f"Must be at least {minimum} characters long")
+    if not re.search(r"[A-Za-z]", password):
+        problems.append("Must contain at least one letter")
+    if not re.search(r"\d", password):
+        problems.append("Must contain at least one digit")
+    if password.strip().lower() in _COMMON_PASSWORDS:
+        problems.append("Is a commonly used password; choose something less predictable")
+
+    return problems
 
 
 def hash_password(password: str) -> str:
