@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .venv/
 __pycache__/
 *.pyc
@@ -5,3 +6,7 @@ __pycache__/
 # Local editor and OS files
 .vscode/
 Thumbs.db
+=======
+Datasets/ 
+models/ 
+>>>>>>> origin/Shireesha
