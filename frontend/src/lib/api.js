@@ -25,7 +25,18 @@ export const tokenStore = {
   clear: () => localStorage.removeItem(TOKEN_KEY),
 }
 
-function describe(body, status) {
+function describe(body, status, path) {
+  // A bare FastAPI 404 on a known API path almost always means the request
+  // reached a *different* service on the backend port, not that our route is
+  // missing. Say so, because "Not Found" alone sends people hunting the wrong bug.
+  if (status === 404 && body?.detail === 'Not Found' && path?.startsWith('/api/')) {
+    return (
+      'The backend responded, but does not recognise this endpoint. Another ' +
+      'application is probably serving the backend port. Check what is on port ' +
+      '8000, then start NetShield on a free port and set VITE_PROXY_TARGET in ' +
+      'frontend/.env.'
+    )
+  }
   if (!body) return `Request failed (${status})`
   if (typeof body.detail === 'string') return body.detail
   if (body.error) return body.error
@@ -84,7 +95,7 @@ export async function request(path, { method = 'GET', body, signal, raw = false 
       /* non-JSON error body */
     }
     const detail = parsed?.detail
-    throw new ApiError(describe(parsed, response.status), {
+    throw new ApiError(describe(parsed, response.status, path), {
       status: response.status,
       code: parsed?.code || 'HTTP_ERROR',
       details: parsed?.details || (typeof detail === 'object' ? detail : undefined),

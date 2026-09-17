@@ -51,6 +51,30 @@ npm install
 npm run dev
 ```
 
+### If port 8000 is already taken
+
+`python -m backend` refuses to start rather than silently losing the port to
+another process - otherwise that other application answers your requests and
+the dashboard shows confusing `Not Found` errors. Pick another port and point
+the frontend at it:
+
+```powershell
+$env:NETSHIELD_PORT = "8001"
+python -m backend
+```
+
+```ini
+# frontend/.env
+VITE_PROXY_TARGET=http://127.0.0.1:8001
+```
+
+Restart `npm run dev` after editing `frontend/.env`. To see what holds a port:
+
+```powershell
+netstat -ano | findstr :8000
+Get-Process -Id <PID>
+```
+
 Tests:
 
 ```powershell

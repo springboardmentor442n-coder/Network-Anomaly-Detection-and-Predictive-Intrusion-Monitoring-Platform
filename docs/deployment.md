@@ -290,6 +290,8 @@ curl -s -X POST 'http://localhost:8080/api/monitoring/scan?source=csv_replay&lim
 
 | Symptom | Cause and fix |
 |---|---|
+| Dashboard shows `Not Found` on every API call | Another application owns the backend port, so it is answering instead of NetShield. Run `netstat -ano \| findstr :8000`; then either stop it or set `NETSHIELD_PORT` and `VITE_PROXY_TARGET`. |
+| `python -m backend` exits with "already in use" | Working as intended - the port guard prevents a silent port race. Choose another port. |
 | `503` from `/api/predictions` | No model on disk. Run the training script and restart. |
 | Analytics `status: not_found` | Dataset absent. See `data/README.md`, or set `NETSHIELD_DATA_ROOT`. |
 | Stream stuck on `polling` | Proxy is buffering. Set `proxy_buffering off` and a long read timeout. |
