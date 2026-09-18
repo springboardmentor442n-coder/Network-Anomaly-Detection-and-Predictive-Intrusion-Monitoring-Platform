@@ -16,18 +16,33 @@
       <h3>Top Attack Types</h3>
       <ul id="attack-list"></ul>
     </div>
+
+    <div class="live-section">
+      <div class="live-header">
+        <h3>Live Threat Monitor</h3>
+        <button id="liveBtn" onclick="toggleLive()">Start Monitoring</button>
+      </div>
+      <div id="liveFeed"></div>
+    </div>
   </div>
 
   <script>
+    function goToLogin() {
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    }
+
     async function loadDashboard() {
       const token = localStorage.getItem('token');
-      if (!token) { window.location.href = 'login.html'; return; }
+      if (!token) { goToLogin(); return; }
 
       const res1 = await fetch('http://127.0.0.1:8000/dashboard', { headers: { 'Authorization': 'Bearer ' + token } });
+      if (!res1.ok) { goToLogin(); return; }
       const data1 = await res1.json();
       document.getElementById('welcome').innerText = data1.message;
 
       const res2 = await fetch('http://127.0.0.1:8000/traffic-stats', { headers: { 'Authorization': 'Bearer ' + token } });
+      if (!res2.ok) { goToLogin(); return; }
       const stats = await res2.json();
 
       document.getElementById('stats-grid').innerHTML =
@@ -41,6 +56,48 @@
         ).join('');
     }
     loadDashboard();
+
+    let liveInterval = null;
+
+    async function fetchPrediction() {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://127.0.0.1:8000/predict-next', { headers: { 'Authorization': 'Bearer ' + token } });
+      if (!res.ok) {
+        clearInterval(liveInterval);
+        liveInterval = null;
+        goToLogin();
+        return;
+      }
+      const data = await res.json();
+
+      const feed = document.getElementById('liveFeed');
+      const entry = document.createElement('div');
+      entry.className = data.prediction === 'ATTACK' ? 'live-entry attack' : 'live-entry benign';
+      entry.innerHTML =
+        '<span class="live-label">' + data.true_label + '</span>' +
+        '<span class="live-prediction">' + data.prediction + '</span>' +
+        '<span class="live-confidence">' + (data.confidence * 100).toFixed(1) + '%</span>';
+
+      feed.insertBefore(entry, feed.firstChild);
+      while (feed.children.length > 15) {
+        feed.removeChild(feed.lastChild);
+      }
+    }
+
+    function toggleLive() {
+      const btn = document.getElementById('liveBtn');
+      if (liveInterval) {
+        clearInterval(liveInterval);
+        liveInterval = null;
+        btn.innerText = 'Start Monitoring';
+        btn.classList.remove('stop');
+      } else {
+        fetchPrediction();
+        liveInterval = setInterval(fetchPrediction, 1500);
+        btn.innerText = 'Stop Monitoring';
+        btn.classList.add('stop');
+      }
+    }
   </script>
 </body>
 </html>

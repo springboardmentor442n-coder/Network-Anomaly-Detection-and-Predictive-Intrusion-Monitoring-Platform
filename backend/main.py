@@ -5,6 +5,8 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 import json
+import joblib
+import pandas as pd
 
 app = FastAPI()
 
@@ -72,3 +74,26 @@ def traffic_stats(current_user: dict = Depends(get_current_user)):
     with open('traffic_summary.json') as f:
         data = json.load(f)
     return data
+
+# ---- Real-time prediction setup ----
+model = joblib.load('model.pkl')
+model_features = joblib.load('model_features.pkl')
+sample_traffic = pd.read_csv('sample_traffic.csv')
+traffic_index = 0
+
+@app.get('/predict-next')
+def predict_next(current_user: dict = Depends(get_current_user)):
+    global traffic_index
+    row = sample_traffic.iloc[traffic_index % len(sample_traffic)]
+    traffic_index += 1
+
+    features = row[model_features].values.reshape(1, -1)
+    prediction = model.predict(features)[0]
+    confidence = float(model.predict_proba(features)[0].max())
+
+    return {
+        "row_number": traffic_index,
+        "true_label": row['Label'],
+        "prediction": "ATTACK" if prediction == 1 else "BENIGN",
+        "confidence": round(confidence, 4)
+    }
