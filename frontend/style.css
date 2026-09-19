@@ -6,77 +6,91 @@
 
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
-  background-color: #FAF9F5;
-  color: #2F3E36;
+  background-color: #0B1220;
+  color: #E2E8F0;
   min-height: 100vh;
 }
 
+/* ---- Login page ---- */
 .login-container {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  background: radial-gradient(circle at top, #131B2E 0%, #0B1220 70%);
 }
 
 .login-card {
-  background-color: #FFFFFF;
+  background-color: #161D2B;
   padding: 40px;
   border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(16, 116, 78, 0.1);
+  border: 1px solid #232D42;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   width: 320px;
   text-align: center;
 }
 
 .login-card h2 {
-  color: #0F7A50;
+  color: #2DD4BF;
   margin-bottom: 24px;
+  letter-spacing: 0.5px;
 }
 
 .login-card input {
   width: 100%;
   padding: 12px 14px;
   margin-bottom: 16px;
-  border: 1px solid #D8E3DC;
+  border: 1px solid #2A3441;
   border-radius: 8px;
   font-size: 14px;
-  background-color: #FAF9F5;
+  background-color: #0F1626;
+  color: #E2E8F0;
+}
+
+.login-card input::placeholder {
+  color: #64748B;
 }
 
 .login-card input:focus {
   outline: none;
-  border-color: #0F7A50;
+  border-color: #2DD4BF;
 }
 
 .login-card button {
   width: 100%;
   padding: 12px;
-  background-color: #0F7A50;
+  background-color: #0D9488;
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 15px;
   cursor: pointer;
+  font-weight: 600;
   transition: background-color 0.2s;
 }
 
 .login-card button:hover {
-  background-color: #0C6641;
+  background-color: #0F766E;
 }
 
 #error {
   margin-top: 12px;
-  color: #C0392B;
+  color: #F87171;
   font-size: 13px;
 }
 
+/* ---- Navbar ---- */
 .navbar {
-  background-color: #0F7A50;
-  color: white;
+  background-color: #101828;
+  border-bottom: 1px solid #232D42;
+  color: #E2E8F0;
   padding: 20px 40px;
 }
 
 .navbar h2 {
   margin: 0;
+  color: #2DD4BF;
+  letter-spacing: 0.5px;
 }
 
 .dashboard-content {
@@ -86,11 +100,12 @@ body {
 }
 
 #welcome {
-  font-size: 16px;
-  color: #2F3E36;
+  font-size: 15px;
+  color: #94A3B8;
   margin-bottom: 24px;
 }
 
+/* ---- Stat cards ---- */
 .stats-grid {
   display: flex;
   gap: 16px;
@@ -99,30 +114,34 @@ body {
 }
 
 .stat-card {
-  background-color: #FFFFFF;
-  border: 1px solid #E3ECE6;
+  background-color: #161D2B;
+  border: 1px solid #232D42;
   border-radius: 12px;
   padding: 20px 24px;
   flex: 1;
   min-width: 160px;
-  box-shadow: 0 2px 8px rgba(16, 116, 78, 0.06);
 }
 
 .stat-card .label {
-  font-size: 13px;
-  color: #6B7D73;
-  margin-bottom: 6px;
+  font-size: 12px;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
 }
 
 .stat-card .value {
-  font-size: 24px;
-  font-weight: 600;
-  color: #0F7A50;
+  font-size: 26px;
+  font-weight: 700;
+  color: #2DD4BF;
+  font-family: 'Consolas', 'Courier New', monospace;
 }
 
+/* ---- Attack list ---- */
 .attack-list h3 {
-  color: #2F3E36;
+  color: #E2E8F0;
   margin-bottom: 12px;
+  font-size: 16px;
 }
 
 .attack-list ul {
@@ -130,16 +149,19 @@ body {
 }
 
 .attack-list li {
-  background-color: #FFFFFF;
-  border-left: 4px solid #0F7A50;
+  background-color: #161D2B;
+  border-left: 4px solid #2DD4BF;
+  border-radius: 6px;
   padding: 10px 16px;
   margin-bottom: 8px;
-  border-radius: 6px;
   display: flex;
   justify-content: space-between;
-  box-shadow: 0 1px 4px rgba(16, 116, 78, 0.05);
+  color: #CBD5E1;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
 }
 
+/* ---- Live section ---- */
 .live-section {
   margin-top: 32px;
 }
@@ -152,21 +174,23 @@ body {
 }
 
 .live-header h3 {
-  color: #2F3E36;
+  color: #E2E8F0;
+  font-size: 16px;
 }
 
 #liveBtn {
-  background-color: #0F7A50;
+  background-color: #0D9488;
   color: white;
   border: none;
   padding: 10px 20px;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 600;
 }
 
 #liveBtn.stop {
-  background-color: #C0392B;
+  background-color: #DC2626;
 }
 
 #liveFeed {
@@ -180,19 +204,238 @@ body {
 .live-entry {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 10px 16px;
   border-radius: 8px;
   font-size: 14px;
+  font-family: 'Consolas', 'Courier New', monospace;
+  background-color: #161D2B;
+  border-left: 4px solid;
 }
 
 .live-entry.benign {
-  background-color: #E8F5EE;
-  border-left: 4px solid #0F7A50;
-  color: #0F7A50;
+  border-left-color: #34D399;
+  color: #6EE7B7;
 }
 
 .live-entry.attack {
-  background-color: #FDEDEB;
-  border-left: 4px solid #C0392B;
-  color: #C0392B;
+  border-left-color: #F87171;
+  color: #FCA5A5;
+}
+
+.live-risk {
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+.risk-low { background-color: rgba(52, 211, 153, 0.15); color: #34D399; }
+.risk-medium { background-color: rgba(250, 204, 21, 0.15); color: #FACC15; }
+.risk-high { background-color: rgba(251, 146, 60, 0.15); color: #FB923C; }
+.risk-critical { background-color: rgba(248, 113, 113, 0.15); color: #F87171; }
+
+/* ---- Report trigger ---- */
+.report-trigger {
+  margin: 24px 0;
+}
+
+#reportBtn {
+  background-color: #0D9488;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ---- Report modal (kept light - looks like an actual printed document) ---- */
+.report-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.report-modal.hidden {
+  display: none;
+}
+
+.report-paper {
+  background: #FFFFFF;
+  width: 640px;
+  max-width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  color: #1E293B;
+}
+
+.report-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.report-actions button {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.report-actions button:first-child {
+  background-color: #0D9488;
+  color: white;
+}
+
+.report-actions button:last-child {
+  background-color: #EDEDED;
+  color: #1E293B;
+}
+
+.report-header {
+  text-align: center;
+  border-bottom: 2px solid #0D9488;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.report-header h1 {
+  color: #0D9488;
+  margin-bottom: 4px;
+}
+
+.report-header p {
+  color: #64748B;
+  font-size: 13px;
+}
+
+.report-section {
+  margin-bottom: 24px;
+}
+
+.report-section h2 {
+  font-size: 16px;
+  color: #1E293B;
+  border-left: 4px solid #0D9488;
+  padding-left: 10px;
+  margin-bottom: 12px;
+}
+
+.report-grid {
+  display: flex;
+  gap: 16px;
+}
+
+.report-grid > div {
+  flex: 1;
+  background: #F8FAFC;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+}
+
+.report-label {
+  display: block;
+  font-size: 12px;
+  color: #64748B;
+}
+
+.report-value {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0D9488;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.report-table th, .report-table td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid #E2E8F0;
+  font-size: 14px;
+}
+
+.report-table th {
+  color: #64748B;
+  font-weight: 600;
+}
+
+.risk-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.risk-bar-label {
+  width: 70px;
+  font-size: 13px;
+  color: #1E293B;
+}
+
+.risk-bar-track {
+  flex: 1;
+  background: #EFEFEF;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 14px;
+}
+
+.risk-bar-fill {
+  height: 100%;
+}
+
+.risk-bar-low { background-color: #10B981; }
+.risk-bar-medium { background-color: #EAB308; }
+.risk-bar-high { background-color: #F97316; }
+.risk-bar-critical { background-color: #DC2626; }
+
+.risk-bar-count {
+  width: 30px;
+  font-size: 13px;
+  text-align: right;
+  color: #1E293B;
+}
+
+.report-list {
+  list-style: none;
+}
+
+.report-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #F0F0F0;
+  font-size: 14px;
+  color: #1E293B;
+}
+
+@media print {
+  .navbar, .dashboard-content > p, .stats-grid, .attack-list, .live-section, .report-trigger, .report-actions {
+    display: none !important;
+  }
+  .report-modal {
+    position: static;
+    background: none;
+  }
+  .report-paper {
+    box-shadow: none;
+    max-height: none;
+    width: 100%;
+  }
 }

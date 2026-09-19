@@ -75,11 +75,46 @@ def traffic_stats(current_user: dict = Depends(get_current_user)):
         data = json.load(f)
     return data
 
-# ---- Real-time prediction setup ----
+# ---- Real-time prediction + risk scoring setup ----
 model = joblib.load('model.pkl')
 model_features = joblib.load('model_features.pkl')
 sample_traffic = pd.read_csv('sample_traffic.csv')
 traffic_index = 0
+
+SEVERITY_TABLE = {
+    "BENIGN": 0,
+    "Portscan": 30,
+    "Infiltration - Portscan": 35,
+    "FTP-Patator": 45,
+    "SSH-Patator": 45,
+    "Web Attack - Brute Force": 50,
+    "Web Attack - XSS": 55,
+    "DoS Slowloris": 60,
+    "DoS Slowhttptest": 60,
+    "DoS Hulk": 70,
+    "DoS GoldenEye": 70,
+    "Web Attack - SQL Injection": 75,
+    "Botnet": 80,
+    "Infiltration": 85,
+    "DDoS": 90,
+    "Heartbleed": 95,
+}
+
+def compute_risk_score(predicted_class: str, confidence: float) -> dict:
+    base_severity = SEVERITY_TABLE.get(predicted_class, 50)
+    score = base_severity * confidence
+    score = min(round(score), 100)
+
+    if score <= 25:
+        label = "Low"
+    elif score <= 50:
+        label = "Medium"
+    elif score <= 75:
+        label = "High"
+    else:
+        label = "Critical"
+
+    return {"risk_score": score, "risk_label": label}
 
 @app.get('/predict-next')
 def predict_next(current_user: dict = Depends(get_current_user)):
@@ -88,12 +123,46 @@ def predict_next(current_user: dict = Depends(get_current_user)):
     traffic_index += 1
 
     features = row[model_features].values.reshape(1, -1)
-    prediction = model.predict(features)[0]
-    confidence = float(model.predict_proba(features)[0].max())
+    probs = model.predict_proba(features)[0]
+    predicted_class = model.classes_[probs.argmax()]
+    confidence = float(probs.max())
+
+    risk = compute_risk_score(predicted_class, confidence)
 
     return {
         "row_number": traffic_index,
         "true_label": row['Label'],
-        "prediction": "ATTACK" if prediction == 1 else "BENIGN",
-        "confidence": round(confidence, 4)
+        "predicted_class": predicted_class,
+        "prediction": "BENIGN" if predicted_class == "BENIGN" else "ATTACK",
+        "confidence": round(confidence, 4),
+        "risk_score": risk["risk_score"],
+        "risk_label": risk["risk_label"]
+    }
+    
+@app.get('/generate-report')
+def generate_report(current_user: dict = Depends(get_current_user)):
+    with open('traffic_summary.json') as f:
+        traffic_summary = json.load(f)
+
+    with open('model_performance.json') as f:
+        model_performance = json.load(f)
+
+    risk_distribution = {"Low": 0, "Medium": 0, "High": 0, "Critical": 0}
+    for _, row in sample_traffic.iterrows():
+        features = row[model_features].values.reshape(1, -1)
+        probs = model.predict_proba(features)[0]
+        predicted_class = model.classes_[probs.argmax()]
+        confidence = float(probs.max())
+        risk = compute_risk_score(predicted_class, confidence)
+        risk_distribution[risk["risk_label"]] += 1
+
+    return {
+        "generated_by": current_user["username"],
+        "generated_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
+        "total_flows": traffic_summary["total_flows"],
+        "benign_count": traffic_summary["benign_count"],
+        "attack_count": traffic_summary["attack_count"],
+        "top_attack_types": traffic_summary["top_attack_types"],
+        "model_performance": model_performance,
+        "risk_distribution": risk_distribution
     }
