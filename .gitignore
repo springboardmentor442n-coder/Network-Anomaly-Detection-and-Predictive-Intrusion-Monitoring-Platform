@@ -22,6 +22,8 @@ venv.bak/
 
 # Logs and databases
 *.log
+*.db
+backend/app/data/*.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

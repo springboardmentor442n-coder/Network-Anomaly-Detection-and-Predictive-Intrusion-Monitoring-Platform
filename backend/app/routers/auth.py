@@ -1,10 +1,17 @@
 from datetime import datetime, timedelta
 from typing import Optional
-import hashlib
 from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 from jose import JWTError, jwt
+
+from app.db import (
+    hash_password,
+    get_user_by_email,
+    create_user,
+    get_all_users as db_get_all_users,
+    delete_user as db_delete_user
+)
 
 SECRET_KEY = "netshield_super_secret_key_for_jwt_token_auth"
 ALGORITHM = "HS256"
@@ -14,35 +21,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
 
 router = APIRouter(prefix="/api/v1/auth", tags=["Authentication & User Management"])
 
-def hash_password(password: str) -> str:
-    """Hashes a password using SHA-256 with a salt."""
-    salt = "netshield_salt_"
-    return hashlib.sha256((salt + password).encode('utf-8')).hexdigest()
-
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return hash_password(plain_password) == hashed_password
-
-# In-memory mock database with pre-configured SOC user roles
-users_db = {
-    "admin@netshield.ai": {
-        "email": "admin@netshield.ai",
-        "hashed_password": hash_password("admin123"),
-        "full_name": "Dr. Sarah Vance",
-        "role": "Admin"
-    },
-    "analyst@netshield.ai": {
-        "email": "analyst@netshield.ai",
-        "hashed_password": hash_password("analyst123"),
-        "full_name": "Marcus Holloway",
-        "role": "Security Analyst"
-    },
-    "operator@netshield.ai": {
-        "email": "operator@netshield.ai",
-        "hashed_password": hash_password("operator123"),
-        "full_name": "Alex Chen",
-        "role": "SOC Operator"
-    }
-}
 
 class UserRegister(BaseModel):
     email: EmailStr
@@ -66,17 +46,19 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 @router.post("/register", response_model=Token)
 def register(user: UserRegister):
-    if user.email in users_db:
+    existing = get_user_by_email(user.email)
+    if existing:
         raise HTTPException(status_code=400, detail="User already registered")
     
     hashed_pwd = hash_password(user.password)
-    user_dict = {
-        "email": user.email,
-        "hashed_password": hashed_pwd,
-        "full_name": user.full_name,
-        "role": user.role
-    }
-    users_db[user.email] = user_dict
+    success = create_user(
+        email=user.email,
+        hashed_password=hashed_pwd,
+        full_name=user.full_name,
+        role=user.role or "Security Analyst"
+    )
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to create user in database")
     
     access_token = create_access_token(
         data={"sub": user.email, "role": user.role},
@@ -90,7 +72,7 @@ def register(user: UserRegister):
 
 @router.post("/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = users_db.get(form_data.username)
+    user = get_user_by_email(form_data.username)
     if not user or not verify_password(form_data.password, user["hashed_password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -113,31 +95,26 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
-        if email is None or email not in users_db:
-            raise HTTPException(status_code=401, detail="Invalid credentials")
-        u = users_db[email]
+        if email is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        u = get_user_by_email(email)
+        if not u:
+            raise HTTPException(status_code=401, detail="User not found")
         return {"email": u["email"], "full_name": u["full_name"], "role": u["role"]}
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
 @router.get("/users")
 def get_all_users():
-    """Lists all active SOC users with RBAC roles."""
-    result = []
-    for idx, (email, u) in enumerate(users_db.items(), start=1):
-        role = u.get("role", "Security Analyst")
-        privileges = "Traffic, AI Inference & IP Blocking"
-        if role == "Admin":
-            privileges = "Full System & RBAC Control (All Tabs & Features)"
-        elif role == "SOC Operator":
-            privileges = "Read-Only Traffic & Threat Monitoring"
-            
-        result.append({
-            "id": str(idx),
-            "email": u.get("email", email),
-            "full_name": u.get("full_name", "SOC User"),
-            "role": role,
-            "privileges": privileges,
-            "status": "ACTIVE"
-        })
-    return result
+    """Lists all active SOC users with RBAC roles from persistent database."""
+    return db_get_all_users()
+
+@router.delete("/users/{email}")
+def remove_user(email: str):
+    """Removes a user from the persistent database."""
+    if email.lower() == "admin@netshield.ai":
+        raise HTTPException(status_code=400, detail="Cannot delete default system Admin account.")
+    deleted = db_delete_user(email)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="User not found.")
+    return {"status": "success", "message": f"User {email} deleted successfully"}

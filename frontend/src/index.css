@@ -4,15 +4,25 @@
   font-weight: 400;
   color-scheme: dark;
   color: #f3f4f6;
-  background-color: #0b0f19;
+  background-color: #070a13;
 }
 
+/* Base body background with smooth theme transition */
 body {
   margin: 0;
   padding: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: radial-gradient(circle at top right, #1e1b4b 0%, #0b0f19 50%, #030712 100%);
+  background-color: #070a13;
+  color: #f3f4f6;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+
+/* Cyber grid background pattern */
+.cyber-grid-pattern {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
 
 /* Custom scrollbars */
@@ -22,40 +32,47 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0b0f19;
+  background: #070a13;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #374151;
-  border-radius: 3px;
+  background: #1f293d;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4b5563;
+  background: #334155;
 }
 
-/* Glowing card effect */
+/* Modern Glassmorphic Cyber Cards */
 .cyber-card {
-  background: rgba(17, 24, 39, 0.7);
-  backdrop-filter: blur(12px);
+  background: rgba(13, 19, 33, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 1px 1px rgba(255, 255, 255, 0.05) inset;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cyber-card:hover {
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .cyber-card-glow {
-  background: rgba(17, 24, 39, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.15), 0 10px 30px -10px rgba(0, 0, 0, 0.5);
 }
 
-/* Pulse animation */
+/* Pulse animation for live indicators */
 @keyframes status-pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
   }
   70% {
-    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+    box-shadow: 0 0 0 7px rgba(34, 197, 94, 0);
   }
   100% {
     box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
@@ -63,5 +80,19 @@ body {
 }
 
 .animate-pulse-glow {
-  animation: status-pulse 2s infinite;
+  animation: status-pulse 2.2s infinite;
+}
+
+/* Subtle glow orb animation */
+@keyframes float-slow {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(20px, 15px) scale(1.05);
+  }
+}
+
+.animate-float {
+  animation: float-slow 12s ease-in-out infinite;
 }
