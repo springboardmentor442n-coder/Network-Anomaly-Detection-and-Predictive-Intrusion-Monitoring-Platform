@@ -1,615 +1,585 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import "./App.css";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
+  const [analytics, setAnalytics] = useState({});
+  const [report, setReport] = useState({});
+  const [alerts, setAlerts] = useState([]);
+  const [traffic, setTraffic] = useState({});
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("User");
-  const [authError, setAuthError] = useState("");
-
-  const [url, setUrl] = useState("");
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const [traffic, setTraffic] = useState(null);
-  const [trafficLoading, setTrafficLoading] = useState(false);
-
-  // ==========================================
-  // USERS
-  // ==========================================
-
-  const users = [
-    {
-      username: "admin",
-      password: "admin123",
-      role: "Admin",
-    },
-    {
-      username: "analyst",
-      password: "analyst123",
-      role: "Analyst",
-    },
-    {
-      username: "user",
-      password: "user123",
-      role: "User",
-    },
-  ];
-
-  // ==========================================
-  // LOGIN
-  // ==========================================
-
-  const login = () => {
-    setAuthError("");
-
-    const foundUser = users.find(
-      (user) =>
-        user.username === username &&
-        user.password === password
-    );
-
-    if (foundUser) {
-      setRole(foundUser.role);
-      setIsLoggedIn(true);
-    } else {
-      setAuthError("Invalid username or password");
-    }
-  };
-
-  // ==========================================
-  // REGISTER
-  // ==========================================
-
-  const register = () => {
-    setAuthError("");
-
-    if (!username || !password) {
-      setAuthError("Please enter username and password");
-      return;
-    }
-
-    alert("Registration successful! You can now login.");
-    setShowRegister(false);
-  };
-
-  // ==========================================
-  // URL SECURITY SCANNER
-  // ==========================================
-
-  const scanUrl = async () => {
-    if (!url) {
-      setResult({
-        error: "Please enter a URL",
-      });
-      return;
-    }
-
-    setLoading(true);
-    setResult(null);
-
+  const loadData = async () => {
     try {
-      const response = await fetch(
-        "http://127.0.0.1:5000/scan",
+      const analyticsResponse = await fetch(
+        "http://127.0.0.1:5000/analytics"
+      );
+      const analyticsData = await analyticsResponse.json();
+      setAnalytics(analyticsData);
+
+      const reportResponse = await fetch(
+        "http://127.0.0.1:5000/threat-report"
+      );
+      const reportData = await reportResponse.json();
+      setReport(reportData);
+
+      const alertsResponse = await fetch(
+        "http://127.0.0.1:5000/alerts"
+      );
+      const alertsData = await alertsResponse.json();
+      setAlerts(alertsData.alerts || []);
+
+      const notificationResponse = await fetch(
+        "http://127.0.0.1:5000/notifications"
+      );
+      const notificationData = await notificationResponse.json();
+
+      setNotifications(
+        notificationData.notifications || []
+      );
+
+    } catch (error) {
+      console.error("Error loading dashboard data:", error);
+    }
+  };
+
+const fetchTraffic = async () => {
+  try {
+    const response = await fetch("http://127.0.0.1:5000/traffic");
+    const data = await response.json();
+
+    if (data.status === "success") {
+      setTraffic(data);
+    }
+  } catch (error) {
+    console.error("Traffic loading error:", error);
+  }
+};
+  useEffect(() => {
+  loadData();
+  fetchTraffic();
+
+  const interval = setInterval(() => {
+    loadData();
+    fetchTraffic();
+  }, 5000);
+
+  return () => clearInterval(interval);
+}, []);
+
+  const updateStatus = async (id, status) => {
+    try {
+      await fetch(
+        `http://127.0.0.1:5000/alerts/${id}`,
         {
-          method: "POST",
+          method: "PUT",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            url: url,
-          }),
+            status: status
+          })
         }
       );
 
-      const data = await response.json();
+      loadData();
 
-      setResult(data);
     } catch (error) {
-      setResult({
-        error: "Could not connect to backend.",
-      });
+      console.error("Status update error:", error);
     }
-
-    setLoading(false);
   };
 
-  // ==========================================
-  // LOAD TRAFFIC ANALYTICS
-  // ==========================================
-
-  const loadTraffic = async () => {
-    setTrafficLoading(true);
-
-    try {
-      const response = await fetch(
-        "http://127.0.0.1:5000/traffic"
-      );
-
-      const data = await response.json();
-
-      setTraffic(data);
-    } catch (error) {
-      setTraffic({
-        error: "Could not load traffic analytics.",
-      });
-    }
-
-    setTrafficLoading(false);
-  };
-
-  // ==========================================
-  // LOAD DATA AFTER LOGIN
-  // ==========================================
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      loadTraffic();
-    }
-  }, [isLoggedIn]);
-
-  // ==========================================
-  // LOGIN PAGE
-  // ==========================================
-
-  if (!isLoggedIn) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "#0f172a",
-          color: "white",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontFamily: "Arial",
-        }}
-      >
-        <div
-          style={{
-            background: "#1e293b",
-            padding: "40px",
-            borderRadius: "15px",
-            width: "350px",
-            textAlign: "center",
-          }}
-        >
-          <h1>🛡️ NetShield AI</h1>
-
-          <p>
-            AI-Powered Network Anomaly Detection
-          </p>
-
-          <h2>
-            {showRegister
-              ? "Create Account"
-              : "Login"}
-          </h2>
-
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) =>
-              setUsername(e.target.value)
-            }
-            style={{
-              width: "90%",
-              padding: "12px",
-              margin: "8px",
-              borderRadius: "8px",
-              border: "none",
-            }}
-          />
-
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) =>
-              setPassword(e.target.value)
-            }
-            style={{
-              width: "90%",
-              padding: "12px",
-              margin: "8px",
-              borderRadius: "8px",
-              border: "none",
-            }}
-          />
-
-          <button
-            onClick={
-              showRegister ? register : login
-            }
-            style={{
-              padding: "12px 30px",
-              margin: "15px",
-              borderRadius: "8px",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            {showRegister
-              ? "Register"
-              : "Login"}
-          </button>
-
-          {authError && (
-            <p style={{ color: "#f87171" }}>
-              {authError}
-            </p>
-          )}
-
-          <p>
-            {showRegister
-              ? "Already have an account?"
-              : "Don't have an account?"}
-          </p>
-
-          <button
-            onClick={() => {
-              setShowRegister(!showRegister);
-              setAuthError("");
-            }}
-            style={{
-              padding: "8px 20px",
-              borderRadius: "8px",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            {showRegister
-              ? "Go to Login"
-              : "Create Account"}
-          </button>
-
-          {!showRegister && (
-            <div style={{ marginTop: "25px" }}>
-              <p>
-                <b>Demo Login</b>
-              </p>
-
-              <p>Admin: admin / admin123</p>
-              <p>
-                Analyst: analyst / analyst123
-              </p>
-              <p>User: user / user123</p>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // ==========================================
-  // TRAFFIC VALUES
-  // ==========================================
-
-  const total =
-    traffic?.total_traffic ??
-    traffic?.total ??
-    0;
-
-  // FIXED: backend sends normal_traffic
-  const benign =
-    traffic?.normal_traffic ??
-    traffic?.benign ??
-    traffic?.normal ??
-    traffic?.benign_traffic ??
-    0;
-
-  const attacks =
-    traffic?.attack_traffic ??
-    traffic?.attacks ??
-    traffic?.attack ??
-    0;
-
-  const attackTypes =
-    traffic?.attack_types ??
-    traffic?.examples ??
-    {};
-
-  // ==========================================
-  // DASHBOARD
-  // ==========================================
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#f1f5f9",
-        fontFamily: "Arial",
-        color: "#0f172a",
-      }}
-    >
-      {/* HEADER */}
+    <div className="dashboard">
 
-      <header
-        style={{
-          background: "#0f172a",
-          color: "white",
-          padding: "20px 40px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+      {/* ================= HEADER ================= */}
+
+      <header className="header">
+
         <div>
-          <h1 style={{ margin: 0 }}>
-            🛡️ NetShield AI
-          </h1>
-
-          <p style={{ margin: "5px 0 0" }}>
-            Network Anomaly Detection Dashboard
-          </p>
+          <h1>🛡️ NetShield AI</h1>
+          <p>Network Anomaly Detection & Threat Monitoring</p>
         </div>
 
-        <div>
-          <b>{username}</b>
-
-          <span style={{ marginLeft: "15px" }}>
-            {role}
-          </span>
+        <div className="notification-container">
 
           <button
-            onClick={() => {
-              setIsLoggedIn(false);
-              setUsername("");
-              setPassword("");
-              setResult(null);
-            }}
-            style={{
-              marginLeft: "20px",
-              padding: "8px 15px",
-              borderRadius: "6px",
-              border: "none",
-              cursor: "pointer",
-            }}
+            className="notification-button"
+            onClick={() =>
+              setShowNotifications(!showNotifications)
+            }
           >
-            Logout
+            🔔
+
+            {notifications.length > 0 && (
+              <span className="notification-badge">
+                {notifications.length}
+              </span>
+            )}
           </button>
-        </div>
-      </header>
 
-      {/* MAIN */}
 
-      <main
-        style={{
-          padding: "30px 40px",
-        }}
-      >
-        <h2>Security Overview</h2>
+          {/* Notification Dropdown */}
 
-        {trafficLoading ? (
-          <p>Loading traffic analytics...</p>
-        ) : traffic?.error ? (
-          <p style={{ color: "red" }}>
-            {traffic.error}
-          </p>
-        ) : (
-          <>
-            {/* SECURITY CARDS */}
+          {showNotifications && (
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  "repeat(3, 1fr)",
-                gap: "20px",
-              }}
-            >
-              {/* TOTAL TRAFFIC */}
+            <div className="notification-panel">
 
-              <div
-                style={{
-                  background: "white",
-                  padding: "25px",
-                  borderRadius: "12px",
-                  boxShadow:
-                    "0 2px 8px rgba(0,0,0,0.1)",
-                }}
-              >
-                <h3>Total Traffic</h3>
+              <div className="notification-header">
+                <h3>🔔 Notifications</h3>
 
-                <h1>
-                  {total.toLocaleString()}
-                </h1>
+                <button
+                  onClick={() =>
+                    setShowNotifications(false)
+                  }
+                >
+                  ✕
+                </button>
               </div>
 
-              {/* NORMAL TRAFFIC */}
 
-              <div
-                style={{
-                  background: "white",
-                  padding: "25px",
-                  borderRadius: "12px",
-                  boxShadow:
-                    "0 2px 8px rgba(0,0,0,0.1)",
-                }}
-              >
-                <h3>Normal Traffic</h3>
+              {notifications.length === 0 ? (
 
-                <h1>
-                  {benign.toLocaleString()}
-                </h1>
-              </div>
+                <div className="no-notifications">
+                  <p>✅ No high-risk notifications</p>
+                </div>
 
-              {/* ATTACKS */}
-
-              <div
-                style={{
-                  background: "white",
-                  padding: "25px",
-                  borderRadius: "12px",
-                  boxShadow:
-                    "0 2px 8px rgba(0,0,0,0.1)",
-                }}
-              >
-                <h3>Attacks Detected</h3>
-
-                <h1>
-                  {attacks.toLocaleString()}
-                </h1>
-              </div>
-            </div>
-
-            {/* ATTACK TYPES */}
-
-            <div
-              style={{
-                background: "white",
-                marginTop: "30px",
-                padding: "25px",
-                borderRadius: "12px",
-                boxShadow:
-                  "0 2px 8px rgba(0,0,0,0.1)",
-              }}
-            >
-              <h2>Attack Types</h2>
-
-              {Object.keys(attackTypes).length ===
-              0 ? (
-                <p>
-                  No attack type information
-                  available.
-                </p>
               ) : (
-                Object.entries(attackTypes).map(
-                  ([name, count]) => (
-                    <div
-                      key={name}
-                      style={{
-                        display: "flex",
-                        justifyContent:
-                          "space-between",
-                        padding: "12px",
-                        borderBottom:
-                          "1px solid #e2e8f0",
-                      }}
-                    >
-                      <b>{name}</b>
+
+                notifications.map((notification) => (
+
+                  <div
+                    className="notification-item"
+                    key={notification.id}
+                  >
+
+                    <div className="notification-title">
+                      🚨 {notification.type}
+                    </div>
+
+                    <div className="notification-message">
+                      {notification.message}
+                    </div>
+
+                    <div className="notification-details">
 
                       <span>
-                        {Number(
-                          count
-                        ).toLocaleString()}
+                        Risk: {notification.risk_level}
                       </span>
+
+                      <span>
+                        Score: {notification.risk_score}
+                      </span>
+
+                      <span>
+                        Confidence: {notification.confidence}%
+                      </span>
+
                     </div>
-                  )
-                )
+
+                    <div className="notification-time">
+                      {notification.timestamp}
+                    </div>
+
+                  </div>
+
+                ))
+
               )}
+
             </div>
-          </>
+
+          )}
+
+        </div>
+
+      </header>
+
+
+      {/* ================= ANALYTICS CARDS ================= */}
+
+      <section className="cards">
+
+        <div className="card">
+          <h3>Total Alerts</h3>
+          <h2>{analytics.total_alerts || 0}</h2>
+        </div>
+
+        <div className="card high">
+          <h3>High Risk</h3>
+          <h2>{analytics.high_risk || 0}</h2>
+        </div>
+
+        <div className="card medium">
+          <h3>Medium Risk</h3>
+          <h2>{analytics.medium_risk || 0}</h2>
+        </div>
+
+        <div className="card open">
+          <h3>Open Alerts</h3>
+          <h2>{analytics.open_alerts || 0}</h2>
+        </div>
+
+        <div className="card investigating">
+          <h3>Investigating</h3>
+          <h2>{analytics.investigating || 0}</h2>
+        </div>
+
+        <div className="card resolved">
+          <h3>Resolved</h3>
+          <h2>{analytics.resolved || 0}</h2>
+        </div>
+
+      </section>
+
+
+      {/* ================= THREAT INTELLIGENCE ================= */}
+
+      <section className="section">
+
+        <h2>🧠 Threat Intelligence Report</h2>
+
+        <div className="cards">
+
+          <div className="card">
+            <h3>Total Threats</h3>
+            <h2>{report.total_threats || 0}</h2>
+          </div>
+
+          <div className="card high">
+            <h3>High Risk</h3>
+            <h2>{report.high_risk || 0}</h2>
+          </div>
+
+          <div className="card medium">
+            <h3>Medium Risk</h3>
+            <h2>{report.medium_risk || 0}</h2>
+          </div>
+
+          <div className="card open">
+            <h3>Open</h3>
+            <h2>{report.open || 0}</h2>
+          </div>
+
+          <div className="card investigating">
+            <h3>Investigating</h3>
+            <h2>{report.investigating || 0}</h2>
+          </div>
+
+          <div className="card resolved">
+            <h3>Resolved</h3>
+            <h2>{report.resolved || 0}</h2>
+          </div>
+
+        </div>
+
+      </section>
+       <section className="section">
+
+        <h2>📡 Network Monitoring</h2>
+
+        <div className="cards">
+
+          <div className="card">
+            <h3>Total Traffic</h3>
+            <h2>
+              {traffic.total_traffic?.toLocaleString() || 0}
+            </h2>
+          </div>
+
+          <div className="card">
+            <h3>Benign Traffic</h3>
+            <h2>
+              {traffic.benign_traffic?.toLocaleString() || 0}
+            </h2>
+          </div>
+
+          <div className="card high">
+            <h3>Attack Traffic</h3>
+            <h2>
+              {traffic.attack_traffic?.toLocaleString() || 0}
+            </h2>
+          </div>
+
+          <div className="card medium">
+            <h3>Attack Percentage</h3>
+            <h2>
+              {traffic.attack_percentage || 0}%
+            </h2>
+          </div>
+
+        </div>
+
+        <div className="monitor-status">
+          🟢 <strong>Monitoring Active</strong>
+        </div>
+
+      </section>
+      <div className="visualization-section">
+  <h2>📊 Attack Type Visualization</h2>
+
+  {Object.keys(report.attack_types || {}).length === 0 ? (
+    <p className="empty-message">No attack data available</p>
+  ) : (
+    <div className="attack-chart">
+      {Object.entries(report.attack_types).map(([attack, count]) => {
+        const maxCount = Math.max(...Object.values(report.attack_types));
+        const width = (count / maxCount) * 100;
+
+        return (
+          <div className="attack-row" key={attack}>
+            <div className="attack-name">
+              {attack}
+            </div>
+
+            <div className="bar-container">
+              <div
+                className="attack-bar"
+                style={{ width: `${width}%` }}
+              >
+                {count}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  )}
+</div>
+
+
+      {/* ================= ATTACK DISTRIBUTION ================= */}
+
+      <section className="section">
+
+        <h2>📊 Attack Type Distribution</h2>
+
+        {report.attack_types &&
+        Object.keys(report.attack_types).length > 0 ? (
+
+          Object.entries(report.attack_types).map(
+            ([attack, count]) => (
+
+              <div
+                className="attack-row"
+                key={attack}
+              >
+
+                <div className="attack-name">
+                  {attack}
+                </div>
+
+                <div className="attack-bar-container">
+
+                  <div
+                    className="attack-bar"
+                    style={{
+                      width: `${
+                        (count /
+                          Math.max(
+                            ...Object.values(
+                              report.attack_types
+                            )
+                          )) *
+                        100
+                      }%`
+                    }}
+                  >
+                    {count}
+                  </div>
+
+                </div>
+
+              </div>
+
+            )
+
+          )
+
+        ) : (
+
+          <p>No attack data available.</p>
+
         )}
 
-        {/* URL SECURITY SCANNER */}
+      </section>
 
-        <div
-          style={{
-            background: "white",
-            marginTop: "30px",
-            padding: "25px",
-            borderRadius: "12px",
-            boxShadow:
-              "0 2px 8px rgba(0,0,0,0.1)",
-          }}
-        >
-          <h2>🔍 URL Security Scanner</h2>
 
-          <input
-            type="text"
-            placeholder="Enter URL to scan"
-            value={url}
-            onChange={(e) =>
-              setUrl(e.target.value)
-            }
-            style={{
-              padding: "12px",
-              width: "60%",
-              borderRadius: "7px",
-              border:
-                "1px solid #cbd5e1",
-            }}
-          />
+      {/* ================= RECENT THREATS ================= */}
 
-          <button
-            onClick={scanUrl}
-            style={{
-              padding: "12px 20px",
-              marginLeft: "10px",
-              borderRadius: "7px",
-              border: "none",
-              cursor: "pointer",
-              background: "#0f172a",
-              color: "white",
-            }}
-          >
-            {loading
-              ? "Scanning..."
-              : "Scan URL"}
-          </button>
+      <section className="section">
 
-          {/* SCAN RESULT */}
+        <h2>🚨 Recent Threats</h2>
 
-          {result && (
-            <div
-              style={{
-                marginTop: "25px",
-                padding: "20px",
-                background: "#f8fafc",
-                borderRadius: "10px",
-              }}
-            >
-              {result.error ? (
-                <p style={{ color: "red" }}>
-                  {result.error}
-                </p>
-              ) : (
-                <>
-                  <h3>Scan Result</h3>
+        {report.recent_threats &&
+        report.recent_threats.length > 0 ? (
 
-                  <p>
-                    <b>URL:</b>{" "}
-                    {result.url}
-                  </p>
+          <div className="table-container">
 
-                  <p>
-                    <b>Risk Level:</b>{" "}
-                    {result.risk_level}
-                  </p>
+            <table>
 
-                  <p>
-                    <b>Score:</b>{" "}
-                    {result.score}
-                  </p>
+              <thead>
 
-                  {result.warnings &&
-                    result.warnings.length >
-                      0 && (
-                      <div>
-                        <h4>Warnings</h4>
+                <tr>
+                  <th>ID</th>
+                  <th>Attack Type</th>
+                  <th>Risk</th>
+                  <th>Score</th>
+                  <th>Confidence</th>
+                  <th>Status</th>
+                  <th>Time</th>
+                </tr>
 
-                        {result.warnings.map(
-                          (
-                            warning,
-                            index
-                          ) => (
-                            <p key={index}>
-                              ⚠️ {warning}
-                            </p>
+              </thead>
+
+              <tbody>
+
+                {report.recent_threats.map(
+                  (threat) => (
+
+                    <tr key={threat.id}>
+
+                      <td>{threat.id}</td>
+
+                      <td>
+                        {threat.attack_type}
+                      </td>
+
+                      <td>
+                        {threat.risk_level}
+                      </td>
+
+                      <td>
+                        {threat.risk_score}
+                      </td>
+
+                      <td>
+                        {threat.confidence}%
+                      </td>
+
+                      <td>
+                        {threat.status}
+                      </td>
+
+                      <td>
+                        {threat.timestamp}
+                      </td>
+
+                    </tr>
+
+                  )
+                )}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        ) : (
+
+          <p>No recent threats detected.</p>
+
+        )}
+
+      </section>
+
+
+      {/* ================= SECURITY ALERTS ================= */}
+
+      <section className="section">
+
+        <h2>🔐 Security Alerts</h2>
+
+        {alerts.length === 0 ? (
+
+          <p>No Security Alerts</p>
+
+        ) : (
+
+          <div className="table-container">
+
+            <table>
+
+              <thead>
+
+                <tr>
+                  <th>ID</th>
+                  <th>Attack</th>
+                  <th>Risk</th>
+                  <th>Score</th>
+                  <th>Confidence</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                {alerts.map((alert) => (
+
+                  <tr key={alert.id}>
+
+                    <td>{alert.id}</td>
+
+                    <td>{alert.attack_type}</td>
+
+                    <td>{alert.risk_level}</td>
+
+                    <td>{alert.risk_score}</td>
+
+                    <td>{alert.confidence}%</td>
+
+                    <td>{alert.status}</td>
+
+                    <td>
+
+                      <select
+                        value={alert.status}
+                        onChange={(e) =>
+                          updateStatus(
+                            alert.id,
+                            e.target.value
                           )
-                        )}
-                      </div>
-                    )}
-                </>
-              )}
-            </div>
-          )}
-        </div>
-      </main>
+                        }
+                      >
+
+                        <option value="Open">
+                          Open
+                        </option>
+
+                        <option value="Investigating">
+                          Investigating
+                        </option>
+
+                        <option value="Resolved">
+                          Resolved
+                        </option>
+
+                        <option value="Closed">
+                          Closed
+                        </option>
+
+                      </select>
+
+                    </td>
+
+                  </tr>
+
+                ))}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        )}
+
+      </section>
+
     </div>
   );
 }
