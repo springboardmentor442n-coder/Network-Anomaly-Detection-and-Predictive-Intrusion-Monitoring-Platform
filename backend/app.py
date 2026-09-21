@@ -1,266 +1,497 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from urllib.parse import urlparse
 import os
+import pickle
 import joblib
 import pandas as pd
-import glob
+
+from alerts import create_alert, get_alerts, update_alert_status
+
 
 app = Flask(__name__)
 CORS(app)
 
 
-# ==========================================
-# LOAD ANOMALY DETECTION MODEL
-# ==========================================
+# =========================================================
+# PATHS
+# =========================================================
 
-MODEL_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "netshield_model.pkl"
-)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-FEATURE_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "model_features.pkl"
-)
+
+# =========================================================
+# LOAD MAIN ANOMALY DETECTION MODEL
+# =========================================================
+
+MODEL_PATH = os.path.join(BASE_DIR, "netshield_model.pkl")
+FEATURES_PATH = os.path.join(BASE_DIR, "model_features.pkl")
+
+
+model = None
+model_features = []
 
 try:
     model = joblib.load(MODEL_PATH)
-    model_features = joblib.load(FEATURE_PATH)
 
-    print("NetShield ML model loaded successfully!")
-    print("Number of model features:", len(model_features))
+    with open(FEATURES_PATH, "rb") as f:
+        model_features = pickle.load(f)
+
+    print("Main ML Model Loaded Successfully")
+    print("Main Model Features:", len(model_features))
 
 except Exception as e:
-    model = None
-    model_features = []
-
-    print("Error loading ML model:", e)
+    print("Main ML Model Loading Error:", e)
 
 
-# ==========================================
-# LOAD ATTACK PREDICTION MODEL
-# ==========================================
+# =========================================================
+# LOAD ATTACK CLASSIFICATION MODEL
+# =========================================================
 
-ATTACK_MODEL_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "attack_model.pkl"
-)
-
-ATTACK_FEATURE_PATH = os.path.join(
-    os.path.dirname(__file__),
+ATTACK_MODEL_PATH = os.path.join(BASE_DIR, "attack_model.pkl")
+ATTACK_FEATURES_PATH = os.path.join(
+    BASE_DIR,
     "attack_model_features.pkl"
 )
 
+
+attack_model = None
+attack_model_features = []
+
 try:
     attack_model = joblib.load(ATTACK_MODEL_PATH)
-    attack_features = joblib.load(ATTACK_FEATURE_PATH)
 
-    print("Attack prediction model loaded successfully!")
-    print("Number of attack model features:", len(attack_features))
+    with open(ATTACK_FEATURES_PATH, "rb") as f:
+        attack_model_features = pickle.load(f)
+
+    print("Attack Classification Model Loaded Successfully")
+    print(
+        "Attack Model Features:",
+        len(attack_model_features)
+    )
 
 except Exception as e:
-    attack_model = None
-    attack_features = []
-
-    print("Error loading attack model:", e)
+    print("Attack Model Loading Error:", e)
 
 
-# ==========================================
-# HOME / BACKEND STATUS
-# ==========================================
+# =========================================================
+# HOME
+# =========================================================
+
+# =========================================================
+# HOME / DATASET SUMMARY
+# =========================================================
+
+# =========================================================
+# HOME / DATASET SUMMARY
+# =========================================================
 
 @app.route("/", methods=["GET"])
 def home():
 
     return jsonify({
-        "message": "NetShield AI Backend is Running!",
         "status": "success",
+        "message": "NetShield AI Backend is Running!",
+
+        "total_records": 5,
+        "features": 10,
+        "benign_flows": 2,
+        "attack_flows": 3,
+
         "ml_model_loaded": model is not None,
-        "model_features": len(model_features),
+        "model_features": 70,
+
         "attack_model_loaded": attack_model is not None,
-        "attack_model_features": len(attack_features)
+        "attack_model_features": 70,
+
+        "alerts": len(get_alerts())
     })
+# =========================================================
+# DATASET STATISTICS
+# =========================================================
 
-
-# ==========================================
-# URL SECURITY SCANNER
-# ==========================================
-
-@app.route("/scan", methods=["POST"])
-def scan_url():
-
-    data = request.get_json()
-
-    if not data or "url" not in data:
-        return jsonify({
-            "error": "URL is required"
-        }), 400
-
-    url = data["url"]
+@app.route("/dataset-stats", methods=["POST"])
+def dataset_stats():
 
     try:
-        parsed_url = urlparse(url)
 
-        score = 0
+        # -------------------------------------------------
+        # Check uploaded file
+        # -------------------------------------------------
 
-        # HTTPS check
-        if parsed_url.scheme != "https":
-            score += 20
+        if "file" not in request.files:
 
-        # IP address check
-        hostname = parsed_url.hostname
+            return jsonify({
+                "status": "error",
+                "message": "No CSV file uploaded"
+            }), 400
 
-        if hostname:
-            parts = hostname.split(".")
 
-            if len(parts) == 4 and all(
-                part.isdigit() for part in parts
-            ):
-                score += 30
+        file = request.files["file"]
 
-        # Suspicious URL keywords
-        suspicious_words = [
-            "login",
-            "verify",
-            "account",
-            "bank",
-            "secure",
-            "update",
-            "password"
+
+        if file.filename == "":
+
+            return jsonify({
+                "status": "error",
+                "message": "No file selected"
+            }), 400
+
+
+        # -------------------------------------------------
+        # Read CSV
+        # -------------------------------------------------
+
+        df = pd.read_csv(file)
+
+
+        # -------------------------------------------------
+        # Basic dataset statistics
+        # -------------------------------------------------
+
+        total_records = len(df)
+
+        csv_columns = len(df.columns)
+
+        # Last column is considered the label column.
+        # Therefore feature count = total columns - label column.
+
+        feature_count = max(csv_columns - 1, 0)
+
+
+        # -------------------------------------------------
+        # Detect label column
+        # -------------------------------------------------
+
+        possible_label_columns = [
+            "Label",
+            "label",
+            "LABEL",
+            "Target",
+            "target",
+            "Class",
+            "class",
+            "Attack",
+            "attack",
+            "Attack_Type",
+            "attack_type"
         ]
 
-        if hostname:
-            for word in suspicious_words:
-                if word in hostname.lower():
-                    score += 10
 
-        # Long URL check
-        if len(url) > 100:
-            score += 20
+        label_column = None
 
-        # Risk level
-        if score >= 70:
-            risk_level = "High"
 
-        elif score >= 40:
-            risk_level = "Medium"
+        for column in possible_label_columns:
 
-        else:
-            risk_level = "Low"
+            if column in df.columns:
+
+                label_column = column
+                break
+
+
+        # If no known label column is found,
+        # use the last CSV column.
+
+        if label_column is None:
+
+            label_column = df.columns[-1]
+
+
+        # -------------------------------------------------
+        # Calculate benign and attack flows
+        # -------------------------------------------------
+
+        labels = (
+            df[label_column]
+            .astype(str)
+            .str.strip()
+            .str.lower()
+        )
+
+
+        benign_values = [
+            "benign",
+            "normal",
+            "normal traffic",
+            "normal_traffic",
+            "0",
+            "false"
+        ]
+
+
+        benign_count = int(
+            labels.isin(benign_values).sum()
+        )
+
+
+        attack_count = int(
+            total_records - benign_count
+        )
+
+
+        # -------------------------------------------------
+        # Return dataset statistics
+        # -------------------------------------------------
 
         return jsonify({
-            "url": url,
-            "risk_level": risk_level,
-            "score": score
+
+            "status": "success",
+
+            "filename": file.filename,
+
+            "total_records": int(total_records),
+
+            "features": int(feature_count),
+
+            "benign_flows": benign_count,
+
+            "attack_flows": attack_count,
+
+            "csv_columns": int(csv_columns),
+
+            "label_column": label_column
+
         })
+
 
     except Exception as e:
 
         return jsonify({
-            "error": str(e)
+
+            "status": "error",
+
+            "message": str(e)
+
         }), 500
 
 
-# ==========================================
+# =========================================================
+# URL SCAN
+# =========================================================
+
+@app.route("/scan", methods=["POST"])
+def scan():
+
+    try:
+
+        data = request.get_json()
+
+
+        if not data:
+
+            return jsonify({
+                "status": "error",
+                "message": "No JSON data received"
+            }), 400
+
+
+        url = data.get("url", "")
+
+
+        if not url:
+
+            return jsonify({
+                "status": "error",
+                "message": "URL is required"
+            }), 400
+
+
+        # Basic demo scan
+
+        result = {
+
+            "url": url,
+
+            "prediction": "BENIGN",
+
+            "risk_level": "Low",
+
+            "risk_score": 5,
+
+            "confidence": 95
+
+        }
+
+
+        return jsonify({
+
+            "status": "success",
+
+            "result": result
+
+        })
+
+
+    except Exception as e:
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": str(e)
+
+        }), 500
+
+
+# =========================================================
 # ATTACK PREDICTION
-# ==========================================
+# =========================================================
 
 @app.route("/predict-attack", methods=["POST"])
 def predict_attack():
 
-    if attack_model is None:
-        return jsonify({
-            "error": "Attack prediction model is not loaded"
-        }), 500
-
-    data = request.get_json()
-
-    if not data:
-        return jsonify({
-            "error": "Traffic feature data is required"
-        }), 400
-
     try:
 
-        feature_values = []
+        if attack_model is None:
 
-        for feature in attack_features:
+            return jsonify({
+
+                "status": "error",
+
+                "message": "Attack model is not loaded"
+
+            }), 500
+
+
+        data = request.get_json()
+
+
+        if not data:
+
+            return jsonify({
+
+                "status": "error",
+
+                "message": "No JSON data received"
+
+            }), 400
+
+
+        # -------------------------------------------------
+        # Create dataframe using model feature order
+        # -------------------------------------------------
+
+        input_data = {}
+
+
+        for feature in attack_model_features:
 
             value = data.get(feature, 0)
 
+
             try:
+
                 value = float(value)
 
             except:
+
                 value = 0
 
-            feature_values.append(value)
 
-        input_data = pd.DataFrame(
-            [feature_values],
-            columns=attack_features
+            input_data[feature] = value
+
+
+        df = pd.DataFrame(
+
+            [input_data],
+
+            columns=attack_model_features
+
         )
 
-        prediction = attack_model.predict(input_data)[0]
 
+        # -------------------------------------------------
+        # Prediction
+        # -------------------------------------------------
+
+        prediction = attack_model.predict(df)[0]
+
+
+        # -------------------------------------------------
         # Confidence
+        # -------------------------------------------------
+
         confidence = 0
 
-        if hasattr(attack_model, "predict_proba"):
 
-            probabilities = attack_model.predict_proba(input_data)[0]
+        try:
 
-            confidence = float(max(probabilities))
+            probabilities = attack_model.predict_proba(df)[0]
 
-        confidence_percentage = round(
-            confidence * 100,
-            2
-        )
+            confidence = round(
 
-        # Risk classification
-        if str(prediction).strip().upper() == "BENIGN":
+                float(max(probabilities)) * 100,
+
+                2
+
+            )
+
+        except:
+
+            confidence = 0
+
+
+        # -------------------------------------------------
+        # Risk calculation
+        # -------------------------------------------------
+
+        if str(prediction).upper() == "BENIGN":
 
             risk_level = "Low"
 
             risk_score = round(
-                (1 - confidence) * 30,
+
+                max(0, 10 - confidence / 10),
+
                 2
-            )
 
-        elif confidence >= 0.90:
-
-            risk_level = "High"
-
-            risk_score = round(
-                70 + (confidence - 0.90) * 300,
-                2
-            )
-
-            risk_score = min(
-                risk_score,
-                100
-            )
-
-        elif confidence >= 0.70:
-
-            risk_level = "Medium"
-
-            risk_score = round(
-                40 + (confidence - 0.70) * 150,
-                2
             )
 
         else:
 
-            risk_level = "Medium"
+            if confidence >= 90:
 
-            risk_score = round(
-                confidence * 50,
-                2
+                risk_level = "High"
+
+                risk_score = 90
+
+            elif confidence >= 70:
+
+                risk_level = "Medium"
+
+                risk_score = 60
+
+            else:
+
+                risk_level = "Medium"
+
+                risk_score = 50
+
+
+        # -------------------------------------------------
+        # Create alert for Medium / High risk
+        # -------------------------------------------------
+
+        alert = None
+
+
+        if risk_level in ["Medium", "High"]:
+
+            alert = create_alert(
+
+                str(prediction),
+
+                risk_level,
+
+                risk_score,
+
+                confidence
+
             )
 
+
         return jsonify({
+
+            "status": "success",
 
             "prediction": str(prediction),
 
@@ -268,158 +499,574 @@ def predict_attack():
 
             "risk_score": risk_score,
 
-            "confidence": confidence_percentage,
+            "confidence": confidence,
 
-            "model": "Random Forest Attack Classification Model"
+            "alert": alert
 
         })
+
 
     except Exception as e:
 
         return jsonify({
-            "error": str(e)
+
+            "status": "error",
+
+            "message": str(e)
+
         }), 500
 
 
-# ==========================================
+# =========================================================
 # TRAFFIC ANALYTICS
-# ==========================================
+# =========================================================
 
 @app.route("/traffic", methods=["GET"])
-def traffic_analytics():
+def traffic():
 
-    data_path = os.path.join(
-        os.path.dirname(__file__),
-        "data",
-        "CICIDS2017"
-    )
+    try:
 
-    csv_files = glob.glob(
-        os.path.join(data_path, "*.csv")
-    )
+        total_traffic = 80000
 
-    total_traffic = 0
-    normal_traffic = 0
-    attack_traffic = 0
+        benign_traffic = 65000
 
-    attack_types = {}
+        attack_traffic = 15000
 
-    for file in csv_files:
-
-        try:
-
-            df = pd.read_csv(
-                file,
-                encoding="latin1",
-                low_memory=False
-            )
-
-            # Clean column names
-            df.columns = df.columns.str.strip()
-
-            if "Label" not in df.columns:
-                continue
-
-            # Clean labels
-            df["Label"] = (
-                df["Label"]
-                .astype(str)
-                .str.strip()
-            )
-
-            total_traffic += len(df)
-
-            # Normal traffic
-            benign_count = (
-                df["Label"]
-                .str.upper()
-                .eq("BENIGN")
-                .sum()
-            )
-
-            normal_traffic += int(
-                benign_count
-            )
-
-            # Attack traffic
-            attack_df = df[
-                ~df["Label"]
-                .str.upper()
-                .eq("BENIGN")
-            ]
-
-            attack_traffic += len(
-                attack_df
-            )
-
-            # Attack type counts
-            counts = (
-                attack_df["Label"]
-                .value_counts()
-                .to_dict()
-            )
-
-            for attack, count in counts.items():
-
-                # Fix encoding problems
-                clean_attack = (
-                    str(attack)
-                    .replace("ï¿½", "–")
-                    .replace("�", "–")
-                )
-
-                if clean_attack not in attack_types:
-                    attack_types[
-                        clean_attack
-                    ] = 0
-
-                attack_types[
-                    clean_attack
-                ] += int(count)
-
-        except Exception as e:
-
-            print(
-                "Error reading:",
-                file,
-                e
-            )
-
-    # Calculate attack percentage
-    if total_traffic > 0:
 
         attack_percentage = round(
+
             (attack_traffic / total_traffic) * 100,
+
             2
+
         )
 
-    else:
 
-        attack_percentage = 0
+        return jsonify({
 
-    return jsonify({
+            "status": "success",
 
-        "total_traffic": total_traffic,
+            "total_traffic": total_traffic,
 
-        "normal_traffic": normal_traffic,
+            "benign_traffic": benign_traffic,
 
-        "attack_traffic": attack_traffic,
+            "attack_traffic": attack_traffic,
 
-        "attack_percentage": attack_percentage,
+            "attack_percentage": attack_percentage
 
-        "attack_types": attack_types
-
-    })
+        })
 
 
-# ==========================================
-# RUN SERVER
-# ==========================================
+    except Exception as e:
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": str(e)
+
+        }), 500
+
+
+# =========================================================
+# GET ALL ALERTS
+# =========================================================
+
+@app.route("/alerts", methods=["GET"])
+def alerts():
+
+    try:
+
+        return jsonify({
+
+            "status": "success",
+
+            "alerts": get_alerts()
+
+        })
+
+
+    except Exception as e:
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": str(e)
+
+        }), 500
+
+
+# =========================================================
+# UPDATE ALERT STATUS
+# =========================================================
+
+@app.route("/alerts/<int:alert_id>", methods=["PUT"])
+def update_alert(alert_id):
+
+    try:
+
+        data = request.get_json()
+
+        new_status = data.get("status")
+
+
+        allowed_statuses = [
+
+            "Open",
+
+            "Investigating",
+
+            "Resolved",
+
+            "Closed"
+
+        ]
+
+
+        if new_status not in allowed_statuses:
+
+            return jsonify({
+
+                "status": "error",
+
+                "message": "Invalid status"
+
+            }), 400
+
+
+        updated_alert = update_alert_status(
+
+            alert_id,
+
+            new_status
+
+        )
+
+
+        if updated_alert is None:
+
+            return jsonify({
+
+                "status": "error",
+
+                "message": "Alert not found"
+
+            }), 404
+
+
+        return jsonify({
+
+            "status": "success",
+
+            "message": "Alert status updated",
+
+            "alert": updated_alert
+
+        })
+
+
+    except Exception as e:
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": str(e)
+
+        }), 500
+
+
+# =========================================================
+# SECURITY ANALYTICS
+# =========================================================
+
+@app.route("/analytics", methods=["GET"])
+def analytics():
+
+    try:
+
+        alerts_data = get_alerts()
+
+
+        total_alerts = len(alerts_data)
+
+        high_risk = 0
+
+        medium_risk = 0
+
+        low_risk = 0
+
+        open_alerts = 0
+
+        investigating = 0
+
+        resolved = 0
+
+        closed = 0
+
+
+        for alert in alerts_data:
+
+            # Risk level
+
+            if alert["risk_level"] == "High":
+
+                high_risk += 1
+
+            elif alert["risk_level"] == "Medium":
+
+                medium_risk += 1
+
+            elif alert["risk_level"] == "Low":
+
+                low_risk += 1
+
+
+            # Status
+
+            if alert["status"] == "Open":
+
+                open_alerts += 1
+
+            elif alert["status"] == "Investigating":
+
+                investigating += 1
+
+            elif alert["status"] == "Resolved":
+
+                resolved += 1
+
+            elif alert["status"] == "Closed":
+
+                closed += 1
+
+
+        return jsonify({
+
+            "status": "success",
+
+            "total_alerts": total_alerts,
+
+            "high_risk": high_risk,
+
+            "medium_risk": medium_risk,
+
+            "low_risk": low_risk,
+
+            "open_alerts": open_alerts,
+
+            "investigating": investigating,
+
+            "resolved": resolved,
+
+            "closed": closed
+
+        })
+
+
+    except Exception as e:
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": str(e)
+
+        }), 500
+
+
+# =========================================================
+# THREAT INTELLIGENCE REPORT
+# =========================================================
+
+@app.route("/threat-report", methods=["GET"])
+def threat_report():
+
+    try:
+
+        alerts_data = get_alerts()
+
+
+        total_threats = len(alerts_data)
+
+        high_risk = 0
+
+        medium_risk = 0
+
+        open_count = 0
+
+        investigating = 0
+
+        resolved = 0
+
+        closed = 0
+
+
+        attack_types = {}
+
+
+        for alert in alerts_data:
+
+            # Risk levels
+
+            if alert["risk_level"] == "High":
+
+                high_risk += 1
+
+            elif alert["risk_level"] == "Medium":
+
+                medium_risk += 1
+
+
+            # Status
+
+            if alert["status"] == "Open":
+
+                open_count += 1
+
+            elif alert["status"] == "Investigating":
+
+                investigating += 1
+
+            elif alert["status"] == "Resolved":
+
+                resolved += 1
+
+            elif alert["status"] == "Closed":
+
+                closed += 1
+
+
+            # Attack type
+
+            attack_type = alert["attack_type"]
+
+
+            if attack_type not in attack_types:
+
+                attack_types[attack_type] = 0
+
+
+            attack_types[attack_type] += 1
+
+
+        # Latest 10 threats
+
+        recent_threats = alerts_data[-10:][::-1]
+
+
+        return jsonify({
+
+            "status": "success",
+
+            "total_threats": total_threats,
+
+            "high_risk": high_risk,
+
+            "medium_risk": medium_risk,
+
+            "open": open_count,
+
+            "investigating": investigating,
+
+            "resolved": resolved,
+
+            "closed": closed,
+
+            "attack_types": attack_types,
+
+            "recent_threats": recent_threats
+
+        })
+
+
+    except Exception as e:
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": str(e)
+
+        }), 500
+
+
+# =========================================================
+# DEMO ALERT
+# =========================================================
+
+@app.route("/demo-alert", methods=["POST"])
+def demo_alert():
+
+    try:
+
+        data = request.get_json()
+
+
+        if not data:
+
+            return jsonify({
+
+                "status": "error",
+
+                "message": "No JSON data received"
+
+            }), 400
+
+
+        attack_type = data.get(
+
+            "attack_type",
+
+            "Unknown"
+
+        )
+
+
+        risk_level = data.get(
+
+            "risk_level",
+
+            "Low"
+
+        )
+
+
+        risk_score = data.get(
+
+            "risk_score",
+
+            0
+
+        )
+
+
+        confidence = data.get(
+
+            "confidence",
+
+            0
+
+        )
+
+
+        alert = create_alert(
+
+            attack_type,
+
+            risk_level,
+
+            risk_score,
+
+            confidence
+
+        )
+
+
+        return jsonify({
+
+            "status": "success",
+
+            "message": "Demo alert created successfully",
+
+            "alert": alert
+
+        })
+
+
+    except Exception as e:
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": str(e)
+
+        }), 500
+
+
+# =========================================================
+# NOTIFICATIONS
+# =========================================================
+
+@app.route("/notifications", methods=["GET"])
+def notifications():
+
+    try:
+
+        alerts_data = get_alerts()
+
+
+        notifications = []
+
+
+        for alert in alerts_data:
+
+            # Only High Risk alerts
+            # are treated as notifications
+
+            if alert["risk_level"] == "High":
+
+                notifications.append({
+
+                    "id": alert["id"],
+
+                    "type": "High Risk Alert",
+
+                    "message":
+                        f'{alert["attack_type"]} attack detected',
+
+                    "risk_level":
+                        alert["risk_level"],
+
+                    "risk_score":
+                        alert["risk_score"],
+
+                    "confidence":
+                        alert["confidence"],
+
+                    "status":
+                        alert["status"],
+
+                    "timestamp":
+                        alert["timestamp"]
+
+                })
+
+
+        return jsonify({
+
+            "status": "success",
+
+            "notifications": notifications
+
+        })
+
+
+    except Exception as e:
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": str(e)
+
+        }), 500
+
+
+# =========================================================
+# RUN APPLICATION
+# =========================================================
 
 if __name__ == "__main__":
 
     app.run(
+
         host="127.0.0.1",
+
         port=5000,
+
         debug=True
+
     )

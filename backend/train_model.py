@@ -421,4 +421,4 @@ print(
 
 print(
     "\nMilestone 2 - Step 2 completed!"
-)
+)Invoke-RestMethod -Uri "http://127.0.0.1:5000/alerts" -Method GET
