@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import joblib
 import pandas as pd
@@ -6,15 +7,23 @@ import numpy as np
 
 
 # Load ML model and preprocessing files
-model = joblib.load("../model/random_forest_model.pkl")
+model = joblib.load("../model/xgboost_model.pkl")
 encoder = joblib.load("../model/onehot_encoder.pkl")
 feature_info = joblib.load("../model/feature_info.pkl")
+label_encoder = joblib.load("../model/xgb_label_encoder.pkl")
 
 print("ML model, encoder, and feature information loaded successfully!")
 
 
 # Create FastAPI app
 app = FastAPI(title="ThreatRadar")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # Severity mapping
@@ -48,7 +57,6 @@ def health_check():
 class PredictionRequest(BaseModel):
     features: dict
 
-
 # Prediction endpoint
 @app.post("/predict")
 def predict(request: PredictionRequest):
@@ -70,6 +78,7 @@ def predict(request: PredictionRequest):
 
     # Prediction
     prediction = model.predict(input_final)[0]
+    prediction = label_encoder.inverse_transform([prediction])[0]
 
     # Confidence
     probabilities = model.predict_proba(input_final)[0]
@@ -94,4 +103,60 @@ def predict(request: PredictionRequest):
         "confidence": round(confidence, 4),
         "risk_score": round(risk_score, 2),
         "risk_level": risk_level
+    }
+from fastapi import UploadFile, File
+import io
+
+@app.post("/predict-csv")
+async def predict_csv(file: UploadFile = File(...)):
+    contents = await file.read()
+
+    df = pd.read_csv(io.BytesIO(contents))
+    df = df.head(100)
+
+    # Remove columns that were not used as model features
+    drop_cols = ["id", "label", "attack_cat"]
+    input_df = df.drop(columns=[col for col in drop_cols if col in df.columns])
+
+    numeric_cols = feature_info["numeric_cols"]
+    categorical_cols = feature_info["categorical_cols"]
+
+    # Keep only the features used during model training
+    input_cat = encoder.transform(input_df[categorical_cols])
+    input_num = input_df[numeric_cols].to_numpy()
+
+    input_final = np.hstack([input_num, input_cat])
+
+    # XGBoost predictions
+    predictions = model.predict(input_final)
+    predictions = label_encoder.inverse_transform(predictions)
+
+    probabilities = model.predict_proba(input_final)
+    confidences = probabilities.max(axis=1)
+
+    results = []
+
+    for prediction, confidence in zip(predictions, confidences):
+        risk_score = severity[prediction] * float(confidence)
+
+        if risk_score <= 25:
+            risk_level = "Low"
+        elif risk_score <= 50:
+            risk_level = "Medium"
+        elif risk_score <= 75:
+            risk_level = "High"
+        else:
+            risk_level = "Critical"
+
+        results.append({
+            "prediction": prediction,
+            "confidence": round(float(confidence), 4),
+            "risk_score": round(float(risk_score), 2),
+            "risk_level": risk_level
+        })
+
+    return {
+        "filename": file.filename,
+        "total_rows": len(results),
+        "results": results
     }
