@@ -11,22 +11,53 @@
 
   <div class="dashboard-content">
     <p id="welcome">Loading...</p>
-    <div class="stats-grid" id="stats-grid"></div>
-    <div class="attack-list">
-      <h3>Top Attack Types</h3>
-      <ul id="attack-list"></ul>
-    </div>
 
-    <div class="live-section">
-      <div class="live-header">
-        <h3>Live Threat Monitor</h3>
-        <button id="liveBtn" onclick="toggleLive()">Start Monitoring</button>
+    <div class="upload-section">
+      <h3>📁 Upload Traffic Data</h3>
+      <p class="upload-hint">Upload a CSV of network flow data to analyze it with NetShield AI.</p>
+      <div class="upload-box">
+        <input type="file" id="csvFile" accept=".csv">
+        <button id="analyzeBtn" onclick="analyzeUpload()">Analyze File</button>
       </div>
-      <div id="liveFeed"></div>
+      <p id="uploadError" class="upload-error"></p>
     </div>
 
-    <div class="report-trigger">
-      <button id="reportBtn" onclick="generateReport()">📄 Generate Report</button>
+    <div id="uploadResults" class="hidden">
+      <div class="stats-grid" id="uploadStatsGrid"></div>
+
+      <h3 class="section-title">Risk Level Distribution</h3>
+      <div class="ring-charts" id="uploadRiskRings"></div>
+
+      <h3 class="section-title">Detected Attack Types</h3>
+      <div class="chevron-bars" id="uploadAttackBars"></div>
+
+      <h3 class="section-title">Detection Results (first 100 rows)</h3>
+      <div id="uploadResultsList" class="upload-results-list"></div>
+
+      <div class="report-trigger">
+        <button id="uploadReportBtn" onclick="generateUploadReport()">📄 Generate Report</button>
+      </div>
+    </div>
+
+    <div id="demoSection" class="hidden">
+      <h3 class="section-title">🖥 Demo Dataset (analyst1 only)</h3>
+      <div class="stats-grid" id="stats-grid"></div>
+      <div class="attack-list">
+        <h3>Top Attack Types</h3>
+        <ul id="attack-list"></ul>
+      </div>
+
+      <div class="live-section">
+        <div class="live-header">
+          <h3>Live Threat Monitor</h3>
+          <button id="liveBtn" onclick="toggleLive()">Start Monitoring</button>
+        </div>
+        <div id="liveFeed"></div>
+      </div>
+
+      <div class="report-trigger">
+        <button id="reportBtn" onclick="generateReport()">📄 Generate Report</button>
+      </div>
     </div>
   </div>
 
@@ -50,7 +81,7 @@
         <table id="reportModelTable" class="report-table"></table>
       </div>
       <div class="report-section">
-        <h2>Risk Level Distribution (Sample Traffic)</h2>
+        <h2>Risk Level Distribution</h2>
         <div id="reportRiskBars"></div>
       </div>
       <div class="report-section">
@@ -75,8 +106,15 @@
       const data1 = await res1.json();
       document.getElementById('welcome').innerText = data1.message;
 
+      if (data1.username === 'analyst1') {
+        document.getElementById('demoSection').classList.remove('hidden');
+        loadDemoData(token);
+      }
+    }
+
+    async function loadDemoData(token) {
       const res2 = await fetch('http://127.0.0.1:8000/traffic-stats', { headers: { 'Authorization': 'Bearer ' + token } });
-      if (!res2.ok) { goToLogin(); return; }
+      if (!res2.ok) return;
       const stats = await res2.json();
 
       document.getElementById('stats-grid').innerHTML =
@@ -103,17 +141,21 @@
         return;
       }
       const data = await res.json();
-
       const feed = document.getElementById('liveFeed');
       const entry = document.createElement('div');
-      entry.className = data.prediction === 'ATTACK' ? 'live-entry attack' : 'live-entry benign';
+      entry.className = data.random_forest.prediction === 'ATTACK' ? 'live-entry attack' : 'live-entry benign';
 
-      const riskClass = 'risk-' + data.risk_label.toLowerCase();
+      const rf = data.random_forest;
+      const xgb = data.xgboost;
+      const rfRiskClass = 'risk-' + rf.risk_label.toLowerCase();
+      const xgbRiskClass = 'risk-' + xgb.risk_label.toLowerCase();
+      const agreeClass = data.models_agree ? 'agree-badge agree-yes' : 'agree-badge agree-no';
+      const agreeText = data.models_agree ? '✓ Models Agree' : '✗ Models Disagree';
 
       entry.innerHTML =
-        '<span class="live-label">' + data.predicted_class + '</span>' +
-        '<span class="live-risk ' + riskClass + '">' + data.risk_label + ' (' + data.risk_score + ')</span>' +
-        '<span class="live-confidence">' + (data.confidence * 100).toFixed(1) + '%</span>';
+        '<div class="model-row"><span class="model-tag">🌲 RF</span><span class="live-label">' + rf.predicted_class + '</span><span class="live-risk ' + rfRiskClass + '">' + rf.risk_label + ' (' + rf.risk_score + ')</span><span class="live-confidence">' + (rf.confidence * 100).toFixed(1) + '%</span></div>' +
+        '<div class="model-row"><span class="model-tag">⚡ XGB</span><span class="live-label">' + xgb.predicted_class + '</span><span class="live-risk ' + xgbRiskClass + '">' + xgb.risk_label + ' (' + xgb.risk_score + ')</span><span class="live-confidence">' + (xgb.confidence * 100).toFixed(1) + '%</span></div>' +
+        '<span class="' + agreeClass + '">' + agreeText + '</span>';
 
       feed.insertBefore(entry, feed.firstChild);
       while (feed.children.length > 15) {
@@ -157,14 +199,7 @@
         '<tr><td>Recall (weighted)</td><td>' + report.model_performance.recall + '</td></tr>' +
         '<tr><td>F1 Score (weighted)</td><td>' + report.model_performance.f1_score + '</td></tr>';
 
-      const riskTotal = report.risk_distribution.Low + report.risk_distribution.Medium + report.risk_distribution.High + report.risk_distribution.Critical;
-      document.getElementById('reportRiskBars').innerHTML = ['Low', 'Medium', 'High', 'Critical'].map(level => {
-        const count = report.risk_distribution[level];
-        const pct = riskTotal ? Math.round((count / riskTotal) * 100) : 0;
-        return '<div class="risk-bar-row"><span class="risk-bar-label">' + level + '</span>' +
-          '<div class="risk-bar-track"><div class="risk-bar-fill risk-bar-' + level.toLowerCase() + '" style="width:' + pct + '%"></div></div>' +
-          '<span class="risk-bar-count">' + count + '</span></div>';
-      }).join('');
+      renderReportRiskBars(report.risk_distribution);
 
       document.getElementById('reportAttackList').innerHTML =
         Object.entries(report.top_attack_types).map(([k, v]) =>
@@ -174,8 +209,140 @@
       document.getElementById('reportModal').classList.remove('hidden');
     }
 
+    function renderReportRiskBars(riskDistribution) {
+      const riskTotal = Object.values(riskDistribution).reduce((a, b) => a + b, 0) || 1;
+      document.getElementById('reportRiskBars').innerHTML = ['Low', 'Medium', 'High', 'Critical'].map(level => {
+        const count = riskDistribution[level];
+        const pct = Math.round((count / riskTotal) * 100);
+        return '<div class="risk-bar-row"><span class="risk-bar-label">' + level + '</span>' +
+          '<div class="risk-bar-track"><div class="risk-bar-fill risk-bar-' + level.toLowerCase() + '" style="width:' + pct + '%"></div></div>' +
+          '<span class="risk-bar-count">' + count + '</span></div>';
+      }).join('');
+    }
+
     function closeReport() {
       document.getElementById('reportModal').classList.add('hidden');
+    }
+
+    async function analyzeUpload() {
+      const fileInput = document.getElementById('csvFile');
+      const errorEl = document.getElementById('uploadError');
+      errorEl.innerText = '';
+
+      if (!fileInput.files.length) {
+        errorEl.innerText = 'Please choose a CSV file first.';
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+
+      const btn = document.getElementById('analyzeBtn');
+      btn.innerText = 'Analyzing...';
+      btn.disabled = true;
+
+      const res = await fetch('http://127.0.0.1:8000/analyze-upload', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token },
+        body: formData
+      });
+
+      btn.innerText = 'Analyze File';
+      btn.disabled = false;
+
+      if (!res.ok) {
+        const err = await res.json();
+        errorEl.innerText = err.detail || 'Something went wrong analyzing this file.';
+        return;
+      }
+
+      const data = await res.json();
+      window.lastUploadData = data;
+      renderUploadResults(data);
+    }
+
+    function renderUploadResults(data) {
+      document.getElementById('uploadResults').classList.remove('hidden');
+
+      document.getElementById('uploadStatsGrid').innerHTML =
+        '<div class="stat-card"><div class="label">Total Flows</div><div class="value">' + data.total_flows.toLocaleString() + '</div></div>' +
+        '<div class="stat-card"><div class="label">Benign</div><div class="value">' + data.benign_count.toLocaleString() + '</div></div>' +
+        '<div class="stat-card"><div class="label">Attacks Detected</div><div class="value">' + data.attack_count.toLocaleString() + '</div></div>' +
+        '<div class="stat-card"><div class="label">Model Agreement</div><div class="value">' + data.model_agreement_rate + '%</div></div>';
+
+      const riskTotal = Object.values(data.risk_distribution).reduce((a, b) => a + b, 0) || 1;
+      const circumference = 326.7;
+      document.getElementById('uploadRiskRings').innerHTML = ['Low', 'Medium', 'High', 'Critical'].map(level => {
+        const count = data.risk_distribution[level];
+        const pct = Math.round((count / riskTotal) * 100);
+        const offset = circumference * (1 - pct / 100);
+        return '<div class="ring-chart">' +
+          '<svg viewBox="0 0 120 120">' +
+          '<circle class="ring-bg" cx="60" cy="60" r="52"></circle>' +
+          '<circle class="ring-fill ring-' + level.toLowerCase() + '" cx="60" cy="60" r="52" style="stroke-dasharray:' + circumference + '; stroke-dashoffset:' + offset + ';"></circle>' +
+          '</svg>' +
+          '<div class="ring-percent">' + pct + '%</div>' +
+          '<div class="ring-caption">' + level + ' (' + count + ')</div>' +
+          '</div>';
+      }).join('');
+
+      const attackTotal = Object.values(data.top_attack_types).reduce((a, b) => a + b, 0) || 1;
+      const barsHtml = Object.entries(data.top_attack_types).map(([name, count]) => {
+        const pct = Math.round((count / attackTotal) * 100);
+        return '<div class="chevron-row">' +
+          '<div class="chevron-name">' + name + '</div>' +
+          '<div class="chevron-track"><div class="chevron-fill" style="width:' + pct + '%">' + count + '</div></div>' +
+          '</div>';
+      }).join('');
+      document.getElementById('uploadAttackBars').innerHTML = barsHtml || '<p style="color:#7FBF7F; font-size:13px;">No attacks detected in this file — all traffic classified as benign.</p>';
+
+      const listHtml = data.results.map(r => {
+        const rf = r.random_forest;
+        const xgb = r.xgboost;
+        const entryClass = rf.prediction === 'ATTACK' ? 'live-entry attack' : 'live-entry benign';
+        const rfRiskClass = 'risk-' + rf.risk_label.toLowerCase();
+        const xgbRiskClass = 'risk-' + xgb.risk_label.toLowerCase();
+        const agreeClass = r.models_agree ? 'agree-badge agree-yes' : 'agree-badge agree-no';
+        const agreeText = r.models_agree ? '✓ Agree' : '✗ Disagree';
+        return '<div class="' + entryClass + '">' +
+          '<div class="model-row"><span class="model-tag">🌲 RF</span><span class="live-label">' + rf.predicted_class + '</span><span class="live-risk ' + rfRiskClass + '">' + rf.risk_label + ' (' + rf.risk_score + ')</span><span class="live-confidence">' + (rf.confidence * 100).toFixed(1) + '%</span></div>' +
+          '<div class="model-row"><span class="model-tag">⚡ XGB</span><span class="live-label">' + xgb.predicted_class + '</span><span class="live-risk ' + xgbRiskClass + '">' + xgb.risk_label + ' (' + xgb.risk_score + ')</span><span class="live-confidence">' + (xgb.confidence * 100).toFixed(1) + '%</span></div>' +
+          '<span class="' + agreeClass + '">' + agreeText + '</span>' +
+          '</div>';
+      }).join('');
+      document.getElementById('uploadResultsList').innerHTML = listHtml;
+    }
+
+    function generateUploadReport() {
+      const data = window.lastUploadData;
+      if (!data) return;
+
+      document.getElementById('reportMeta').innerText = 'Generated from uploaded file: ' + data.filename;
+
+      document.getElementById('reportTrafficSummary').innerHTML =
+        '<div><span class="report-label">Total Flows</span><span class="report-value">' + data.total_flows.toLocaleString() + '</span></div>' +
+        '<div><span class="report-label">Benign</span><span class="report-value">' + data.benign_count.toLocaleString() + '</span></div>' +
+        '<div><span class="report-label">Attacks</span><span class="report-value">' + data.attack_count.toLocaleString() + '</span></div>';
+
+      const avgConfidence = data.results.length
+        ? (data.results.reduce((sum, r) => sum + r.random_forest.confidence, 0) / data.results.length * 100).toFixed(1)
+        : 'N/A';
+
+      document.getElementById('reportModelTable').innerHTML =
+        '<tr><th>Metric</th><th>Value</th></tr>' +
+        '<tr><td>Average Prediction Confidence (RF)</td><td>' + avgConfidence + '%</td></tr>' +
+        '<tr><td>Model Agreement Rate (RF vs XGBoost)</td><td>' + data.model_agreement_rate + '%</td></tr>' +
+        '<tr><td colspan="2" style="font-size:11px; color:#64748B; padding-top:10px;">Accuracy/F1 metrics require known true labels and reflect the internal validation dataset only. This report shows live predictions on unlabeled uploaded data.</td></tr>';
+        
+      renderReportRiskBars(data.risk_distribution);
+
+      document.getElementById('reportAttackList').innerHTML =
+        Object.entries(data.top_attack_types).map(([k, v]) =>
+          '<li><span>' + k + '</span><span>' + v.toLocaleString() + '</span></li>'
+        ).join('');
+
+      document.getElementById('reportModal').classList.remove('hidden');
     }
   </script>
 </body>

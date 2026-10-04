@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NetShield AI - Network Threat Detection</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="spotlight"></div>
+
+  <div class="landing-nav">
+    <div class="brand">🛡 NETSHIELD AI</div>
+    <div class="nav-links">
+      <a href="login.html">Login</a>
+      <a href="signup.html" class="primary">Get Started</a>
+    </div>
+  </div>
+
+  <div class="hero">
+    <canvas id="matrixCanvas" class="matrix-canvas"></canvas>
+    <div class="hero-content">
+      <div class="tag">AI-POWERED NETWORK DEFENSE</div>
+      <h1>Detect Threats Before<br>They Become <span>Breaches</span><span class="cursor-blink"></span></h1>
+      <p>NetShield AI monitors network traffic in real time, classifies attacks using machine learning, and scores every threat by risk — so your team knows exactly what to act on first.</p>
+      <div class="hero-buttons">
+        <a href="signup.html" class="btn-primary">Get Started</a>
+        <a href="login.html" class="btn-secondary">Login</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="feature-card reveal">
+      <div class="icon">⚡</div>
+      <h3>Real-Time Monitoring</h3>
+      <p>Live traffic analysis with instant classification of benign vs. malicious flows.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="icon">🎯</div>
+      <h3>Attack Classification</h3>
+      <p>Identifies specific attack types — DDoS, PortScan, Botnet, and more — not just yes/no.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="icon">📊</div>
+      <h3>Risk Scoring</h3>
+      <p>Every threat is scored 0-100 and labeled Low to Critical, so analysts triage faster.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="icon">📄</div>
+      <h3>Instant Reports</h3>
+      <p>Generate a full detection report with one click, ready to print or share.</p>
+    </div>
+  </div>
+
+  <div class="section-divider reveal">
+    <span>// HOW IT WORKS</span>
+  </div>
+
+  <div class="how-it-works">
+    <div class="step reveal">
+      <div class="step-number">01</div>
+      <h3>Upload Traffic Data</h3>
+      <p>Upload a CSV of network flow data from your own systems.</p>
+    </div>
+    <div class="step reveal">
+      <div class="step-number">02</div>
+      <h3>AI Analysis</h3>
+      <p>Our trained model classifies every flow in real time.</p>
+    </div>
+    <div class="step reveal">
+      <div class="step-number">03</div>
+      <h3>Risk Scoring</h3>
+      <p>Each detection gets a 0-100 risk score and severity label.</p>
+    </div>
+    <div class="step reveal">
+      <div class="step-number">04</div>
+      <h3>Get Insights</h3>
+      <p>Watch live results stream in, or generate a full report instantly.</p>
+    </div>
+  </div>
+
+  <div class="stats-band reveal">
+    <div class="stat-item">
+      <div class="stat-number">2M+</div>
+      <div class="stat-desc">Flows Analyzed</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">99.27%</div>
+      <div class="stat-desc">F1 Score</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">15</div>
+      <div class="stat-desc">Attack Types Detected</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">1.5s</div>
+      <div class="stat-desc">Detection Interval</div>
+    </div>
+  </div>
+
+  <div class="final-cta reveal">
+    <h2>Ready to see it in action?</h2>
+    <p>Create a free account and start analyzing traffic in minutes.</p>
+    <a href="signup.html" class="btn-primary">Get Started Free</a>
+  </div>
+
+  <div class="footer">
+    <p>🛡 NETSHIELD AI — Built for Infosys Springboard Virtual Internship 7.0</p>
+  </div>
+
+  <script>
+    document.addEventListener('mousemove', (e) => {
+      const glow = document.getElementById('spotlight');
+      glow.style.left = e.clientX + 'px';
+      glow.style.top = e.clientY + 'px';
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('reveal-visible');
+        }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    function startMatrixRain() {
+      const canvas = document.getElementById('matrixCanvas');
+      const ctx = canvas.getContext('2d');
+      function resize() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      const chars = 'アイウエオカキクケコサシスセソ01';
+      const fontSize = 14;
+      let columns = Math.floor(canvas.width / fontSize);
+      let drops = Array(columns).fill(1);
+
+      function draw() {
+        ctx.fillStyle = 'rgba(5, 7, 5, 0.08)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#00FF41';
+        ctx.font = fontSize + 'px monospace';
+        for (let i = 0; i < drops.length; i++) {
+          const text = chars[Math.floor(Math.random() * chars.length)];
+          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i]++;
+        }
+      }
+      setInterval(draw, 50);
+    }
+    startMatrixRain();
+  </script>
+</body>
+</html>

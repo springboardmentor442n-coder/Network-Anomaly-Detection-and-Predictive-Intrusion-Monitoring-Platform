@@ -1,0 +1,20 @@
+{
+  "random_forest": {
+    "best_params": {
+      "n_estimators": 300,
+      "min_samples_split": 2,
+      "min_samples_leaf": 1,
+      "max_depth": null
+    },
+    "test_f1_weighted": 0.9927
+  },
+  "xgboost": {
+    "best_params": {
+      "subsample": 1.0,
+      "n_estimators": 300,
+      "max_depth": 8,
+      "learning_rate": 0.1
+    },
+    "test_f1_weighted": 0.9927
+  }
+}

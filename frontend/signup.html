@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>NetShield AI - Login</title>
+  <title>NetShield AI - Sign Up</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -9,36 +9,40 @@
   <div class="login-container">
     <canvas id="matrixCanvas" class="matrix-canvas"></canvas>
     <div class="login-card">
-      <h2>NetShield AI</h2>
-      <input type="text" id="username" placeholder="Username">
-      <input type="password" id="password" placeholder="Password">
-      <button onclick="login()">Login</button>
+      <h2>Create Account</h2>
+      <input type="email" id="username" placeholder="Enter your email">
+      <input type="password" id="password" placeholder="Choose a password">
+      <button onclick="signup()">Sign Up</button>
       <p id="error"></p>
-      <p style="margin-top:16px; font-size:13px;"><a href="signup.html" style="color:#00FF41;">Don't have an account? Sign up</a></p>
+      <p style="margin-top:16px; font-size:13px;"><a href="login.html" style="color:#00FF41;">Already have an account? Log in</a></p>
     </div>
   </div>
 
   <script>
-    async function login() {
+    async function signup() {
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
 
-      const formData = new URLSearchParams();
-      formData.append('username', username);
-      formData.append('password', password);
+      if (!username || !password) {
+        document.getElementById('error').innerText = 'Please fill in both fields.';
+        return;
+      }
 
-      const response = await fetch('http://127.0.0.1:8000/login', {
+      const response = await fetch('http://127.0.0.1:8000/signup', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
       });
 
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('token', data.access_token);
         window.location.href = 'dashboard.html';
+      } else if (response.status === 422) {
+        document.getElementById('error').innerText = 'Please enter a valid email address.';
       } else {
-        document.getElementById('error').innerText = 'Login failed. Check your username and password.';
+        const data = await response.json();
+        document.getElementById('error').innerText = data.detail || 'Signup failed.';
       }
     }
 
