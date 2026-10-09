@@ -3,6 +3,7 @@ from database.database import Base, engine
 # Import all models so SQLAlchemy registers their tables.
 from backend.app.models import (
     Alert,
+    Incident,
     NetworkTraffic,
     Prediction,
     User,
@@ -15,7 +16,7 @@ def initialize_database():
     print("Database initialized successfully.")
     print(f"Database URL: {engine.url}")
     print("Tables created:")
-    
+
     for table_name in Base.metadata.tables:
         print(f" - {table_name}")
 
