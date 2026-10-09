@@ -131,5 +131,13 @@ git push origin your-name
 
 ---
 
+## 📸 Platform Screenshots & Interactive Walkthrough
+### 1. 🔐 Cyber Defense Authentication & RBAC Gate
+> *Secure JWT-backed multi-tenant login screen supporting role-based access isolation (Admin, Security Analyst, SOC Operator).*
+<p align="center">
+  <img src="docs/screenshots/screen_login.png" alt="Login & Role Selection" width="850">
+</p>
+---
+
 ## 📄 License
 This project is released under the **MIT License**.
