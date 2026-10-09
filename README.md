@@ -17,14 +17,44 @@
   - **UNSW-NB15 Model**: **84.73% Accuracy** trained on payload exploit features (Fuzzers, Shellcode, Backdoors).
 - 🎭 **Role-Based Access Control (RBAC)**:
   - Strict role-tailored workspace isolation (**Admin**, **Security Analyst**, **SOC Operator**) backed by JWT tokens.
-- 📁 **Real `.pcap` Packet Capture Forensic Inspector**:
-  - Upload raw Wireshark `.pcap` / `.pcapng` capture files for batch AI anomaly extraction powered by `Scapy`.
 - 🔍 **Explainable AI (XAI Feature Drivers)**:
   - Identifies and explains top feature metrics (e.g. `Flow Bytes/sec = 5.7M B/s (+570% velocity surge)`) driving threat scores.
 - 🛡️ **Automated Firewall Remediation**:
   - 1-click script exporter generating ready-to-use drop rules for Linux `iptables`, Ubuntu `ufw`, Windows `PowerShell`, and `pfSense`.
 - 🔔 **Real-Time Webhook Alert Integration**:
   - Dispatches formatted alert payloads to **Slack**, **Discord**, or **webhook.site**.
+
+---
+
+## 📸 Platform Interface & Screenshots
+
+### 1. 🔐 Cyber Defense Authentication Portal
+Credential-authenticated SOC entry point featuring dynamic 3D neural sphere visualization and role-tailored authentication.
+
+<p align="center">
+  <img src="docs/screenshots/01-login-screen.png" alt="NetShield AI Login Screen" width="900">
+</p>
+
+### 2. 📊 Real-Time SOC Threat Monitoring Dashboard
+Live telemetry operations overview displaying inspected packet throughput, blocked attack metrics, active connection flows, real-time throughput velocity streams, and categorical attack distributions.
+
+<p align="center">
+  <img src="docs/screenshots/02-soc-overview.png" alt="SOC Overview Dashboard" width="900">
+</p>
+
+### 3. 🧠 Dual-Engine AI Anomaly Predictor
+Interactive threat predictor supporting single-flow real-time inference and batch CSV dataset processing across **CICIDS2017 (52 features)** and **UNSW-NB15** models.
+
+<p align="center">
+  <img src="docs/screenshots/03-ai-anomaly-predictor.png" alt="AI Anomaly Predictor" width="900">
+</p>
+
+### 4. 👥 Role-Based Access Control (RBAC) & Team Management
+Granular privilege administration enabling Admin, Security Analyst, and SOC Operator credential assignment and workspace isolation.
+
+<p align="center">
+  <img src="docs/screenshots/04-user-rbac-controls.png" alt="User & RBAC Controls" width="900">
+</p>
 
 ---
 

@@ -3,104 +3,149 @@ import {
   ShieldAlert, ShieldCheck, Activity, Cpu, Server, Terminal, 
   AlertTriangle, Radio, BarChart3, Users, Lock, LogOut, Key, 
   CheckCircle2, XCircle, ArrowUpRight, Search, Download, Filter, UserCheck, UserPlus, Eye, EyeOff, X, Upload, Copy, Bell, Code, Zap,
-  Palette, Sparkles, Trash2, History, FileText, RefreshCw
+  Sparkles, Trash2, History, FileText, RefreshCw, Waves, User, LayoutDashboard,
+  PieChart as PieChartIcon
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import signinBg from './assets/signin_bg.jpg';
+import AstralShell from './components/AstralShell';
+import HexagonalVault from './components/HexagonalVault';
+import GlyphSonar from './components/GlyphSonar';
+import VoxelArc from './components/VoxelArc';
+import Profile5 from './components/Profile5';
+import StarBurst from './components/StarBurst';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1";
+const ASTRAL_SHELL_COLORS = ['#7C6BFF', '#FFE6FA'];
+const HEX_VAULT_COLORS_BLUE = ['#2563eb', '#60a5fa'];
+const HEX_VAULT_COLORS_PURPLE = ['#6366f1', '#a855f7'];
+const HEX_VAULT_COLORS_ROSE = ['#e11d48', '#fb7185'];
+const HEX_VAULT_COLORS_EMERALD = ['#059669', '#34d399'];
 
-// Custom Scalable NetShield AI Logo Component
+// Professional High-Tech Scalable NetShield AI Logo Component
 function NetShieldLogo({ className = "w-8 h-8" }) {
+  const rawId = React.useId();
+  const id = rawId.replace(/[^a-zA-Z0-9]/g, '');
+
   return (
     <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="shieldGradApp" x1="0%" y1="0%" x2="100%" y2="100%">
+        {/* Core Multi-Tone Cyber Shield Gradients */}
+        <linearGradient id={`shieldLeft_${id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#8b5cf6" />
+          <stop offset="50%" stopColor="#5227ff" />
+          <stop offset="100%" stopColor="#311099" />
+        </linearGradient>
+
+        <linearGradient id={`shieldRight_${id}`} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#6366f1" />
-          <stop offset="50%" stopColor="#4f46e5" />
+          <stop offset="45%" stopColor="#4338ca" />
           <stop offset="100%" stopColor="#06b6d4" />
         </linearGradient>
-        <linearGradient id="coreGradApp" x1="0%" y1="0%" x2="0%" y2="100%">
+
+        <linearGradient id={`shieldCore_${id}`} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#38bdf8" />
-          <stop offset="100%" stopColor="#818cf8" />
+          <stop offset="50%" stopColor="#818cf8" />
+          <stop offset="100%" stopColor="#c084fc" />
         </linearGradient>
+
+        <linearGradient id={`shieldRim_${id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.85" />
+          <stop offset="40%" stopColor="#a78bfa" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#5227ff" stopOpacity="0.05" />
+        </linearGradient>
+
+        <linearGradient id={`innerBevel_${id}`} x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.1" />
+        </linearGradient>
+
+        {/* Ambient Bloom Glow Filter */}
+        <filter id={`shieldGlow_${id}`} x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2.5" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
       </defs>
-      <path d="M50 8 L85 24 V50 C85 71.5 69.8 89.2 50 94 C30.2 89.2 15 71.5 15 50 V24 L50 8 Z" fill="url(#shieldGradApp)" fillOpacity="0.2" stroke="url(#shieldGradApp)" strokeWidth="3.5"/>
-      <path d="M50 16 L77 29 V50 C77 67 65.5 81 50 85 C34.5 81 23 67 23 50 V29 L50 16 Z" stroke="#818cf8" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.7"/>
-      <circle cx="50" cy="35" r="4" fill="url(#coreGradApp)"/>
-      <circle cx="36" cy="52" r="3.5" fill="url(#coreGradApp)"/>
-      <circle cx="64" cy="52" r="3.5" fill="url(#coreGradApp)"/>
-      <circle cx="50" cy="68" r="4" fill="url(#coreGradApp)"/>
-      <line x1="50" y1="35" x2="36" y2="52" stroke="#38bdf8" strokeWidth="2" opacity="0.8"/>
-      <line x1="50" y1="35" x2="64" y2="52" stroke="#38bdf8" strokeWidth="2" opacity="0.8"/>
-      <line x1="36" y1="52" x2="50" y2="68" stroke="#38bdf8" strokeWidth="2" opacity="0.8"/>
-      <line x1="64" y1="52" x2="50" y2="68" stroke="#38bdf8" strokeWidth="2" opacity="0.8"/>
-      <line x1="36" y1="52" x2="64" y2="52" stroke="#818cf8" strokeWidth="1.5" opacity="0.6"/>
-      <circle cx="50" cy="51.5" r="8" stroke="#38bdf8" strokeWidth="1.5" opacity="0.9"/>
-      <circle cx="50" cy="51.5" r="3" fill="#ffffff"/>
+
+      {/* Ambient Neural Backlight Aura */}
+      <circle cx="50" cy="50" r="36" fill={`url(#shieldLeft_${id})`} opacity="0.18" filter={`url(#shieldGlow_${id})`} />
+
+      {/* Outer Protective Defense Orbit Ring */}
+      <path
+        d="M50 4 C52 4 78 16 86 22 C86 42 84 64 68 80 C60 88 53 92 50 94 C47 92 40 88 32 80 C16 64 14 42 14 22 C22 16 48 4 50 4 Z"
+        stroke={`url(#shieldRim_${id})`}
+        strokeWidth="1.2"
+        strokeDasharray="5 3"
+        opacity="0.45"
+      />
+
+      {/* Left Shield Wing (Stealth Electric Violet Facet) */}
+      <path
+        d="M50 8 L18 24 V52 C18 69 33 82 50 88 V50 L35 36 V28 L50 16 Z"
+        fill={`url(#shieldLeft_${id})`}
+      />
+
+      {/* Right Shield Wing (Cyber Luminescent Facet) */}
+      <path
+        d="M50 8 L82 24 V52 C82 69 67 82 50 88 V50 L65 36 V28 L50 16 Z"
+        fill={`url(#shieldRight_${id})`}
+      />
+
+      {/* Stylized Cyber "N" Neural Chevrons */}
+      <path
+        d="M35 32 L50 46 L65 32 V39 L50 53 L35 39 Z"
+        fill={`url(#shieldCore_${id})`}
+        opacity="0.95"
+      />
+      <path
+        d="M35 48 L50 62 L65 48 V55 L50 69 L35 55 Z"
+        fill={`url(#shieldCore_${id})`}
+        opacity="0.6"
+      />
+
+      {/* Razor-Sharp Specular Top Rim Highlight */}
+      <path
+        d="M50 8 L18 24 L19 25.5 L50 10 L81 25.5 L82 24 Z"
+        fill={`url(#innerBevel_${id})`}
+      />
+
+      {/* Central Quantum Cryptographic Diamond AI Core */}
+      <g filter={`url(#shieldGlow_${id})`}>
+        <polygon points="50,42 58,50 50,58 42,50" fill={`url(#shieldCore_${id})`} stroke="#ffffff" strokeWidth="0.8" />
+        <circle cx="50" cy="50" r="2.2" fill="#ffffff" />
+      </g>
+
+      {/* Neural Telemetry Circuit Node Terminals */}
+      <circle cx="35" cy="32" r="1.8" fill="#38bdf8" />
+      <circle cx="65" cy="32" r="1.8" fill="#38bdf8" />
+      <circle cx="35" cy="55" r="1.8" fill="#a78bfa" />
+      <circle cx="65" cy="55" r="1.8" fill="#a78bfa" />
+      <circle cx="50" cy="69" r="1.8" fill="#06b6d4" />
     </svg>
   );
 }
 
-// Background Theme Configurations (Obsidian Cyber is the primary recommended palette)
-const THEMES = {
-  cyber: {
-    id: 'cyber',
-    name: 'Obsidian Cyber',
-    tagline: 'Deep Indigo & Cyan (Recommended)',
-    canvasBg: 'bg-[#070a13]',
-    headerBg: 'bg-[#0c1220]/95 border-indigo-950/70',
-    navBg: 'bg-[#0a0f1c]/80 border-gray-800/80',
-    activeTab: 'bg-indigo-600/20 text-indigo-300 border-indigo-500/50 shadow-indigo-600/20',
-    activeTabIcon: 'text-indigo-400',
-    badge: 'bg-indigo-950/90 text-indigo-300 border-indigo-700/50',
-    accentDot: 'bg-indigo-400',
-    glow1: 'bg-indigo-600/15',
-    glow2: 'bg-cyan-500/10',
-    btnPrimary: 'bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white shadow-lg shadow-indigo-600/30',
-  },
-  matrix: {
-    id: 'matrix',
-    name: 'Stealth Matrix',
-    tagline: 'Terminal Obsidian & Emerald',
-    canvasBg: 'bg-[#050f0c]',
-    headerBg: 'bg-[#071713]/95 border-emerald-950/70',
-    navBg: 'bg-[#061410]/80 border-emerald-950/50',
-    activeTab: 'bg-emerald-600/20 text-emerald-300 border-emerald-500/50 shadow-emerald-600/20',
-    activeTabIcon: 'text-emerald-400',
-    badge: 'bg-emerald-950/90 text-emerald-300 border-emerald-700/50',
-    accentDot: 'bg-emerald-400',
-    glow1: 'bg-emerald-600/15',
-    glow2: 'bg-teal-500/10',
-    btnPrimary: 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white shadow-lg shadow-emerald-600/30',
-  },
-  gunmetal: {
-    id: 'gunmetal',
-    name: 'Gunmetal Dimmed',
-    tagline: 'Soft Charcoal Slate Night-Shift',
-    canvasBg: 'bg-[#10141d]',
-    headerBg: 'bg-[#151b27]/95 border-slate-800/70',
-    navBg: 'bg-[#131823]/80 border-slate-800/50',
-    activeTab: 'bg-slate-700/50 text-sky-300 border-sky-500/40 shadow-slate-900/30',
-    activeTabIcon: 'text-sky-400',
-    badge: 'bg-slate-800/90 text-slate-300 border-slate-700/50',
-    accentDot: 'bg-sky-400',
-    glow1: 'bg-slate-600/15',
-    glow2: 'bg-sky-600/10',
-    btnPrimary: 'bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white shadow-lg shadow-sky-600/30',
-  }
+// Permanent NetShield AI Electric Indigo Theme (#5227ff)
+const themeConfig = {
+  id: 'cyber',
+  name: 'NetShield Obsidian Cyber',
+  canvasBg: 'bg-[#060814]',
+  headerBg: 'bg-[#0a0d20]/95 border-indigo-950/70',
+  navBg: 'bg-[#080a1a]/85 border-indigo-950/50',
+  activeTab: 'bg-[#5227ff]/20 text-indigo-300 border-[#5227ff]/50 shadow-[#5227ff]/20',
+  activeTabIcon: 'text-indigo-400',
+  badge: 'bg-indigo-950/90 text-indigo-300 border-indigo-700/50',
+  accentDot: 'bg-[#5227ff]',
+  glow1: 'bg-[#5227ff]/20',
+  glow2: 'bg-[#8b5cf6]/15',
+  btnPrimary: 'bg-gradient-to-r from-[#5227ff] to-indigo-600 hover:from-[#4318e6] hover:to-indigo-500 text-white shadow-lg shadow-[#5227ff]/30',
+  voxelColor: '#5227ff',
+  voxelAccent: '#a78bfa',
 };
 
 export default function App() {
-  // Visual Theme State (Obsidian Cyber is the default master choice)
-  const [currentTheme, setCurrentTheme] = useState(() => {
-    return localStorage.getItem('netshield_theme') || 'cyber';
-  });
-
-  const themeConfig = THEMES[currentTheme] || THEMES.cyber;
-
-  useEffect(() => {
-    localStorage.setItem('netshield_theme', currentTheme);
-  }, [currentTheme]);
+  // Permanent Background Voxel Arc Waves
+  const showVoxelWaves = true;
 
   // Authentication State
   const [user, setUser] = useState(() => {
@@ -127,11 +172,6 @@ export default function App() {
   const [firewallModalIP, setFirewallModalIP] = useState(null);
   const [firewallRules, setFirewallRules] = useState(null);
 
-  // PCAP Upload Analysis State
-  const [pcapResult, setPcapResult] = useState(null);
-  const [isUploadingPcap, setIsUploadingPcap] = useState(false);
-  const [pcapFilter, setPcapFilter] = useState('');
-
   // CSV Batch Dataset State
   const [inferenceMode, setInferenceMode] = useState('single'); // 'single' | 'batch_csv'
   const [csvResult, setCsvResult] = useState(null);
@@ -141,10 +181,10 @@ export default function App() {
   // Webhook Config State
   const [webhookUrl, setWebhookUrl] = useState('https://webhook.site/385e3422-c262-4e3e-8d9e-5213a6534311');
 
-  // Forensic Attack History State (Persisted across PCAP & CSV uploads)
+  // Forensic Attack History State (Persisted across CSV dataset uploads)
   const [attackHistory, setAttackHistory] = useState([]);
-  const [attackCounts, setAttackCounts] = useState({ total: 0, pcap: 0, csv: 0, actioned: 0, active: 0 });
-  const [attackHistoryFilter, setAttackHistoryFilter] = useState('ALL'); // 'ALL' | 'PCAP' | 'CSV'
+  const [attackCounts, setAttackCounts] = useState({ total: 0, csv: 0, actioned: 0, active: 0 });
+  const [attackHistoryFilter, setAttackHistoryFilter] = useState('ALL'); // 'ALL' | 'CSV'
   const [attackHistorySearch, setAttackHistorySearch] = useState('');
   const [isLoadingAttackHistory, setIsLoadingAttackHistory] = useState(false);
   const [alertSubView, setAlertSubView] = useState('upload_history'); // 'upload_history' | 'live_alerts'
@@ -330,7 +370,7 @@ export default function App() {
     }
   };
 
-  // Sync persistent forensic attack history (PCAP & CSV uploads)
+  // Sync persistent forensic attack history (CSV uploads)
   const fetchAttackHistory = async (sourceFilter = attackHistoryFilter, searchQuery = attackHistorySearch) => {
     setIsLoadingAttackHistory(true);
     try {
@@ -582,45 +622,6 @@ export default function App() {
     });
   };
 
-  const handlePcapUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setIsUploadingPcap(true);
-    showToast(`Parsing PCAP file '${file.name}' using Scapy...`, 'info');
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    fetch(`${API_BASE}/detect/upload-pcap`, {
-      method: 'POST',
-      body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data && data.data) {
-        setPcapResult(data.data);
-        showToast(`Parsed ${data.data.total_packets_parsed} packets across ${data.data.total_unique_flows} flows! Logged threats to forensic history.`, 'success');
-        fetchAttackHistory();
-      }
-    })
-    .catch(() => {
-      setPcapResult({
-        filename: file.name,
-        total_packets_parsed: 1420,
-        total_unique_flows: 5,
-        malicious_flows_detected: 2,
-        clean_flows: 3,
-        analyzed_flows: [
-          { flow_id: '192.168.1.104->10.0.0.15:tcp', src_ip: '192.168.1.104', dst_ip: '10.0.0.15', protocol: 'TCP', packet_count: 420, byte_count: 285000, risk_score: 94.2, threat_level: 'CRITICAL', prediction: 'ATTACK', xai_drivers: [{ feature: 'Flow Bytes / sec', value: '5,700,000 B/s', impact: 'CRITICAL', reason: 'Abnormal velocity surge (+570% baseline).' }] },
-          { flow_id: '192.168.1.42->10.0.0.2:tcp', src_ip: '192.168.1.42', dst_ip: '10.0.0.2', protocol: 'TCP', packet_count: 12, byte_count: 1450, risk_score: 4.1, threat_level: 'LOW', prediction: 'BENIGN', xai_drivers: [{ feature: 'Flow Metrics Standard', value: 'Standard HTTP GET', impact: 'LOW', reason: 'Normal user web browsing traffic.' }] }
-        ]
-      });
-      showToast(`Parsed ${file.name} successfully!`, 'success');
-      fetchAttackHistory();
-    })
-    .finally(() => setIsUploadingPcap(false));
-  };
-
   const handleCsvUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -669,169 +670,140 @@ export default function App() {
 
   const getNavTabsForRole = (role) => {
     const allTabs = [
-      { id: 'overview', label: 'SOC Overview', icon: Activity, roles: ['Admin', 'Security Analyst', 'SOC Operator'] },
-      { id: 'traffic', label: 'Live Traffic & PCAP', icon: Radio, roles: ['Admin', 'Security Analyst', 'SOC Operator'] },
-      { id: 'predictor', label: 'AI Anomaly Predictor', icon: Cpu, roles: ['Admin', 'Security Analyst'] },
-      { id: 'alerts', label: 'Alerts & Incidents', icon: AlertTriangle, badge: alerts.filter(a => !a.actioned).length, roles: ['Admin', 'Security Analyst'] },
-      { id: 'intelligence', label: 'Threat Intel & Webhooks', icon: BarChart3, roles: ['Admin', 'Security Analyst', 'SOC Operator'] },
-      { id: 'users', label: 'User & RBAC Controls', icon: Users, roles: ['Admin'] }
+      { id: 'overview', label: 'SOC Overview', icon: LayoutDashboard, roles: ['Admin', 'Security Analyst', 'SOC Operator', 'Lead Administrator', 'SOC Manager', 'Incident Responder'] },
+      { id: 'traffic', label: 'Live Traffic', icon: Radio, roles: ['Admin', 'Security Analyst', 'SOC Operator', 'Lead Administrator', 'SOC Manager', 'Incident Responder'] },
+      { id: 'predictor', label: 'AI Anomaly Predictor', icon: Cpu, roles: ['Admin', 'Security Analyst', 'Lead Administrator', 'SOC Manager'] },
+      { id: 'alerts', label: 'Alerts & Incidents', icon: AlertTriangle, badge: alerts.filter(a => !a.actioned).length, roles: ['Admin', 'Security Analyst', 'Lead Administrator', 'SOC Manager', 'Incident Responder'] },
+      { id: 'intelligence', label: 'Threat Intel & Webhooks', icon: BarChart3, roles: ['Admin', 'Security Analyst', 'SOC Operator', 'Lead Administrator', 'SOC Manager'] },
+      { id: 'users', label: 'User & RBAC Controls', icon: Users, roles: ['Admin', 'Lead Administrator'] },
+      { id: 'profile', label: 'Analyst Profile', icon: User, roles: ['Admin', 'Security Analyst', 'SOC Operator', 'Lead Administrator', 'SOC Manager', 'Incident Responder'] }
     ];
-    return allTabs.filter(tab => tab.roles.includes(role));
+    return allTabs.filter(tab => !tab.roles || tab.roles.includes(role));
   };
 
   // LOGIN SCREEN (STRICT VALIDATED CREDENTIALS LOGIN ONLY - DEMO BUTTONS REMOVED)
   if (!user) {
     return (
-      <div className={`min-h-screen ${themeConfig.canvasBg} text-gray-100 flex flex-col justify-center items-center p-4 relative overflow-hidden font-sans cyber-grid-pattern transition-colors duration-300`}>
+      <div className="min-h-screen text-gray-100 flex flex-col justify-center items-center p-4 relative overflow-hidden font-sans transition-colors duration-300 bg-gray-950">
+        {/* Watermark-Free High-Tech Cyber Security Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none scale-100 transition-all duration-700"
+          style={{ backgroundImage: `url(${signinBg})` }}
+        />
+        {/* Dark Cyber Glassmorphism Overlay for readability & high contrast */}
+        <div className="absolute inset-0 bg-gradient-to-b from-gray-950/80 via-gray-950/70 to-gray-950/90 backdrop-blur-[2px] pointer-events-none" />
+
         {/* Ambient mesh glow lighting */}
-        <div className={`absolute top-1/4 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[580px] h-[580px] ${themeConfig.glow1} blur-[140px] rounded-full pointer-events-none animate-float`}></div>
-        <div className={`absolute bottom-1/4 right-1/3 translate-x-1/2 translate-y-1/2 w-[480px] h-[480px] ${themeConfig.glow2} blur-[150px] rounded-full pointer-events-none`}></div>
+        <div className={`absolute top-1/4 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[580px] h-[580px] ${themeConfig.glow1} blur-[140px] rounded-full pointer-events-none opacity-30 animate-float`}></div>
+        <div className={`absolute bottom-1/4 right-1/3 translate-x-1/2 translate-y-1/2 w-[480px] h-[480px] ${themeConfig.glow2} blur-[150px] rounded-full pointer-events-none opacity-30`}></div>
 
-        {/* Theme Quick Switcher in Login Screen */}
-        <div className="absolute top-5 right-5 z-20 flex items-center bg-gray-900/80 backdrop-blur-md p-1.5 rounded-xl border border-gray-800/90 text-xs shadow-xl">
-          <Palette className="w-3.5 h-3.5 text-gray-400 ml-1.5 mr-1" />
-          <button
-            onClick={() => setCurrentTheme('cyber')}
-            title="Obsidian Cyber (Recommended)"
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition flex items-center gap-1.5 ${
-              currentTheme === 'cyber' ? 'bg-indigo-600/30 text-indigo-200 border border-indigo-500/50 shadow-sm' : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
-            <span>Cyber</span>
-          </button>
-          <button
-            onClick={() => setCurrentTheme('matrix')}
-            title="Stealth Matrix"
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition flex items-center gap-1.5 ${
-              currentTheme === 'matrix' ? 'bg-emerald-600/30 text-emerald-200 border border-emerald-500/50 shadow-sm' : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            <span>Matrix</span>
-          </button>
-          <button
-            onClick={() => setCurrentTheme('gunmetal')}
-            title="Gunmetal Dimmed"
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition flex items-center gap-1.5 ${
-              currentTheme === 'gunmetal' ? 'bg-slate-700/50 text-slate-200 border border-slate-600/50 shadow-sm' : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
-            <span>Gunmetal</span>
-          </button>
-        </div>
-
-        <div className="w-full max-w-md space-y-6 relative z-10">
-          <div className="text-center space-y-2">
-            <div className="inline-flex p-3.5 bg-indigo-950/80 border border-indigo-500/40 rounded-3xl shadow-2xl shadow-indigo-950/80 mb-1">
-              <NetShieldLogo className="w-12 h-12" />
-            </div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center justify-center gap-2.5">
-              NetShield AI
-              <span className={`text-xs font-mono px-2 py-0.5 ${themeConfig.badge} rounded-full font-normal`}>v1.0.0</span>
-            </h1>
-            <p className="text-xs text-gray-400">Security Operations Center • Credential Authenticated Portal</p>
+        {/* TWO-COLUMN GRID: Astral Shell on Left, Sign-in card on Right */}
+        <div className="w-full max-w-7xl mx-auto px-4 py-8 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center min-h-[85vh]">
+          {/* LEFT COLUMN: Astral Shell 3D Connected Stars Constellation (Free-Floating) */}
+          <div className="order-2 lg:order-1 lg:col-span-7 xl:col-span-7 w-full h-[520px] lg:h-[700px] relative flex items-center justify-center overflow-visible select-none pointer-events-auto">
+            <AstralShell
+              className="w-full h-full"
+              colors={ASTRAL_SHELL_COLORS}
+              backgroundColor="transparent"
+              nodes={2400}
+              connections={4}
+              reach={0.2}
+              clustering={0.85}
+              chords={0.35}
+              radius={0.4}
+              originX={0.5}
+              originY={0.5}
+              lineOpacity={0.7}
+              nodeSize={0.8}
+              depthFade={0.7}
+              spin={1.0}
+              tilt={18}
+              interactive={true}
+              draggable={true}
+              hoverRadius={0.22}
+              hoverBoost={1.0}
+              clickPulse={true}
+              pulseSpeed={1.2}
+            />
           </div>
 
-          <div className="cyber-card p-8 rounded-2xl border border-gray-800 space-y-6 shadow-2xl">
-            <div className="flex justify-between items-center border-b border-gray-800/80 pb-4">
-              <h2 className="text-sm font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
-                <Lock className="w-4 h-4 text-indigo-400" />
-                SOC Portal Sign In
-              </h2>
-              <span className="text-[10px] font-mono px-2 py-0.5 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded">
-                SECURE AUTH
-              </span>
+          {/* RIGHT COLUMN: Sign In Form & Branding */}
+          <div className="order-1 lg:order-2 lg:col-span-5 xl:col-span-5 w-full max-w-md mx-auto lg:mx-0 lg:ml-auto space-y-6">
+            <div className="text-left space-y-2">
+              <div className="inline-flex p-2.5 bg-[#0d1127] border border-[#5227ff]/50 rounded-3xl shadow-2xl shadow-[#5227ff]/25 mb-1">
+                <NetShieldLogo className="w-14 h-14" />
+              </div>
+              <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+                NetShield AI
+                <span className={`text-xs font-mono px-2 py-0.5 ${themeConfig.badge} rounded-full font-normal`}>v1.0.0</span>
+              </h1>
+              <p className="text-xs text-gray-400">Security Operations Center • Credential Authenticated Portal</p>
             </div>
 
-            {authError && (
-              <div className="p-3 bg-rose-950/80 border border-rose-800 text-rose-200 text-xs rounded-xl flex items-center gap-2.5 animate-in fade-in duration-200">
-                <XCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
-                <span>{authError}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleLoginSubmit} className="space-y-4 text-xs">
-              <div>
-                <label className="block text-gray-300 font-medium mb-1.5">User Email Address</label>
-                <input
-                  type="email" required placeholder="admin@netshield.ai"
-                  value={loginCreds.email} onChange={e => setLoginCreds({ ...loginCreds, email: e.target.value })}
-                  className="w-full bg-gray-900/90 border border-gray-700/80 rounded-lg px-3.5 py-2.5 text-gray-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 focus:outline-none font-mono transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-300 font-medium mb-1.5">Password</label>
-                <div className="relative">
-                  <input
-                    type={showLoginPassword ? "text" : "password"}
-                    required
-                    placeholder="••••••••"
-                    value={loginCreds.password}
-                    onChange={e => setLoginCreds({ ...loginCreds, password: e.target.value })}
-                    className="w-full bg-gray-900/90 border border-gray-700/80 rounded-lg pl-3.5 pr-10 py-2.5 text-gray-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 focus:outline-none font-mono transition"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowLoginPassword(!showLoginPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition p-1 focus:outline-none"
-                    aria-label={showLoginPassword ? "Hide password" : "Show password"}
-                  >
-                    {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <button
-                type="submit" disabled={isLoggingIn}
-                className={`w-full ${themeConfig.btnPrimary} font-semibold py-3 rounded-lg transition flex items-center justify-center space-x-2 text-xs cursor-pointer`}
-              >
-                {isLoggingIn ? (
-                  <span>Validating Credentials...</span>
-                ) : (
-                  <>
-                    <Key className="w-4 h-4" />
-                    <span>Sign In to Role Workspace</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="pt-4 border-t border-gray-800/80 space-y-2">
-              <div className="flex items-center justify-between">
-                <p className="text-[11px] text-gray-400 font-medium">Quick Credentials (Click to auto-fill):</p>
-                <span className="text-[10px] font-mono text-indigo-400 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" /> Auto-Fill
+            <div className="cyber-card p-8 rounded-2xl border border-indigo-500/30 bg-gray-900/90 backdrop-blur-xl space-y-6 shadow-2xl shadow-indigo-950/80">
+              <div className="flex justify-between items-center border-b border-gray-800/80 pb-4">
+                <h2 className="text-sm font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-indigo-400" />
+                  SOC Portal Sign In
+                </h2>
+                <span className="text-[10px] font-mono px-2 py-0.5 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded">
+                  SECURE AUTH
                 </span>
               </div>
-              <div className="bg-gray-900/70 p-2.5 rounded-xl border border-gray-800/90 text-[11px] font-mono space-y-1.5 text-gray-400">
-                <div 
-                  onClick={() => setLoginCreds({ email: 'admin@netshield.ai', password: 'admin123' })}
-                  className="flex justify-between items-center p-1.5 rounded-lg hover:bg-indigo-600/20 hover:text-indigo-200 cursor-pointer transition group"
-                  title="Click to auto-fill Admin credentials"
-                >
-                  <span className="text-gray-300 group-hover:text-white">admin@netshield.ai</span>
-                  <span className="text-indigo-400 font-bold px-2 py-0.5 rounded bg-indigo-950/60 border border-indigo-800/50 group-hover:border-indigo-500">admin123 (Admin)</span>
+
+              {authError && (
+                <div className="p-3 bg-rose-950/80 border border-rose-800 text-rose-200 text-xs rounded-xl flex items-center gap-2.5 animate-in fade-in duration-200">
+                  <XCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+                  <span>{authError}</span>
                 </div>
-                <div 
-                  onClick={() => setLoginCreds({ email: 'analyst@netshield.ai', password: 'analyst123' })}
-                  className="flex justify-between items-center p-1.5 rounded-lg hover:bg-cyan-600/20 hover:text-cyan-200 cursor-pointer transition group"
-                  title="Click to auto-fill Analyst credentials"
-                >
-                  <span className="text-gray-300 group-hover:text-white">analyst@netshield.ai</span>
-                  <span className="text-cyan-400 font-bold px-2 py-0.5 rounded bg-cyan-950/60 border border-cyan-800/50 group-hover:border-cyan-500">analyst123 (Analyst)</span>
+              )}
+
+              <form onSubmit={handleLoginSubmit} className="space-y-4 text-xs">
+                <div>
+                  <label className="block text-gray-300 font-medium mb-1.5">User Email Address</label>
+                  <input
+                    type="email" required placeholder="admin@netshield.ai"
+                    value={loginCreds.email} onChange={e => setLoginCreds({ ...loginCreds, email: e.target.value })}
+                    className="w-full bg-gray-900/90 border border-gray-700/80 rounded-lg px-3.5 py-2.5 text-gray-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 focus:outline-none font-mono transition"
+                  />
                 </div>
-                <div 
-                  onClick={() => setLoginCreds({ email: 'operator@netshield.ai', password: 'operator123' })}
-                  className="flex justify-between items-center p-1.5 rounded-lg hover:bg-slate-700/30 hover:text-slate-200 cursor-pointer transition group"
-                  title="Click to auto-fill Operator credentials"
-                >
-                  <span className="text-gray-300 group-hover:text-white">operator@netshield.ai</span>
-                  <span className="text-gray-400 font-bold px-2 py-0.5 rounded bg-gray-800/60 border border-gray-700 group-hover:border-gray-500">operator123 (Operator)</span>
+
+                <div>
+                  <label className="block text-gray-300 font-medium mb-1.5">Password</label>
+                  <div className="relative">
+                    <input
+                      type={showLoginPassword ? "text" : "password"}
+                      required
+                      placeholder="••••••••"
+                      value={loginCreds.password}
+                      onChange={e => setLoginCreds({ ...loginCreds, password: e.target.value })}
+                      className="w-full bg-gray-900/90 border border-gray-700/80 rounded-lg pl-3.5 pr-10 py-2.5 text-gray-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 focus:outline-none font-mono transition"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowLoginPassword(!showLoginPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition p-1 focus:outline-none"
+                      aria-label={showLoginPassword ? "Hide password" : "Show password"}
+                    >
+                      {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
-              </div>
+
+                <button
+                  type="submit" disabled={isLoggingIn}
+                  className={`w-full ${themeConfig.btnPrimary} font-semibold py-3 rounded-lg transition flex items-center justify-center space-x-2 text-xs cursor-pointer`}
+                >
+                  {isLoggingIn ? (
+                    <span>Validating Credentials...</span>
+                  ) : (
+                    <>
+                      <Key className="w-4 h-4" />
+                      <span>Sign In to Role Workspace</span>
+                    </>
+                  )}
+                </button>
+              </form>
             </div>
           </div>
         </div>
@@ -843,7 +815,34 @@ export default function App() {
   const visibleTabs = getNavTabsForRole(user.role);
 
   return (
-    <div className={`min-h-screen ${themeConfig.canvasBg} text-gray-100 font-sans flex flex-col relative cyber-grid-pattern transition-colors duration-300`}>
+    <div className={`min-h-screen ${themeConfig.canvasBg} text-gray-100 font-sans flex relative cyber-grid-pattern transition-colors duration-300 overflow-x-hidden`}>
+      {/* Voxel Arc Rolling Sea Horizon Platform Background (Main Console) */}
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-75 overflow-hidden transition-opacity duration-700">
+        <VoxelArc
+          className="w-full h-full"
+          color="#5227ff"
+          accentColor="#a78bfa"
+          backgroundColor="transparent"
+          density={0.94}
+          voxelSize={0.65}
+          roundness={0}
+          horizon={0.62}
+          curvature={0.55}
+          waveHeight={0.75}
+          waveLength={1.1}
+          speed={0.35}
+          turbulence={0.32}
+          brightness={2.2}
+          glow={1.5}
+          haze={0.15}
+          bloom={0.15}
+          grain={0}
+          aperture={0}
+          interactive={false}
+          dpr={2}
+        />
+      </div>
+
       {/* Background Ambient Mesh Glows */}
       <div className={`absolute top-20 left-12 w-[600px] h-[600px] ${themeConfig.glow1} blur-[160px] rounded-full pointer-events-none -z-10 animate-float`}></div>
       <div className={`absolute bottom-20 right-12 w-[500px] h-[500px] ${themeConfig.glow2} blur-[160px] rounded-full pointer-events-none -z-10`}></div>
@@ -859,325 +858,424 @@ export default function App() {
         </div>
       )}
 
-      {/* Header */}
-      <header className={`border-b ${themeConfig.headerBg} backdrop-blur-xl sticky top-0 z-40 px-6 py-3.5 flex items-center justify-between transition-colors duration-300`}>
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-3">
-            <NetShieldLogo className="w-9 h-9" />
-            <div>
-              <h1 className="text-xl font-bold tracking-wide text-white flex items-center gap-2">
-                NetShield AI
-                <span className={`text-xs font-mono font-normal px-2 py-0.5 ${themeConfig.badge} rounded-full`}>SOC Console</span>
-              </h1>
-              <p className="text-xs text-gray-400">Network Anomaly Detection & Threat Monitoring</p>
+      {/* SIDEBAR NAVIGATION (Matching Image 1: Subly-style dark vertical navigation) */}
+      <aside className="w-64 xl:w-72 bg-[#090c1a]/95 backdrop-blur-2xl border-r border-[#5227ff]/20 flex flex-col justify-between shrink-0 sticky top-0 h-screen z-40 p-4 transition-all duration-300">
+        <div>
+          {/* Brand Header with Rounded Square Logo */}
+          <div className="flex items-center justify-between p-2 mb-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-11 h-11 rounded-2xl bg-[#0f132a] border border-[#5227ff]/50 flex items-center justify-center p-1.5 shadow-lg shadow-[#5227ff]/25">
+                <NetShieldLogo className="w-full h-full" />
+              </div>
+              <div>
+                <h1 className="text-base font-extrabold tracking-wider text-white">NETSHIELD</h1>
+                <p className="text-[11px] text-gray-400 font-mono">@{user?.email ? user.email.split('@')[0] : 'soc_team'}</p>
+              </div>
+            </div>
+            <div className="w-7 h-7 rounded-lg bg-gray-800/60 border border-gray-700/60 flex items-center justify-center text-gray-400">
+              <div className="w-2.5 h-2.5 rounded-sm border border-gray-400"></div>
             </div>
           </div>
+
+          {/* Vertical Menu Items (Populated with website's features) */}
+          <nav className="space-y-1.5">
+            {visibleTabs.map(tab => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer ${
+                    isActive
+                      ? 'bg-[#181c33] text-white border border-[#5227ff]/40 shadow-lg shadow-[#5227ff]/15 font-semibold'
+                      : 'text-gray-400 hover:text-gray-100 hover:bg-[#12162b]/60 border border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${isActive ? 'text-[#a78bfa]' : 'text-gray-400'}`} />
+                    <span>{tab.label}</span>
+                  </div>
+                  {tab.badge ? (
+                    <span className="px-2 py-0.5 text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded-full font-mono">
+                      {tab.badge}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </nav>
         </div>
 
-        <div className="hidden lg:flex items-center space-x-5 bg-gray-900/80 px-4 py-1.5 rounded-xl border border-gray-800 text-xs font-mono">
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse-glow"></span>
-            <span className="text-gray-400">System:</span>
-            <span className="text-emerald-400 font-semibold">SOC ACTIVE</span>
-          </div>
-          <div className="h-3 w-[1px] bg-gray-800"></div>
-          <div><span className="text-gray-400">CICIDS2017:</span><span className="text-indigo-300 font-bold ml-1.5">99.89% Acc</span></div>
-          <div className="h-3 w-[1px] bg-gray-800"></div>
-          <div><span className="text-gray-400">UNSW-NB15:</span><span className="text-cyan-300 font-bold ml-1.5">84.73% Acc</span></div>
-          <div className="h-3 w-[1px] bg-gray-800 hidden xl:block"></div>
-          <div className="text-gray-400 text-[11px] hidden xl:block font-mono">{currentTime}</div>
-        </div>
-
-        <div className="flex items-center space-x-3.5">
-          {/* Theme Quick Selector */}
-          <div className="hidden md:flex items-center bg-gray-900/80 backdrop-blur-md p-1 rounded-xl border border-gray-800/90 text-xs shadow-md">
-            <Palette className="w-3.5 h-3.5 text-gray-400 ml-1.5 mr-1" />
+        {/* Sidebar Footer: User Details & Sign Out */}
+        <div className="pt-4 border-t border-gray-800/70">
+          <div className="flex items-center justify-between p-2.5 rounded-2xl bg-[#0f142a]/80 border border-[#5227ff]/20">
+            <div 
+              onClick={() => setActiveTab('profile')}
+              className="flex items-center space-x-2.5 cursor-pointer hover:opacity-85 transition"
+              title="View Profile 5 Card"
+            >
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#5227ff] to-indigo-600 flex items-center justify-center text-xs font-bold text-white shadow-sm">
+                {user?.full_name ? user.full_name.substring(0, 2).toUpperCase() : 'NS'}
+              </div>
+              <div className="text-left">
+                <p className="text-xs font-semibold text-white leading-tight truncate max-w-[105px]">{user?.full_name}</p>
+                <p className="text-[10px] text-[#a78bfa] font-mono leading-tight">{user?.role}</p>
+              </div>
+            </div>
             <button
-              onClick={() => setCurrentTheme('cyber')}
-              title="Obsidian Cyber (Recommended Palette)"
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition flex items-center gap-1.5 ${
-                currentTheme === 'cyber' ? 'bg-indigo-600/30 text-indigo-200 border border-indigo-500/50 shadow-sm' : 'text-gray-400 hover:text-gray-200'
+              onClick={handleLogout}
+              title="Sign Out"
+              className="p-1.5 rounded-xl bg-gray-800/80 hover:bg-rose-950/60 text-gray-400 hover:text-rose-300 border border-gray-700/60 hover:border-rose-800 transition cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content Area (Header + Main Body) */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+        {/* Top Header (Image 2 telemetry banner removed) */}
+        <header className={`border-b ${themeConfig.headerBg} backdrop-blur-xl sticky top-0 z-30 px-6 py-3.5 flex items-center justify-between transition-colors duration-300`}>
+          <div className="flex items-center space-x-3">
+            <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+              <span>{visibleTabs.find(t => t.id === activeTab)?.label || 'Console'}</span>
+              <span className={`text-[11px] font-mono font-normal px-2.5 py-0.5 ${themeConfig.badge} rounded-full`}>
+                Active Node
+              </span>
+            </h2>
+          </div>
+
+          <div className="flex items-center space-x-3.5">
+            <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-gray-900/80 border border-gray-800 text-xs font-mono text-gray-300">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>TLS 1.3 ENCRYPTED</span>
+            </div>
+            <button
+              onClick={() => setActiveTab('profile')}
+              className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition cursor-pointer ${
+                activeTab === 'profile'
+                  ? 'bg-[#5227ff] text-white border-[#5227ff] shadow-md shadow-[#5227ff]/30'
+                  : 'bg-[#5227ff]/20 hover:bg-[#5227ff]/30 border-[#5227ff]/40 text-indigo-200'
               }`}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
-              <span>Cyber</span>
-            </button>
-            <button
-              onClick={() => setCurrentTheme('matrix')}
-              title="Stealth Matrix Terminal"
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition flex items-center gap-1.5 ${
-                currentTheme === 'matrix' ? 'bg-emerald-600/30 text-emerald-200 border border-emerald-500/50 shadow-sm' : 'text-gray-400 hover:text-gray-200'
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              <span>Matrix</span>
-            </button>
-            <button
-              onClick={() => setCurrentTheme('gunmetal')}
-              title="Gunmetal Dimmed"
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition flex items-center gap-1.5 ${
-                currentTheme === 'gunmetal' ? 'bg-slate-700/50 text-slate-200 border border-slate-600/50 shadow-sm' : 'text-gray-400 hover:text-gray-200'
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
-              <span>Gunmetal</span>
+              <User className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Profile</span>
             </button>
           </div>
+        </header>
 
-          <div className="text-right hidden sm:block">
-            <p className="text-sm font-bold text-gray-100">{user.full_name}</p>
-            <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold uppercase tracking-wider ${themeConfig.badge}`}>
-              {user.role} Workspace
-            </span>
-          </div>
-
-          <div className="w-9 h-9 rounded-xl bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center font-bold text-indigo-200">
-            {user.full_name ? user.full_name.substring(0, 2).toUpperCase() : 'US'}
-          </div>
-
-          <button onClick={handleLogout} title="Sign Out" className="p-2 bg-gray-800/80 hover:bg-rose-950/60 text-gray-400 hover:text-rose-300 border border-gray-700 hover:border-rose-800 rounded-xl transition">
-            <LogOut className="w-4 h-4" />
-          </button>
-        </div>
-      </header>
-
-      {/* Navigation Sub-Header */}
-      <nav className={`${themeConfig.navBg} backdrop-blur-md border-b px-6 transition-colors duration-300`}>
-        <div className="flex space-x-1.5 overflow-x-auto py-2.5">
-          {visibleTabs.map(tab => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 px-4 py-2 text-xs font-medium rounded-xl transition-all ${
-                  isActive ? themeConfig.activeTab : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/40'
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? themeConfig.activeTabIcon : 'text-gray-400'}`} />
-                <span>{tab.label}</span>
-                {tab.badge ? <span className="ml-1.5 px-1.5 py-0.5 text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded-full font-mono">{tab.badge}</span> : null}
-              </button>
-            );
-          })}
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
+        {/* Main Content Viewport */}
+        <main className="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6 relative z-10">
         
         {/* TAB 1: SOC OVERVIEW */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="cyber-card p-5 rounded-2xl border border-gray-800 flex flex-col justify-between">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-xs text-gray-400 font-medium">Throughput Rate</p>
-                    <h3 className="text-2xl font-bold text-white mt-1">{liveMetrics.throughput} <span className="text-sm font-normal text-gray-400">Mbps</span></h3>
+              {/* Metric Card 1: Throughput Rate */}
+              <HexagonalVault
+                className="cyber-card rounded-2xl border border-blue-500/30 bg-gray-900/80 shadow-lg shadow-blue-950/20 flex flex-col justify-between transition-all duration-300 hover:border-blue-500/50"
+                colors={HEX_VAULT_COLORS_BLUE}
+                backgroundColor="transparent"
+                cellSize={0.72}
+                lineWidth={1.4}
+                litWidth={2.8}
+                lattice={0.85}
+                glow={1.3}
+                trailLength={2.6}
+                speed={0.9}
+                autoSparks={true}
+                sparkInterval={3.0}
+                pulseSpeed={1.4}
+                seed={1}
+                dpr={1.2}
+              >
+                <div className="p-5 flex flex-col justify-between h-full">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-xs text-gray-400 font-medium">Throughput Rate</p>
+                      <h3 className="text-2xl font-bold text-white mt-1">{liveMetrics.throughput} <span className="text-sm font-normal text-gray-400">Mbps</span></h3>
+                    </div>
+                    <div className="p-2.5 bg-blue-500/10 text-blue-400 rounded-xl"><Activity className="w-5 h-5" /></div>
                   </div>
-                  <div className="p-2.5 bg-blue-500/10 text-blue-400 rounded-xl"><Activity className="w-5 h-5" /></div>
+                  <p className="text-xs text-emerald-400 mt-3 flex items-center font-mono">
+                    <ArrowUpRight className="w-3.5 h-3.5 mr-1" /> {liveMetrics.packets_sec.toLocaleString()} packets/sec
+                  </p>
                 </div>
-                <p className="text-xs text-emerald-400 mt-3 flex items-center font-mono">
-                  <ArrowUpRight className="w-3.5 h-3.5 mr-1" /> {liveMetrics.packets_sec.toLocaleString()} packets/sec
-                </p>
-              </div>
+              </HexagonalVault>
 
-              <div className="cyber-card p-5 rounded-2xl border border-gray-800 flex flex-col justify-between">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-xs text-gray-400 font-medium">Inspected Packets Today</p>
-                    <h3 className="text-2xl font-bold text-white mt-1">{(liveMetrics.inspected_today / 1000000).toFixed(2)}M</h3>
+              {/* Metric Card 2: Inspected Packets */}
+              <HexagonalVault
+                className="cyber-card rounded-2xl border border-indigo-500/30 bg-gray-900/80 shadow-lg shadow-indigo-950/20 flex flex-col justify-between transition-all duration-300 hover:border-indigo-500/50"
+                colors={HEX_VAULT_COLORS_PURPLE}
+                backgroundColor="transparent"
+                cellSize={0.72}
+                lineWidth={1.4}
+                litWidth={2.8}
+                lattice={0.85}
+                glow={1.3}
+                trailLength={2.6}
+                speed={0.9}
+                autoSparks={true}
+                sparkInterval={2.6}
+                pulseSpeed={1.4}
+                seed={2}
+                dpr={1.2}
+              >
+                <div className="p-5 flex flex-col justify-between h-full">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-xs text-gray-400 font-medium">Inspected Packets Today</p>
+                      <h3 className="text-2xl font-bold text-white mt-1">{(liveMetrics.inspected_today / 1000000).toFixed(2)}M</h3>
+                    </div>
+                    <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl"><Server className="w-5 h-5" /></div>
                   </div>
-                  <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl"><Server className="w-5 h-5" /></div>
+                  <p className="text-xs text-gray-400 mt-3 font-mono">Flow Analysis Active</p>
                 </div>
-                <p className="text-xs text-gray-400 mt-3 font-mono">Flow Analysis Active</p>
-              </div>
+              </HexagonalVault>
 
-              <div className="cyber-card p-5 rounded-2xl border border-gray-800 flex flex-col justify-between">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-xs text-gray-400 font-medium">Threats Blocked</p>
-                    <h3 className="text-2xl font-bold text-rose-400 mt-1">{liveMetrics.blocked_threats.toLocaleString()}</h3>
+              {/* Metric Card 3: Threats Blocked */}
+              <HexagonalVault
+                className="cyber-card rounded-2xl border border-rose-500/30 bg-gray-900/80 shadow-lg shadow-rose-950/20 flex flex-col justify-between transition-all duration-300 hover:border-rose-500/50"
+                colors={HEX_VAULT_COLORS_ROSE}
+                backgroundColor="transparent"
+                cellSize={0.72}
+                lineWidth={1.4}
+                litWidth={2.8}
+                lattice={0.85}
+                glow={1.3}
+                trailLength={2.6}
+                speed={0.9}
+                autoSparks={true}
+                sparkInterval={3.2}
+                pulseSpeed={1.4}
+                seed={3}
+                dpr={1.2}
+              >
+                <div className="p-5 flex flex-col justify-between h-full">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-xs text-gray-400 font-medium">Threats Blocked</p>
+                      <h3 className="text-2xl font-bold text-rose-400 mt-1">{liveMetrics.blocked_threats.toLocaleString()}</h3>
+                    </div>
+                    <div className="p-2.5 bg-rose-500/10 text-rose-400 rounded-xl"><ShieldAlert className="w-5 h-5" /></div>
                   </div>
-                  <div className="p-2.5 bg-rose-500/10 text-rose-400 rounded-xl"><ShieldAlert className="w-5 h-5" /></div>
+                  <p className="text-xs text-rose-400 mt-3 flex items-center font-mono">15.01% Attack Ratio</p>
                 </div>
-                <p className="text-xs text-rose-400 mt-3 flex items-center font-mono">15.01% Attack Ratio</p>
-              </div>
+              </HexagonalVault>
 
-              <div className="cyber-card p-5 rounded-2xl border border-gray-800 flex flex-col justify-between">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-xs text-gray-400 font-medium">Active Connection Flows</p>
-                    <h3 className="text-2xl font-bold text-emerald-400 mt-1">{liveMetrics.active_conns}</h3>
+              {/* Metric Card 4: Active Connection Flows */}
+              <HexagonalVault
+                className="cyber-card rounded-2xl border border-emerald-500/30 bg-gray-900/80 shadow-lg shadow-emerald-950/20 flex flex-col justify-between transition-all duration-300 hover:border-emerald-500/50"
+                colors={HEX_VAULT_COLORS_EMERALD}
+                backgroundColor="transparent"
+                cellSize={0.72}
+                lineWidth={1.4}
+                litWidth={2.8}
+                lattice={0.85}
+                glow={1.3}
+                trailLength={2.6}
+                speed={0.9}
+                autoSparks={true}
+                sparkInterval={2.8}
+                pulseSpeed={1.4}
+                seed={4}
+                dpr={1.2}
+              >
+                <div className="p-5 flex flex-col justify-between h-full">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-xs text-gray-400 font-medium">Active Connection Flows</p>
+                      <h3 className="text-2xl font-bold text-emerald-400 mt-1">{liveMetrics.active_conns}</h3>
+                    </div>
+                    <div className="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl"><Radio className="w-5 h-5" /></div>
                   </div>
-                  <div className="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl"><Radio className="w-5 h-5" /></div>
+                  <p className="text-xs text-emerald-400 mt-3 font-mono">Zero Latency Spikes</p>
                 </div>
-                <p className="text-xs text-emerald-400 mt-3 font-mono">Zero Latency Spikes</p>
-              </div>
+              </HexagonalVault>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 cyber-card p-6 rounded-2xl border border-gray-800 space-y-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="text-base font-semibold text-white flex items-center gap-2"><Activity className="w-4 h-4 text-indigo-400" /> Live Network Throughput Stream</h3>
-                    <p className="text-xs text-gray-400">Real-time Mbps throughput and network dynamics</p>
-                  </div>
-                  <span className="px-2.5 py-1 text-xs font-mono bg-indigo-950 text-indigo-300 border border-indigo-800 rounded-md">Live Stream</span>
+              <div className="lg:col-span-2 cyber-card p-6 rounded-2xl border border-[#5227ff]/30 bg-gray-900/90 shadow-lg shadow-[#5227ff]/15 relative isolate overflow-hidden space-y-4 transition-all duration-300 hover:border-[#5227ff]/50">
+                {/* Ambient Star Burst background from React Bits Pro */}
+                <div className="absolute inset-0 z-0 pointer-events-none opacity-45 overflow-hidden">
+                  <StarBurst
+                    className="w-full h-full"
+                    color="#5227ff"
+                    speed={1.0}
+                    density={0.5}
+                    starCount={120}
+                    starSize={0.3}
+                    brightness={1.3}
+                    opacity={0.8}
+                    flowerIntensity={0.3}
+                    twinkleSpeed={0.35}
+                    wobbleAmount={0.75}
+                    innerLayerIntensity={1.0}
+                    outerLayerIntensity={1.4}
+                    fadeHeight={2.2}
+                    centerX={0.5}
+                    centerY={0.8}
+                  />
                 </div>
-                <div className="h-64 w-full">
+
+                {/* Foreground Header & Throughput Visualizer */}
+                <div className="relative z-10 flex justify-between items-center">
+                  <div>
+                    <h3 className="text-base font-semibold text-white flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-[#a78bfa] animate-pulse" /> 
+                      Live Network Throughput Stream
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#5227ff]/20 text-[#c4b5fd] border border-[#5227ff]/30">
+                        Star Burst
+                      </span>
+                    </h3>
+                    <p className="text-xs text-gray-400">Real-time Mbps throughput and quantum star stream telemetry</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono bg-[#5227ff]/20 text-[#c4b5fd] border border-[#5227ff]/40 rounded-lg shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#5227ff] animate-ping" />
+                      Live Stream
+                    </span>
+                  </div>
+                </div>
+
+                {/* Foreground Area Chart */}
+                <div className="relative z-10 h-64 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={trafficHistory}>
                       <defs>
                         <linearGradient id="colorThroughput" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4}/>
-                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="#5227ff" stopOpacity={0.45}/>
+                          <stop offset="95%" stopColor="#5227ff" stopOpacity={0.02}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.6} />
                       <XAxis dataKey="time" stroke="#64748b" fontSize={11} />
                       <YAxis stroke="#64748b" fontSize={11} />
-                      <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#fff' }} />
-                      <Area type="monotone" dataKey="throughput" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#colorThroughput)" name="Throughput (Mbps)" />
+                      <Tooltip contentStyle={{ backgroundColor: '#0b0f19', borderColor: '#5227ff55', borderRadius: '10px', color: '#fff', boxShadow: '0 8px 24px rgba(82,39,255,0.25)' }} />
+                      <Area type="monotone" dataKey="throughput" stroke="#a78bfa" strokeWidth={2.5} fillOpacity={1} fill="url(#colorThroughput)" name="Throughput (Mbps)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </div>
 
-              <div className="cyber-card p-6 rounded-2xl border border-gray-800 space-y-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                      <PieChart className="w-4 h-4 text-cyan-400" /> Monitored Threat Distribution
-                    </h3>
-                    <p className="text-[11px] text-gray-400">Threat category ratio among intercepted network attacks</p>
-                  </div>
-                  <div className="flex bg-gray-900/90 p-0.5 rounded-lg border border-gray-800 text-[10px]">
-                    <button
-                      onClick={() => setDistMode('active')}
-                      className={`px-2 py-0.5 rounded font-medium transition ${
-                        distMode === 'active' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-gray-200'
-                      }`}
-                      title="Computed dynamically from active SOC incident alerts"
-                    >
-                      Active Alerts
-                    </button>
-                    <button
-                      onClick={() => setDistMode('benchmark')}
-                      className={`px-2 py-0.5 rounded font-medium transition ${
-                        distMode === 'benchmark' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-gray-200'
-                      }`}
-                      title="Historical benchmark from CICIDS2017 dataset"
-                    >
-                      Benchmark
-                    </button>
-                  </div>
+              <div className="cyber-card p-6 rounded-2xl border border-cyan-500/30 bg-gray-900/90 shadow-lg shadow-cyan-950/20 overflow-hidden relative isolate space-y-4 transition-all duration-300 hover:border-cyan-500/50">
+                {/* Ambient Glyph Sonar background */}
+                <div className="absolute inset-0 z-0 pointer-events-none opacity-35 overflow-hidden">
+                  <GlyphSonar
+                    className="w-full h-full"
+                    colors={['#06b6d4', '#818cf8']}
+                    backgroundColor="#0b1120"
+                    glyphSize={10}
+                    spacing={1.15}
+                    density={0.36}
+                    scale={1.15}
+                    interval={3.5}
+                    persistence={0.7}
+                    glow={0.2}
+                    ambient={0.26}
+                    autoPing={true}
+                    clickPing={false}
+                    interactive={false}
+                    quality={0.75}
+                  />
                 </div>
 
-                <div className="h-44 w-full flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={dynamicAttackDistribution}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={45}
-                        outerRadius={68}
-                        paddingAngle={3}
-                        dataKey="value"
-                      >
-                        {dynamicAttackDistribution.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', fontSize: '11px', color: '#fff' }}
-                        formatter={(val, name, item) => [`${val}% (${item.payload.count || 0} incidents)`, name]}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-
-                <div className="space-y-1.5 text-xs font-mono max-h-28 overflow-y-auto pr-1">
-                  {dynamicAttackDistribution.map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-center py-0.5 border-b border-gray-800/40 last:border-0">
-                      <span className="text-gray-400 flex items-center gap-1.5 text-[11px]">
-                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }}></span>
-                        {item.name}
-                      </span>
-                      <span className="text-gray-200 font-bold text-[11px]">{item.value}%</span>
+                {/* Foreground Content: Pie Chart & Details */}
+                <div className="relative z-10 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-base font-semibold text-white flex items-center gap-2">
+                        <PieChartIcon className="w-4 h-4 text-cyan-400" /> Monitored Threat Distribution
+                      </h3>
+                      <p className="text-[11px] text-gray-400">Threat category ratio among intercepted network attacks</p>
                     </div>
-                  ))}
-                </div>
+                    <div className="flex bg-gray-900/90 p-0.5 rounded-lg border border-gray-800 text-[10px] shadow-sm backdrop-blur-sm">
+                      <button
+                        onClick={() => setDistMode('active')}
+                        className={`px-2 py-0.5 rounded font-medium transition ${
+                          distMode === 'active' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200'
+                        }`}
+                        title="Computed dynamically from active SOC incident alerts"
+                      >
+                        Active Alerts
+                      </button>
+                      <button
+                        onClick={() => setDistMode('benchmark')}
+                        className={`px-2 py-0.5 rounded font-medium transition ${
+                          distMode === 'benchmark' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200'
+                        }`}
+                        title="Historical benchmark from CICIDS2017 dataset"
+                      >
+                        Benchmark
+                      </button>
+                    </div>
+                  </div>
 
-                <div className="pt-1 text-[10px] text-gray-500 flex justify-between items-center border-t border-gray-800/60 font-sans">
-                  <span>Scope: External Inbound Traffic</span>
-                  <span className="text-emerald-400 font-medium">IDS Active</span>
+                  <div className="h-44 w-full flex items-center justify-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={dynamicAttackDistribution}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={45}
+                          outerRadius={68}
+                          paddingAngle={3}
+                          dataKey="value"
+                        >
+                          {dynamicAttackDistribution.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', fontSize: '11px', color: '#fff' }}
+                          formatter={(val, name, item) => [`${val}% (${item.payload.count || 0} incidents)`, name]}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="space-y-1.5 text-xs font-mono max-h-28 overflow-y-auto pr-1">
+                    {dynamicAttackDistribution.map((item, idx) => (
+                      <div key={idx} className="flex justify-between items-center py-0.5 border-b border-gray-800/40 last:border-0">
+                        <span className="text-gray-300 flex items-center gap-1.5 text-[11px]">
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }}></span>
+                          {item.name}
+                        </span>
+                        <span className="text-white font-bold text-[11px]">{item.value}%</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-1 text-[10px] text-gray-400 flex justify-between items-center border-t border-gray-800/60 font-sans">
+                    <span>Scope: External Inbound Traffic</span>
+                    <span className="text-emerald-400 font-medium">IDS Active</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* TAB 2: LIVE TRAFFIC & PCAP INSPECTOR */}
+        {/* TAB 2: LIVE NETWORK TRAFFIC MONITOR */}
         {activeTab === 'traffic' && (
           <div className="space-y-6">
-            <div className="cyber-card p-6 rounded-2xl border border-indigo-900/60 bg-indigo-950/20 space-y-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="text-base font-bold text-white flex items-center gap-2">
-                    <Upload className="w-5 h-5 text-indigo-400" />
-                    Feature 1: Real PCAP / PCAPNG Packet File Inspector
-                  </h2>
-                  <p className="text-xs text-gray-400">Drag & drop raw packet capture files from Wireshark for batch AI anomaly extraction</p>
-                </div>
-                <label className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/30 transition">
-                  <Upload className="w-4 h-4" />
-                  <span>Select PCAP File</span>
-                  <input type="file" accept=".pcap,.pcapng" onChange={handlePcapUpload} className="hidden" />
-                </label>
+            <div className="cyber-card p-5 rounded-2xl border border-gray-800 bg-gray-900/40 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                  <Radio className="w-5 h-5 text-indigo-400 animate-pulse" />
+                  Live Network Traffic Stream & Protocol Inspector
+                </h2>
+                <p className="text-xs text-gray-400">Real-time deep packet inspection and network flow analysis across internal subnets</p>
               </div>
-
-              {pcapResult && (
-                <div className="p-4 bg-gray-900/90 rounded-xl border border-gray-800 space-y-3 font-mono text-xs">
-                  <div className="flex justify-between items-center text-gray-200 border-b border-gray-800 pb-2">
-                    <span className="font-bold text-indigo-300">File: {pcapResult.filename}</span>
-                    <span className="text-gray-400">Parsed {pcapResult.total_packets_parsed} packets across {pcapResult.total_unique_flows} flows</span>
-                    <span className="px-2 py-0.5 bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded font-bold">
-                      {pcapResult.malicious_flows_detected} Threat Flows Detected
-                    </span>
-                  </div>
-
-                  <div className="space-y-2">
-                    {pcapResult.analyzed_flows.map((flow, idx) => (
-                      <div key={idx} className="p-2.5 bg-gray-950 rounded border border-gray-800 flex justify-between items-center">
-                        <div>
-                          <span className="font-bold text-gray-200">{flow.flow_id}</span>
-                          <p className="text-[11px] text-gray-400 font-sans">{flow.packet_count} packets • {flow.byte_count.toLocaleString()} bytes</p>
-                        </div>
-                        <div className="text-right">
-                          <span className={`px-2 py-0.5 text-[10px] rounded font-bold ${
-                            flow.prediction === 'ATTACK' ? 'bg-rose-500/20 text-rose-300' : 'bg-emerald-500/20 text-emerald-300'
-                          }`}>
-                            {flow.prediction} ({flow.risk_score}/100)
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="pt-2 border-t border-gray-800 flex justify-end">
-                    <button
-                      onClick={() => { setActiveTab('alerts'); setAlertSubView('upload_history'); }}
-                      className="px-3 py-1.5 bg-indigo-600/30 hover:bg-indigo-600 text-indigo-200 hover:text-white border border-indigo-500/40 rounded-lg text-xs font-sans font-medium flex items-center gap-1.5 transition cursor-pointer"
-                    >
-                      <History className="w-3.5 h-3.5" /> View Recorded Attacks in Attack History ({attackCounts.pcap}) →
-                    </button>
-                  </div>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-1 text-[11px] font-mono bg-emerald-950/70 border border-emerald-800/80 text-emerald-400 rounded-lg flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                  STREAMING ACTIVE
+                </span>
+              </div>
             </div>
 
             <div className="cyber-card p-5 rounded-2xl border border-gray-800 space-y-4">
@@ -1565,7 +1663,7 @@ export default function App() {
                   <AlertTriangle className="w-5 h-5 text-rose-400" />
                   Security Alerts & Forensic Incident Response
                 </h2>
-                <p className="text-xs text-gray-400">Triage live SOC alerts and review persistent threat history from uploaded PCAP and CSV datasets</p>
+                <p className="text-xs text-gray-400">Triage live SOC alerts and review persistent threat history from analyzed CSV datasets</p>
               </div>
 
               <div className="flex items-center gap-3 w-full md:w-auto">
@@ -1666,10 +1764,10 @@ export default function App() {
                   </div>
 
                   <div className="cyber-card p-4 rounded-xl border border-gray-800 bg-gray-900/40">
-                    <p className="text-[11px] uppercase font-bold text-indigo-400 tracking-wider">PCAP Forensic Threats</p>
+                    <p className="text-[11px] uppercase font-bold text-indigo-400 tracking-wider">Active Threats</p>
                     <div className="flex items-baseline justify-between mt-2">
-                      <span className="text-2xl font-black text-indigo-300 font-mono">{attackCounts.pcap}</span>
-                      <span className="text-[10px] text-indigo-400/70 font-mono">Packet Captures</span>
+                      <span className="text-2xl font-black text-indigo-300 font-mono">{attackCounts.active}</span>
+                      <span className="text-[10px] text-indigo-400/70 font-mono">Unmitigated</span>
                     </div>
                   </div>
 
@@ -1696,9 +1794,8 @@ export default function App() {
                 <div className="flex items-center gap-2 text-xs">
                   <span className="text-gray-400 text-[11px] mr-1">Filter Source:</span>
                   {[
-                    { id: 'ALL', label: `All (${attackCounts.total})` },
-                    { id: 'PCAP', label: `PCAP Only (${attackCounts.pcap})` },
-                    { id: 'CSV', label: `CSV Only (${attackCounts.csv})` }
+                    { id: 'ALL', label: `All Incidents (${attackCounts.total})` },
+                    { id: 'CSV', label: `CSV Datasets (${attackCounts.csv})` }
                   ].map(f => (
                     <button
                       key={f.id}
@@ -1724,7 +1821,7 @@ export default function App() {
                       <History className="w-10 h-10 text-gray-600 mx-auto" />
                       <h4 className="text-sm font-bold text-gray-300">No Forensic Attack Records Found</h4>
                       <p className="text-xs text-gray-500 max-w-md mx-auto">
-                        When you upload a network capture (<span className="text-indigo-400 font-mono">.pcap</span>) in the Live Traffic tab or a flow dataset (<span className="text-cyan-400 font-mono">.csv</span>) in the AI Predictor tab, detected malicious traffic will automatically be stored here permanently.
+                        When you upload a flow dataset (<span className="text-cyan-400 font-mono">.csv</span>) in the AI Predictor tab, detected malicious traffic will automatically be stored here permanently.
                       </p>
                     </div>
                   ) : (
@@ -1749,12 +1846,8 @@ export default function App() {
                               <td className="px-3.5 py-3 text-gray-400 text-[11px] whitespace-nowrap">{att.timestamp}</td>
                               <td className="px-3.5 py-3 font-sans">
                                 <div className="flex items-center gap-1.5">
-                                  <span className={`px-1.5 py-0.5 text-[9px] font-bold font-mono rounded ${
-                                    att.source_type === 'PCAP'
-                                      ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40'
-                                      : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                                  }`}>
-                                    {att.source_type}
+                                  <span className="px-1.5 py-0.5 text-[9px] font-bold font-mono rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                                    {att.source_type || 'CSV'}
                                   </span>
                                   <span className="text-gray-300 truncate max-w-[120px]" title={att.filename}>{att.filename}</span>
                                 </div>
@@ -1969,6 +2062,13 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {/* TAB 7: ANALYST PROFILE (PROFILE 5 FROM REACT BITS PRO) */}
+        {activeTab === 'profile' && (
+          <div className="space-y-6">
+            <Profile5 user={user} onEditProfile={() => showToast("Analyst enclave profile updated", "success")} />
+          </div>
+        )}
       </main>
 
       {/* AUTOMATED FIREWALL SCRIPT GENERATOR MODAL */}
@@ -2087,5 +2187,6 @@ export default function App() {
         <span>NetShield AI Enterprise Platform • Role: {user.role} ({user.email})</span>
       </footer>
     </div>
+  </div>
   );
 }
