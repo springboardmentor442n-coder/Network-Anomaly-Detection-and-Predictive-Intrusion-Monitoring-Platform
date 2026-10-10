@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from backend.app.core.auth import get_current_user
@@ -61,16 +61,23 @@ def create_alert(
 
 @router.get("")
 def get_alerts(
+    limit: int = Query(default=100, ge=1, le=500),
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """
-    Return all security alerts.
+    Return the most recent security alerts.
+
+    The limit parameter controls the number of alerts returned.
+    Default: 100
+    Minimum: 1
+    Maximum: 500
     """
 
     alerts = (
         db.query(Alert)
         .order_by(Alert.alert_id.desc())
+        .limit(limit)
         .all()
     )
 
