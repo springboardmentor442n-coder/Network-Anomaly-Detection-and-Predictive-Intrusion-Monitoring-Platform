@@ -1,0 +1,6 @@
+Destination Port,Flow Duration,Total Fwd Packets,Total Backward Packets,Total Length of Fwd Packets,Total Length of Bwd Packets,Fwd Packet Length Max,Fwd Packet Length Min,Fwd Packet Length Mean,Fwd Packet Length Std,Label
+80,12000,10,8,500,400,100,20,50,15,BENIGN
+443,25000,20,15,1200,800,150,30,60,20,BENIGN
+80,5000,500,20,50000,1000,200,1,100,30,DoS Hulk
+21,8000,100,50,10000,5000,200,10,100,40,FTP-Patator
+22,9000,200,40,20000,4000,200,10,100,45,SSH-Patator

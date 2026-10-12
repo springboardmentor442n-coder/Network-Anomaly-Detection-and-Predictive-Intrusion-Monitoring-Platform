@@ -1,0 +1,7 @@
+{
+  "name": "NetShield AI",
+  "description": "AI-Powered Network Anomaly Detection & Threat Monitoring SOC System",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
