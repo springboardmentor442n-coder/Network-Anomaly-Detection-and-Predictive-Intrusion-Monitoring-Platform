@@ -1,0 +1,6 @@
+{
+  "css_structural_checks": "passed",
+  "javascript_syntax": "passed",
+  "backend_or_model_changes": false,
+  "browser_visual_review": "pending local verification"
+}
