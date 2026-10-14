@@ -1,3 +1,4 @@
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -26,17 +27,13 @@ async def lifespan(app: FastAPI):
     print("=" * 70)
 
     monitor_service.start()
-
     print("Real-time monitoring service started.")
 
     try:
         yield
-
     finally:
         print("Stopping real-time monitoring service...")
-
         monitor_service.stop()
-
         print("Real-time monitoring service stopped.")
 
 
@@ -69,23 +66,14 @@ app.add_middleware(
 # =========================================================
 
 app.include_router(prediction_router)
-
 app.include_router(alerts_router)
-
 app.include_router(auth_router)
-
 app.include_router(monitoring_router)
-
 app.include_router(users_router)
-
 app.include_router(risk_analysis_router)
-
 app.include_router(incidents_router)
-
 app.include_router(threat_intelligence_router)
-
 app.include_router(reports_router)
-
 app.include_router(audit_logs_router)
 
 

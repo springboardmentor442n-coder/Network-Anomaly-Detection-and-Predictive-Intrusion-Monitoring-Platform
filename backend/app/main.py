@@ -14,6 +14,11 @@ from backend.app.api.risk_analysis import (
 from backend.app.api.incidents import (
     router as incidents_router,
 )
+from backend.app.api.threat_intelligence import (
+    router as threat_intelligence_router,
+)
+from backend.app.api.reports import router as reports_router
+from backend.app.api.audit_logs import router as audit_logs_router
 
 from backend.app.services.realtime_monitor import monitor_service
 
@@ -77,6 +82,9 @@ app.include_router(monitoring_router)
 app.include_router(users_router)
 app.include_router(risk_analysis_router)
 app.include_router(incidents_router)
+app.include_router(threat_intelligence_router)
+app.include_router(reports_router)
+app.include_router(audit_logs_router)
 
 
 # ---------------------------------------------------------
