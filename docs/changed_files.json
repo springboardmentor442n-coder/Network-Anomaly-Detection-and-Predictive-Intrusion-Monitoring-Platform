@@ -1,0 +1,222 @@
+[
+  {
+    "path": "README.md",
+    "change": "Updated",
+    "sha256": "9a15095bd87a82cc94fa7c0769ba10b75f0c5c0478283f36f6f6a5103e45f415"
+  },
+  {
+    "path": "admin.py",
+    "change": "Updated",
+    "sha256": "829a01f3bae89e6cd71587ec1c1fcf2e6a74a6d82de0d817a2d5d31db5718251"
+  },
+  {
+    "path": "backend/__init__.py",
+    "change": "Added",
+    "sha256": "e60b0c7647a33d280cd5cfba5587c573442c2cab07fc38d719d304d9789d5e6d"
+  },
+  {
+    "path": "backend/engine.py",
+    "change": "Updated",
+    "sha256": "fc0349299f84f720ba7d6911ac447f95d528e6fa1c22516595a8fd4516c11582"
+  },
+  {
+    "path": "backend/label_encoder.pkl",
+    "change": "Added",
+    "sha256": "45be41ee605b71733c9c2555d98adbfa048ad5074fd0194109a37f59837c4cae"
+  },
+  {
+    "path": "backend/main.py",
+    "change": "Updated",
+    "sha256": "30b94ca4855125a867004ebffbde4e994c48649823752472b18ee6c8d9bf84c6"
+  },
+  {
+    "path": "backend/model_comparison.json",
+    "change": "Added",
+    "sha256": "84a0cb0123cf568afb91659bb6a9b0fb7d435d6c14c944ae96963f4168892aaa"
+  },
+  {
+    "path": "backend/model_extra_trees.pkl",
+    "change": "Added",
+    "sha256": "cf20e5d41e7d8285a07d2fb5e92f9c49dc7945ce1a4df7ced1e93ec54e09b143"
+  },
+  {
+    "path": "backend/model_features.pkl",
+    "change": "Added",
+    "sha256": "934b97652be71ee455656d9acc7878c064fa7db7c0c161882ca2f73810639ca0"
+  },
+  {
+    "path": "backend/model_rf.pkl",
+    "change": "Added",
+    "sha256": "ee3e16a774c7b7b611d46323136abc55cc4f3789ef0693ee74f5b25602732c0e"
+  },
+  {
+    "path": "backend/model_xgb.pkl",
+    "change": "Added",
+    "sha256": "a44044cff30f5d5030ad7c711f1b2dfae430e08bd4f7d624bf3a313098f690a2"
+  },
+  {
+    "path": "backend/reports.py",
+    "change": "Added",
+    "sha256": "7ebfda4813095aa7b59ba9c8ca6215a30c2426522bd979e84b2c4f696442b82a"
+  },
+  {
+    "path": "backend/traffic_summary.json",
+    "change": "Added",
+    "sha256": "93bcb3e8bd1098c130831586cc4474ff543eafc8710e55ac79ad5e3004e48e7d"
+  },
+  {
+    "path": "data/cicids_demo_real_ips.csv",
+    "change": "Added",
+    "sha256": "b36ace4ebe5f9cf68809c1dafec148771ae46469559608645ae6bc7aafcee54f"
+  },
+  {
+    "path": "docs/CHANGELOG.md",
+    "change": "Added",
+    "sha256": "468cd054eb7cd46ed846e0a45a1cff83651d83fca84f6055112f8872916de2b9"
+  },
+  {
+    "path": "docs/LEARNING_GUIDE.md",
+    "change": "Updated",
+    "sha256": "afe022e919a7ca18f6adcb9c896cbcc4415189f5ce780f5e3f1b217c3f220840"
+  },
+  {
+    "path": "docs/NetShield.postman_collection.json",
+    "change": "Updated",
+    "sha256": "eb1670201727bcb554e24662548447c66aece6c371d5d7e279d162dad28c657b"
+  },
+  {
+    "path": "docs/POSTMAN.md",
+    "change": "Updated",
+    "sha256": "9a776842b3bee11d431bb72706acf8c1c4a8b1579d9640de9d3bae32dc1765cf"
+  },
+  {
+    "path": "docs/REQUIREMENTS_STATUS.md",
+    "change": "Updated",
+    "sha256": "2f88e187bc239f00ea78729e117a88d1d3c922cd9ad63a27a5def6721de97988"
+  },
+  {
+    "path": "docs/archive/NetShield_Learning_and_Demo_Guide_sample_release.pdf",
+    "change": "Added",
+    "sha256": "e271ca4bc558386702dd6c94bfc7c3d5f903b0877d55e8495849d9d135d7c15c"
+  },
+  {
+    "path": "docs/benchmark_before_optimization.json",
+    "change": "Added",
+    "sha256": "f423c4e3f49b9f5bcb84fdf2be4c62992f93383d213f33051ff0a700f49dd2e3"
+  },
+  {
+    "path": "docs/frontend_dom_validation.json",
+    "change": "Added",
+    "sha256": "5559c20e0b24192bd88e190f5a166eb6987717bdf96141b2731b5e0e2691bc2c"
+  },
+  {
+    "path": "docs/full_scan_benchmark.json",
+    "change": "Added",
+    "sha256": "7024d9edd9322f9fc21b097136e5d55d6f639d4fe9b6eb00e34bba41c7e55701"
+  },
+  {
+    "path": "docs/original_model_comparison.json",
+    "change": "Added",
+    "sha256": "60e5a6b035089ba99fad0209a89f5ee1dfcccac0572aeb27c05f359be69106d8"
+  },
+  {
+    "path": "docs/original_traffic_summary.json",
+    "change": "Added",
+    "sha256": "d0137e80d59e78243cdf3a45c7b5f347b7287ee788f14b9ee861af0e12a78eee"
+  },
+  {
+    "path": "exploration.ipynb",
+    "change": "Added",
+    "sha256": "f5e08ca72079170ae2a310fb752f8b6edde171f2258669df8edcf141d13f3030"
+  },
+  {
+    "path": "frontend/app.js",
+    "change": "Updated",
+    "sha256": "9de37fba6070f0b6b8825f7aa55ec7c22b26b80339b3560c645112b85baab0b0"
+  },
+  {
+    "path": "frontend/dashboard.html",
+    "change": "Added",
+    "sha256": "b8bef3da89d0ceccf8877b68d6be2f8d33cd674cdf953e366910ed45d4ce1100"
+  },
+  {
+    "path": "frontend/index.html",
+    "change": "Updated",
+    "sha256": "0bf001abad37610da1ac021448f37932b8b6b9fa985cd2b4913527d159d617e4"
+  },
+  {
+    "path": "frontend/login.html",
+    "change": "Added",
+    "sha256": "b8bef3da89d0ceccf8877b68d6be2f8d33cd674cdf953e366910ed45d4ce1100"
+  },
+  {
+    "path": "frontend/signup.html",
+    "change": "Added",
+    "sha256": "b8bef3da89d0ceccf8877b68d6be2f8d33cd674cdf953e366910ed45d4ce1100"
+  },
+  {
+    "path": "frontend/style.css",
+    "change": "Updated",
+    "sha256": "012bb50040bddfedc9532a5dace2e2f09a31c484d34e335b2fd7ee8a9b062ea2"
+  },
+  {
+    "path": "maintenance.py",
+    "change": "Added",
+    "sha256": "a1867b8dce7f63dd6b1ce75d1c85cfa685a0567d4cfc1ee3ded0d1dcfca71ff3"
+  },
+  {
+    "path": "models/bundle.joblib",
+    "change": "Updated",
+    "sha256": "cdb35a61234109da32bfe4b12c2e81c8b5ffc0a9dcc5c2fc16ccd032d2799ba3"
+  },
+  {
+    "path": "models/data_manifest.json",
+    "change": "Added",
+    "sha256": "93bcb3e8bd1098c130831586cc4474ff543eafc8710e55ac79ad5e3004e48e7d"
+  },
+  {
+    "path": "models/metrics.json",
+    "change": "Updated",
+    "sha256": "dd2fec317cc59b7cd87da883d8ccfb79b47281695770ef097eec324f4f175ad0"
+  },
+  {
+    "path": "prepare_cicids.py",
+    "change": "Added",
+    "sha256": "8f54126bad19ce849ca0433f51aadac2931ad3fe82170ca1d792f59cdfe281f1"
+  },
+  {
+    "path": "requirements.txt",
+    "change": "Updated",
+    "sha256": "9a95cd4a4309062cb0bd3c24d51953c850c55229bf62712b4ab8200cf3aa3337"
+  },
+  {
+    "path": "setup_data.py",
+    "change": "Added",
+    "sha256": "e4df9d3eeff50d1a3fdf08af4f3099925bf8be0e9a6fb5e0a51d68d6b34021fa"
+  },
+  {
+    "path": "start.ps1",
+    "change": "Added",
+    "sha256": "e2e35dafacc7e490bfdea1187d220cf8d18cfd344656533f5a22dfa3aa6d82a3"
+  },
+  {
+    "path": "tests/conftest.py",
+    "change": "Updated",
+    "sha256": "8659c4f6af34a32f61ecc29774fd873cf628e7e0828ce9ff04773418357a6cc6"
+  },
+  {
+    "path": "tests/test_system.py",
+    "change": "Updated",
+    "sha256": "3a1f38e19374933ae2b198b4b6de3b01e342f53c29839d4a41321944cb395c96"
+  },
+  {
+    "path": "train.py",
+    "change": "Updated",
+    "sha256": "396e473fd8b3eba3f66693795a7a9ca4d737cdc395331dbc96282334165db6bd"
+  },
+  {
+    "path": "train_cicids.py",
+    "change": "Added",
+    "sha256": "b7bb79fd1e3cb12d41e5e2b07fad795b621dae7154944e3e497ff95156a7a016"
+  }
+]

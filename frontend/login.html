@@ -1,85 +1,17 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>NetShield AI - Login</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div id="spotlight"></div>
-  <div class="login-container">
-    <canvas id="matrixCanvas" class="matrix-canvas"></canvas>
-    <div class="login-card">
-      <h2>NetShield AI</h2>
-      <input type="text" id="username" placeholder="Username">
-      <input type="password" id="password" placeholder="Password">
-      <button onclick="login()">Login</button>
-      <p id="error"></p>
-      <p style="margin-top:16px; font-size:13px;"><a href="signup.html" style="color:#00FF41;">Don't have an account? Sign up</a></p>
-    </div>
-  </div>
-
-  <script>
-    async function login() {
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-
-      const formData = new URLSearchParams();
-      formData.append('username', username);
-      formData.append('password', password);
-
-      const response = await fetch('http://127.0.0.1:8000/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem('token', data.access_token);
-        window.location.href = 'dashboard.html';
-      } else {
-        document.getElementById('error').innerText = 'Login failed. Check your username and password.';
-      }
-    }
-
-    document.addEventListener('mousemove', (e) => {
-      const glow = document.getElementById('spotlight');
-      if (glow) { glow.style.left = e.clientX + 'px'; glow.style.top = e.clientY + 'px'; }
-    });
-
-    function startMatrixRain() {
-      const canvas = document.getElementById('matrixCanvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      function resize() {
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
-      }
-      resize();
-      window.addEventListener('resize', resize);
-
-      const chars = 'アイウエオカキクケコサシスセソ01';
-      const fontSize = 14;
-      let columns = Math.floor(canvas.width / fontSize);
-      let drops = Array(columns).fill(1);
-
-      function draw() {
-        ctx.fillStyle = 'rgba(5, 7, 5, 0.08)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#00FF41';
-        ctx.font = fontSize + 'px monospace';
-        for (let i = 0; i < drops.length; i++) {
-          const text = chars[Math.floor(Math.random() * chars.length)];
-          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-            drops[i] = 0;
-          }
-          drops[i]++;
-        }
-      }
-      setInterval(draw, 50);
-    }
-    startMatrixRain();
-  </script>
-</body>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>NetShield AI</title>
+  </head>
+  <body>
+    <p>Opening NetShield AI. Start the FastAPI server first.</p>
+    <a href="http://127.0.0.1:8000/">Open analyst workspace</a>
+    <script>
+      location.replace(
+        location.port === "8000" ? "/" : "http://127.0.0.1:8000/",
+      );
+    </script>
+  </body>
 </html>

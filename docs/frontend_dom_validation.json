@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "checks": [
+    "Real model metadata, 16-class table and confusion matrix rendered",
+    "SSE parser, all-row totals, completed status and 200-row window",
+    "Row evidence dialog and close",
+    "History report opens without confusing model metadata with row evidence",
+    "Grouped incident render and update request",
+    "Polling fallback preserves completed state",
+    "Model matrix selection"
+  ],
+  "environment": "jsdom with real inference/model fixtures and mocked transport; no browser layout claim"
+}

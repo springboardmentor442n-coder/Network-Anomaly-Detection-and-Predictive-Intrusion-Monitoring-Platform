@@ -1,0 +1,17 @@
+[
+  "RST Flag Count",
+  "Bwd Packet Length Std",
+  "Packet Length Std",
+  "Flow Duration",
+  "Flow IAT Max",
+  "Bwd Packet Length Mean",
+  "Packet Length Variance",
+  "Fwd Packets/s",
+  "Packet Length Max",
+  "Fwd Segment Size Avg",
+  "Subflow Fwd Bytes",
+  "Bwd Segment Size Avg",
+  "Average Packet Size",
+  "Flow Packets/s",
+  "Packet Length Mean"
+]

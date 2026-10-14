@@ -1,0 +1,13 @@
+services:
+  netshield:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      CHUNK_SIZE: "200"
+      MAX_UPLOAD_BYTES: "536870912"
+    volumes:
+      - netshield-data:/app/data
+    restart: unless-stopped
+volumes:
+  netshield-data:

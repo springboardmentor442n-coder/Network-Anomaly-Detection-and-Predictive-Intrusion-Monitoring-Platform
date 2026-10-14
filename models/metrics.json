@@ -1,0 +1,1878 @@
+{
+  "scope": "REAL CICIDS2017 CNS2022: capped unique training and holdout samples drawn from all five original daily CSVs",
+  "demo": false,
+  "trained_at": "2026-10-13T14:44:56.965971+00:00",
+  "split": "Feature-vector hash modulo 100: <80 train, >=80 holdout; capped unique samples per class",
+  "train_rows": 80439,
+  "test_rows": 45032,
+  "features": [
+    "RST Flag Count",
+    "Bwd Packet Length Std",
+    "Packet Length Std",
+    "Flow Duration",
+    "Flow IAT Max",
+    "Bwd Packet Length Mean",
+    "Packet Length Variance",
+    "Fwd Packets/s",
+    "Packet Length Max",
+    "Fwd Segment Size Avg",
+    "Subflow Fwd Bytes",
+    "Bwd Segment Size Avg",
+    "Average Packet Size",
+    "Flow Packets/s",
+    "Packet Length Mean"
+  ],
+  "data_manifest": {
+    "raw_rows": 2099976,
+    "invalid_feature_rows": 5,
+    "relabeled_attempts": 11979,
+    "valid_labels": {
+      "BENIGN": 1594540,
+      "DDoS": 95144,
+      "Portscan": 159066,
+      "Botnet": 736,
+      "Web Attack - Brute Force": 73,
+      "Infiltration - Portscan": 71767,
+      "Infiltration": 36,
+      "Web Attack - XSS": 18,
+      "Web Attack - SQL Injection": 13,
+      "FTP-Patator": 3972,
+      "SSH-Patator": 2961,
+      "DoS Hulk": 158468,
+      "DoS Slowloris": 3859,
+      "DoS Slowhttptest": 1740,
+      "DoS GoldenEye": 7567,
+      "Heartbleed": 11
+    },
+    "files": [
+      {
+        "name": "friday.csv",
+        "raw_rows": 547557,
+        "valid_rows": 547557,
+        "sha256": "ebd499e6f23bd59f9cb81bec28178491b02b925fa5640a24215c9437d79482d0",
+        "bytes": 285188226
+      },
+      {
+        "name": "monday.csv",
+        "raw_rows": 371624,
+        "valid_rows": 371621,
+        "sha256": "51fe5dc962626efb4ae70dce0303072fb780da0932822b651202ee9c2fbc1aff",
+        "bytes": 207875155
+      },
+      {
+        "name": "thursday.csv",
+        "raw_rows": 362076,
+        "valid_rows": 362075,
+        "sha256": "78a4d11eaf473d099e30e71ddb01e0f38218e844c0a9cdd36602145d674af482",
+        "bytes": 189519159
+      },
+      {
+        "name": "tuesday.csv",
+        "raw_rows": 322078,
+        "valid_rows": 322078,
+        "sha256": "e2a0a5b631dfc6b455cc9f9a88b944110637d70a7f74171473925f76f38b6b0c",
+        "bytes": 178397720
+      },
+      {
+        "name": "wednesday.csv",
+        "raw_rows": 496641,
+        "valid_rows": 496640,
+        "sha256": "bf46c5f3c792e8817381f724511229569606918eaf07ac986d7a2592b6341bc2",
+        "bytes": 291290505
+      }
+    ],
+    "train_sample_rows": 80439,
+    "train_sample_labels": {
+      "BENIGN": 40000,
+      "DoS Hulk": 10000,
+      "DDoS": 10000,
+      "DoS GoldenEye": 6063,
+      "FTP-Patator": 3192,
+      "Infiltration - Portscan": 2771,
+      "DoS Slowloris": 2752,
+      "SSH-Patator": 2389,
+      "DoS Slowhttptest": 1406,
+      "Portscan": 1162,
+      "Botnet": 576,
+      "Web Attack - Brute Force": 62,
+      "Infiltration": 32,
+      "Web Attack - XSS": 15,
+      "Web Attack - SQL Injection": 10,
+      "Heartbleed": 9
+    },
+    "test_sample_rows": 45032,
+    "test_sample_labels": {
+      "BENIGN": 30000,
+      "DoS Hulk": 5000,
+      "DDoS": 5000,
+      "DoS GoldenEye": 1504,
+      "FTP-Patator": 780,
+      "DoS Slowloris": 698,
+      "Infiltration - Portscan": 684,
+      "SSH-Patator": 572,
+      "DoS Slowhttptest": 323,
+      "Portscan": 288,
+      "Botnet": 160,
+      "Web Attack - Brute Force": 11,
+      "Infiltration": 4,
+      "Web Attack - XSS": 3,
+      "Web Attack - SQL Injection": 3,
+      "Heartbleed": 2
+    },
+    "preparation_seconds": 16.41,
+    "split": "Feature-vector hash modulo 100: <80 train, >=80 holdout; capped unique samples per class",
+    "limitations": [
+      "Not a chronological or host/session-disjoint split",
+      "Fixed 15 features inherited from earlier project; retrospective benchmark",
+      "Per-class caps change prevalence; sample-weighted metrics are not full-population metrics",
+      "No UNSW-NB15 included"
+    ],
+    "features": [
+      "RST Flag Count",
+      "Bwd Packet Length Std",
+      "Packet Length Std",
+      "Flow Duration",
+      "Flow IAT Max",
+      "Bwd Packet Length Mean",
+      "Packet Length Variance",
+      "Fwd Packets/s",
+      "Packet Length Max",
+      "Fwd Segment Size Avg",
+      "Subflow Fwd Bytes",
+      "Bwd Segment Size Avg",
+      "Average Packet Size",
+      "Flow Packets/s",
+      "Packet Length Mean"
+    ]
+  },
+  "models": {
+    "random_forest": {
+      "accuracy": 0.9981124533664949,
+      "macro_f1": 0.9523670388317274,
+      "weighted_f1": 0.99812265082561,
+      "attack_precision": 0.99721059972106,
+      "attack_recall": 0.9988690792974987,
+      "false_positive_rate": 0.0014,
+      "attack_average_precision": 0.9997392675098736,
+      "log_loss": 0.011381766535818098,
+      "classification_report": {
+        "BENIGN": {
+          "precision": 0.9994328607172643,
+          "recall": 0.9986,
+          "f1-score": 0.9990162567736557,
+          "support": 30000.0
+        },
+        "Botnet": {
+          "precision": 1.0,
+          "recall": 0.99375,
+          "f1-score": 0.9968652037617555,
+          "support": 160.0
+        },
+        "DDoS": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 5000.0
+        },
+        "DoS GoldenEye": {
+          "precision": 0.9960185799601858,
+          "recall": 0.9980053191489362,
+          "f1-score": 0.9970109598140153,
+          "support": 1504.0
+        },
+        "DoS Hulk": {
+          "precision": 0.9996,
+          "recall": 0.9996,
+          "f1-score": 0.9996,
+          "support": 5000.0
+        },
+        "DoS Slowhttptest": {
+          "precision": 0.996875,
+          "recall": 0.9876160990712074,
+          "f1-score": 0.9922239502332815,
+          "support": 323.0
+        },
+        "DoS Slowloris": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 698.0
+        },
+        "FTP-Patator": {
+          "precision": 0.998719590268886,
+          "recall": 1.0,
+          "f1-score": 0.9993593850096092,
+          "support": 780.0
+        },
+        "Heartbleed": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 2.0
+        },
+        "Infiltration": {
+          "precision": 1.0,
+          "recall": 0.75,
+          "f1-score": 0.8571428571428571,
+          "support": 4.0
+        },
+        "Infiltration - Portscan": {
+          "precision": 0.9678832116788321,
+          "recall": 0.9692982456140351,
+          "f1-score": 0.9685902118334551,
+          "support": 684.0
+        },
+        "Portscan": {
+          "precision": 0.8867924528301887,
+          "recall": 0.9791666666666666,
+          "f1-score": 0.9306930693069307,
+          "support": 288.0
+        },
+        "SSH-Patator": {
+          "precision": 1.0,
+          "recall": 0.9947552447552448,
+          "f1-score": 0.9973707274320771,
+          "support": 572.0
+        },
+        "Web Attack - Brute Force": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 11.0
+        },
+        "Web Attack - SQL Injection": {
+          "precision": 1.0,
+          "recall": 0.3333333333333333,
+          "f1-score": 0.5,
+          "support": 3.0
+        },
+        "Web Attack - XSS": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "accuracy": 0.9981124533664949,
+        "macro avg": {
+          "precision": 0.9903326059659598,
+          "recall": 0.937757806786839,
+          "f1-score": 0.9523670388317274,
+          "support": 45032.0
+        },
+        "weighted avg": {
+          "precision": 0.9981883552671701,
+          "recall": 0.9981124533664949,
+          "f1-score": 0.99812265082561,
+          "support": 45032.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          29958,
+          0,
+          0,
+          4,
+          2,
+          0,
+          0,
+          1,
+          0,
+          0,
+          19,
+          16,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          159,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          5000,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0,
+          1501,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          2,
+          4998,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          4,
+          0,
+          0,
+          0,
+          0,
+          319,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          698,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          780,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          663,
+          20,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3,
+          282,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          569,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          11,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3
+        ]
+      ],
+      "class_order": [
+        "BENIGN",
+        "Botnet",
+        "DDoS",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS Slowloris",
+        "FTP-Patator",
+        "Heartbleed",
+        "Infiltration",
+        "Infiltration - Portscan",
+        "Portscan",
+        "SSH-Patator",
+        "Web Attack - Brute Force",
+        "Web Attack - SQL Injection",
+        "Web Attack - XSS"
+      ],
+      "binary_confusion": {
+        "TN": 29958,
+        "FP": 42,
+        "FN": 17,
+        "TP": 15015
+      },
+      "train_seconds_including_search": 21.654728617000046,
+      "batch_latency_p50_ms": 32.949932499946044,
+      "batch_latency_p95_ms": 34.3574977000344,
+      "benchmark_batch_rows": 1000,
+      "benchmark_repeats": 10,
+      "rows_per_second": 30349.075828960726,
+      "holdout_rows": 45032,
+      "hyperparameters": {
+        "bootstrap": true,
+        "ccp_alpha": 0.0,
+        "class_weight": "balanced_subsample",
+        "criterion": "gini",
+        "max_depth": 22,
+        "max_features": "sqrt",
+        "max_leaf_nodes": null,
+        "max_samples": null,
+        "min_impurity_decrease": 0.0,
+        "min_samples_leaf": 1,
+        "min_samples_split": 2,
+        "min_weight_fraction_leaf": 0.0,
+        "monotonic_cst": null,
+        "n_estimators": 160,
+        "n_jobs": 2,
+        "oob_score": false,
+        "random_state": 42,
+        "verbose": 0,
+        "warm_start": false
+      },
+      "search": {
+        "best_params": {
+          "n_estimators": 160,
+          "min_samples_leaf": 1,
+          "max_depth": 22
+        },
+        "best_cv_macro_f1": 0.9479914893492841,
+        "folds": 2,
+        "search_rows": 19272,
+        "candidate_results": [
+          {
+            "params": {
+              "n_estimators": 160,
+              "min_samples_leaf": 1,
+              "max_depth": 14
+            },
+            "mean_macro_f1": 0.9475761561893534
+          },
+          {
+            "params": {
+              "n_estimators": 160,
+              "min_samples_leaf": 1,
+              "max_depth": 22
+            },
+            "mean_macro_f1": 0.9479914893492841
+          }
+        ]
+      }
+    },
+    "xgboost": {
+      "accuracy": 0.9976905311778291,
+      "macro_f1": 0.9577263310051276,
+      "weighted_f1": 0.997709162370044,
+      "attack_precision": 0.9960857161812512,
+      "attack_recall": 0.9988025545502927,
+      "false_positive_rate": 0.0019666666666666665,
+      "attack_average_precision": 0.9999071858635651,
+      "log_loss": 0.008563845277348677,
+      "classification_report": {
+        "BENIGN": {
+          "precision": 0.9993991788777996,
+          "recall": 0.9980333333333333,
+          "f1-score": 0.9987157891225671,
+          "support": 30000.0
+        },
+        "Botnet": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 160.0
+        },
+        "DDoS": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 5000.0
+        },
+        "DoS GoldenEye": {
+          "precision": 0.9947054930509597,
+          "recall": 0.9993351063829787,
+          "f1-score": 0.9970149253731343,
+          "support": 1504.0
+        },
+        "DoS Hulk": {
+          "precision": 0.9994,
+          "recall": 0.9994,
+          "f1-score": 0.9994,
+          "support": 5000.0
+        },
+        "DoS Slowhttptest": {
+          "precision": 1.0,
+          "recall": 0.9876160990712074,
+          "f1-score": 0.9937694704049844,
+          "support": 323.0
+        },
+        "DoS Slowloris": {
+          "precision": 0.9985693848354793,
+          "recall": 1.0,
+          "f1-score": 0.9992841803865425,
+          "support": 698.0
+        },
+        "FTP-Patator": {
+          "precision": 0.998719590268886,
+          "recall": 1.0,
+          "f1-score": 0.9993593850096092,
+          "support": 780.0
+        },
+        "Heartbleed": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 2.0
+        },
+        "Infiltration": {
+          "precision": 1.0,
+          "recall": 0.75,
+          "f1-score": 0.8571428571428571,
+          "support": 4.0
+        },
+        "Infiltration - Portscan": {
+          "precision": 0.939521800281294,
+          "recall": 0.9766081871345029,
+          "f1-score": 0.9577060931899641,
+          "support": 684.0
+        },
+        "Portscan": {
+          "precision": 0.900990099009901,
+          "recall": 0.9479166666666666,
+          "f1-score": 0.9238578680203046,
+          "support": 288.0
+        },
+        "SSH-Patator": {
+          "precision": 1.0,
+          "recall": 0.9947552447552448,
+          "f1-score": 0.9973707274320771,
+          "support": 572.0
+        },
+        "Web Attack - Brute Force": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 11.0
+        },
+        "Web Attack - SQL Injection": {
+          "precision": 1.0,
+          "recall": 0.6666666666666666,
+          "f1-score": 0.8,
+          "support": 3.0
+        },
+        "Web Attack - XSS": {
+          "precision": 1.0,
+          "recall": 0.6666666666666666,
+          "f1-score": 0.8,
+          "support": 3.0
+        },
+        "accuracy": 0.9976905311778291,
+        "macro avg": {
+          "precision": 0.98945659664527,
+          "recall": 0.9366873731673291,
+          "f1-score": 0.9577263310051276,
+          "support": 45032.0
+        },
+        "weighted avg": {
+          "precision": 0.9977601083410639,
+          "recall": 0.9976905311778291,
+          "f1-score": 0.997709162370044,
+          "support": 45032.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          29941,
+          0,
+          0,
+          4,
+          3,
+          0,
+          1,
+          1,
+          0,
+          0,
+          30,
+          20,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          160,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          5000,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          1503,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          3,
+          4997,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          0,
+          1,
+          0,
+          319,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          698,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          780,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          6,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          668,
+          10,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          13,
+          273,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          569,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          11,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2
+        ]
+      ],
+      "class_order": [
+        "BENIGN",
+        "Botnet",
+        "DDoS",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS Slowloris",
+        "FTP-Patator",
+        "Heartbleed",
+        "Infiltration",
+        "Infiltration - Portscan",
+        "Portscan",
+        "SSH-Patator",
+        "Web Attack - Brute Force",
+        "Web Attack - SQL Injection",
+        "Web Attack - XSS"
+      ],
+      "binary_confusion": {
+        "TN": 29941,
+        "FP": 59,
+        "FN": 18,
+        "TP": 15014
+      },
+      "train_seconds_including_search": 16.689351434999935,
+      "batch_latency_p50_ms": 16.434037500062004,
+      "batch_latency_p95_ms": 16.95079615000168,
+      "benchmark_batch_rows": 1000,
+      "benchmark_repeats": 10,
+      "rows_per_second": 60849.319590284926,
+      "holdout_rows": 45032,
+      "hyperparameters": {
+        "objective": "multi:softprob",
+        "base_score": null,
+        "booster": null,
+        "callbacks": null,
+        "colsample_bylevel": null,
+        "colsample_bynode": null,
+        "colsample_bytree": 0.9,
+        "device": null,
+        "early_stopping_rounds": null,
+        "enable_categorical": true,
+        "eval_metric": "mlogloss",
+        "feature_types": null,
+        "feature_weights": null,
+        "gamma": null,
+        "grow_policy": null,
+        "importance_type": null,
+        "interaction_constraints": null,
+        "learning_rate": 0.1,
+        "max_bin": null,
+        "max_cat_threshold": null,
+        "max_cat_to_onehot": null,
+        "max_delta_step": null,
+        "max_depth": 4,
+        "max_leaves": null,
+        "min_child_weight": null,
+        "missing": null,
+        "monotone_constraints": null,
+        "multi_strategy": null,
+        "n_estimators": 160,
+        "n_jobs": 2,
+        "num_parallel_tree": null,
+        "random_state": 42,
+        "reg_alpha": null,
+        "reg_lambda": null,
+        "sampling_method": null,
+        "scale_pos_weight": null,
+        "subsample": 0.9,
+        "tree_method": "hist",
+        "validate_parameters": null,
+        "verbosity": null
+      },
+      "search": {
+        "best_params": {
+          "n_estimators": 160,
+          "max_depth": 4,
+          "learning_rate": 0.1
+        },
+        "best_cv_macro_f1": 0.9297188904508299,
+        "folds": 2,
+        "search_rows": 19272,
+        "candidate_results": [
+          {
+            "params": {
+              "n_estimators": 160,
+              "max_depth": 4,
+              "learning_rate": 0.05
+            },
+            "mean_macro_f1": 0.9219934415086455
+          },
+          {
+            "params": {
+              "n_estimators": 160,
+              "max_depth": 4,
+              "learning_rate": 0.1
+            },
+            "mean_macro_f1": 0.9297188904508299
+          }
+        ]
+      }
+    },
+    "extra_trees": {
+      "accuracy": 0.9894075324213892,
+      "macro_f1": 0.9221496642060857,
+      "weighted_f1": 0.9902971653546784,
+      "attack_precision": 0.9729186912860383,
+      "attack_recall": 0.9990021287919106,
+      "false_positive_rate": 0.013933333333333334,
+      "attack_average_precision": 0.9997185343737653,
+      "log_loss": 0.1182145591217718,
+      "classification_report": {
+        "BENIGN": {
+          "precision": 0.9994931918775551,
+          "recall": 0.9860666666666666,
+          "f1-score": 0.992734533617464,
+          "support": 30000.0
+        },
+        "Botnet": {
+          "precision": 0.9875776397515528,
+          "recall": 0.99375,
+          "f1-score": 0.9906542056074766,
+          "support": 160.0
+        },
+        "DDoS": {
+          "precision": 0.9982032341784788,
+          "recall": 1.0,
+          "f1-score": 0.9991008092716556,
+          "support": 5000.0
+        },
+        "DoS GoldenEye": {
+          "precision": 0.989452867501648,
+          "recall": 0.9980053191489362,
+          "f1-score": 0.9937106918238994,
+          "support": 1504.0
+        },
+        "DoS Hulk": {
+          "precision": 0.9986,
+          "recall": 0.9986,
+          "f1-score": 0.9986,
+          "support": 5000.0
+        },
+        "DoS Slowhttptest": {
+          "precision": 0.996875,
+          "recall": 0.9876160990712074,
+          "f1-score": 0.9922239502332815,
+          "support": 323.0
+        },
+        "DoS Slowloris": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 698.0
+        },
+        "FTP-Patator": {
+          "precision": 0.998719590268886,
+          "recall": 1.0,
+          "f1-score": 0.9993593850096092,
+          "support": 780.0
+        },
+        "Heartbleed": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 2.0
+        },
+        "Infiltration": {
+          "precision": 1.0,
+          "recall": 0.75,
+          "f1-score": 0.8571428571428571,
+          "support": 4.0
+        },
+        "Infiltration - Portscan": {
+          "precision": 0.7243660418963617,
+          "recall": 0.9605263157894737,
+          "f1-score": 0.8258956631049654,
+          "support": 684.0
+        },
+        "Portscan": {
+          "precision": 0.6241457858769932,
+          "recall": 0.9513888888888888,
+          "f1-score": 0.7537826685006878,
+          "support": 288.0
+        },
+        "SSH-Patator": {
+          "precision": 1.0,
+          "recall": 0.9965034965034965,
+          "f1-score": 0.9982486865148862,
+          "support": 572.0
+        },
+        "Web Attack - Brute Force": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 11.0
+        },
+        "Web Attack - SQL Injection": {
+          "precision": 0.21428571428571427,
+          "recall": 1.0,
+          "f1-score": 0.35294117647058826,
+          "support": 3.0
+        },
+        "Web Attack - XSS": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "accuracy": 0.9894075324213892,
+        "macro avg": {
+          "precision": 0.9082324416023243,
+          "recall": 0.9764035491292917,
+          "f1-score": 0.9221496642060857,
+          "support": 45032.0
+        },
+        "weighted avg": {
+          "precision": 0.9922236761379474,
+          "recall": 0.9894075324213892,
+          "f1-score": 0.9902971653546784,
+          "support": 45032.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          29582,
+          2,
+          0,
+          9,
+          7,
+          0,
+          0,
+          1,
+          0,
+          0,
+          245,
+          143,
+          0,
+          0,
+          11,
+          0
+        ],
+        [
+          1,
+          159,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          5000,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0,
+          1501,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          7,
+          4993,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          4,
+          0,
+          0,
+          0,
+          0,
+          319,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          698,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          780,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          5,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          657,
+          22,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          9,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          5,
+          274,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          570,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          11,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3
+        ]
+      ],
+      "class_order": [
+        "BENIGN",
+        "Botnet",
+        "DDoS",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS Slowloris",
+        "FTP-Patator",
+        "Heartbleed",
+        "Infiltration",
+        "Infiltration - Portscan",
+        "Portscan",
+        "SSH-Patator",
+        "Web Attack - Brute Force",
+        "Web Attack - SQL Injection",
+        "Web Attack - XSS"
+      ],
+      "binary_confusion": {
+        "TN": 29582,
+        "FP": 418,
+        "FN": 15,
+        "TP": 15017
+      },
+      "train_seconds_including_search": 6.31945185099994,
+      "batch_latency_p50_ms": 44.257968000010806,
+      "batch_latency_p95_ms": 54.34012844996231,
+      "benchmark_batch_rows": 1000,
+      "benchmark_repeats": 10,
+      "rows_per_second": 22594.801460377843,
+      "holdout_rows": 45032,
+      "hyperparameters": {
+        "bootstrap": false,
+        "ccp_alpha": 0.0,
+        "class_weight": "balanced",
+        "criterion": "gini",
+        "max_depth": 16,
+        "max_features": "sqrt",
+        "max_leaf_nodes": null,
+        "max_samples": null,
+        "min_impurity_decrease": 0.0,
+        "min_samples_leaf": 1,
+        "min_samples_split": 2,
+        "min_weight_fraction_leaf": 0.0,
+        "monotonic_cst": null,
+        "n_estimators": 160,
+        "n_jobs": 2,
+        "oob_score": false,
+        "random_state": 42,
+        "verbose": 0,
+        "warm_start": false
+      },
+      "search": {
+        "best_params": {
+          "n_estimators": 160,
+          "min_samples_leaf": 1,
+          "max_depth": 16
+        },
+        "best_cv_macro_f1": 0.9620603670077841,
+        "folds": 2,
+        "search_rows": 19272,
+        "candidate_results": [
+          {
+            "params": {
+              "n_estimators": 160,
+              "min_samples_leaf": 1,
+              "max_depth": 16
+            },
+            "mean_macro_f1": 0.9620603670077841
+          },
+          {
+            "params": {
+              "n_estimators": 160,
+              "min_samples_leaf": 1,
+              "max_depth": 24
+            },
+            "mean_macro_f1": 0.9609722213646132
+          }
+        ]
+      }
+    }
+  },
+  "global_feature_importances": {
+    "random_forest": [
+      {
+        "feature": "Flow Duration",
+        "importance": 0.08002126306177261
+      },
+      {
+        "feature": "Bwd Segment Size Avg",
+        "importance": 0.07872602478074385
+      },
+      {
+        "feature": "Bwd Packet Length Mean",
+        "importance": 0.07821571060998611
+      },
+      {
+        "feature": "Flow IAT Max",
+        "importance": 0.07791975283250784
+      },
+      {
+        "feature": "Average Packet Size",
+        "importance": 0.07473185787343867
+      },
+      {
+        "feature": "Flow Packets/s",
+        "importance": 0.07465438103608975
+      },
+      {
+        "feature": "Fwd Segment Size Avg",
+        "importance": 0.06991031917249334
+      },
+      {
+        "feature": "Packet Length Max",
+        "importance": 0.06935618408431295
+      },
+      {
+        "feature": "Subflow Fwd Bytes",
+        "importance": 0.06698695351507172
+      },
+      {
+        "feature": "Packet Length Mean",
+        "importance": 0.06274788943213101
+      },
+      {
+        "feature": "Bwd Packet Length Std",
+        "importance": 0.06170519030937773
+      },
+      {
+        "feature": "Fwd Packets/s",
+        "importance": 0.06019477472088886
+      },
+      {
+        "feature": "Packet Length Variance",
+        "importance": 0.05444675992957566
+      },
+      {
+        "feature": "Packet Length Std",
+        "importance": 0.04973767222961228
+      },
+      {
+        "feature": "RST Flag Count",
+        "importance": 0.04064526641199748
+      }
+    ],
+    "xgboost": [
+      {
+        "feature": "Bwd Packet Length Std",
+        "importance": 0.14150939881801605
+      },
+      {
+        "feature": "Fwd Segment Size Avg",
+        "importance": 0.11693214625120163
+      },
+      {
+        "feature": "Packet Length Std",
+        "importance": 0.09889809042215347
+      },
+      {
+        "feature": "Average Packet Size",
+        "importance": 0.08436927199363708
+      },
+      {
+        "feature": "Bwd Packet Length Mean",
+        "importance": 0.07907722145318985
+      },
+      {
+        "feature": "Flow IAT Max",
+        "importance": 0.07754471898078918
+      },
+      {
+        "feature": "Subflow Fwd Bytes",
+        "importance": 0.07298492640256882
+      },
+      {
+        "feature": "RST Flag Count",
+        "importance": 0.06824783235788345
+      },
+      {
+        "feature": "Packet Length Variance",
+        "importance": 0.06604967266321182
+      },
+      {
+        "feature": "Packet Length Mean",
+        "importance": 0.06566137820482254
+      },
+      {
+        "feature": "Flow Packets/s",
+        "importance": 0.03509928658604622
+      },
+      {
+        "feature": "Fwd Packets/s",
+        "importance": 0.03419381007552147
+      },
+      {
+        "feature": "Packet Length Max",
+        "importance": 0.022282041609287262
+      },
+      {
+        "feature": "Bwd Segment Size Avg",
+        "importance": 0.018651217222213745
+      },
+      {
+        "feature": "Flow Duration",
+        "importance": 0.01849909871816635
+      }
+    ],
+    "extra_trees": [
+      {
+        "feature": "Flow Duration",
+        "importance": 0.10322822285820381
+      },
+      {
+        "feature": "Bwd Packet Length Mean",
+        "importance": 0.0933835890234514
+      },
+      {
+        "feature": "Bwd Segment Size Avg",
+        "importance": 0.0831189742092223
+      },
+      {
+        "feature": "Flow IAT Max",
+        "importance": 0.07901764605264401
+      },
+      {
+        "feature": "Packet Length Mean",
+        "importance": 0.0766171972038388
+      },
+      {
+        "feature": "Average Packet Size",
+        "importance": 0.07529885945101362
+      },
+      {
+        "feature": "Bwd Packet Length Std",
+        "importance": 0.07279765333791571
+      },
+      {
+        "feature": "Packet Length Std",
+        "importance": 0.06908251548849861
+      },
+      {
+        "feature": "Packet Length Max",
+        "importance": 0.06821058785299397
+      },
+      {
+        "feature": "Fwd Segment Size Avg",
+        "importance": 0.0659889449078943
+      },
+      {
+        "feature": "Subflow Fwd Bytes",
+        "importance": 0.0637551304469767
+      },
+      {
+        "feature": "RST Flag Count",
+        "importance": 0.06106019174247792
+      },
+      {
+        "feature": "Packet Length Variance",
+        "importance": 0.04951111923360381
+      },
+      {
+        "feature": "Fwd Packets/s",
+        "importance": 0.019568104925773953
+      },
+      {
+        "feature": "Flow Packets/s",
+        "importance": 0.019361263265491105
+      }
+    ]
+  },
+  "anomaly_metrics": {
+    "benign_flag_rate": 0.030233333333333334,
+    "attack_flag_rate": 0.7458754656732305,
+    "contamination_policy": 0.03,
+    "benign_train_rows": 40000,
+    "interpretation": "Unusual behaviour review signal, not a calibrated attack probability"
+  },
+  "holdout_model_disagreement_rate": 0.010503641854681115,
+  "versions": {
+    "python": "3.12.14",
+    "scikit-learn": "1.8.0",
+    "xgboost": "3.4.1",
+    "pandas": "2.2.3",
+    "numpy": "2.3.5",
+    "joblib": "1.5.3"
+  },
+  "risk_policy": "mentor-compatible-v1",
+  "probability_calibration": "Not calibrated; confidence is model-estimated class probability",
+  "limitations": [
+    "Not a chronological or host/session-disjoint split",
+    "Fixed 15 features inherited from earlier project; retrospective benchmark",
+    "Per-class caps change prevalence; sample-weighted metrics are not full-population metrics",
+    "No UNSW-NB15 included"
+  ],
+  "legacy_results": {
+    "random_forest": {
+      "best_params": {
+        "n_estimators": 300,
+        "min_samples_split": 2,
+        "min_samples_leaf": 1,
+        "max_depth": null
+      },
+      "test_f1_weighted": 0.9927
+    },
+    "xgboost": {
+      "best_params": {
+        "subsample": 1.0,
+        "n_estimators": 300,
+        "max_depth": 8,
+        "learning_rate": 0.1
+      },
+      "test_f1_weighted": 0.9927
+    }
+  },
+  "validation_date": "2026-10-13",
+  "version": "cicids-release-20261013"
+}

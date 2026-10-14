@@ -1,12 +1,123 @@
 {
-  "total_flows": 2099971,
-  "benign_count": 1594540,
-  "attack_count": 505431,
-  "top_attack_types": {
-    "Portscan": 159066,
-    "DoS Hulk": 158468,
+  "raw_rows": 2099976,
+  "invalid_feature_rows": 5,
+  "relabeled_attempts": 11979,
+  "valid_labels": {
+    "BENIGN": 1594540,
     "DDoS": 95144,
+    "Portscan": 159066,
+    "Botnet": 736,
+    "Web Attack - Brute Force": 73,
     "Infiltration - Portscan": 71767,
-    "DoS GoldenEye": 7567
-  }
+    "Infiltration": 36,
+    "Web Attack - XSS": 18,
+    "Web Attack - SQL Injection": 13,
+    "FTP-Patator": 3972,
+    "SSH-Patator": 2961,
+    "DoS Hulk": 158468,
+    "DoS Slowloris": 3859,
+    "DoS Slowhttptest": 1740,
+    "DoS GoldenEye": 7567,
+    "Heartbleed": 11
+  },
+  "files": [
+    {
+      "name": "friday.csv",
+      "raw_rows": 547557,
+      "valid_rows": 547557,
+      "sha256": "ebd499e6f23bd59f9cb81bec28178491b02b925fa5640a24215c9437d79482d0",
+      "bytes": 285188226
+    },
+    {
+      "name": "monday.csv",
+      "raw_rows": 371624,
+      "valid_rows": 371621,
+      "sha256": "51fe5dc962626efb4ae70dce0303072fb780da0932822b651202ee9c2fbc1aff",
+      "bytes": 207875155
+    },
+    {
+      "name": "thursday.csv",
+      "raw_rows": 362076,
+      "valid_rows": 362075,
+      "sha256": "78a4d11eaf473d099e30e71ddb01e0f38218e844c0a9cdd36602145d674af482",
+      "bytes": 189519159
+    },
+    {
+      "name": "tuesday.csv",
+      "raw_rows": 322078,
+      "valid_rows": 322078,
+      "sha256": "e2a0a5b631dfc6b455cc9f9a88b944110637d70a7f74171473925f76f38b6b0c",
+      "bytes": 178397720
+    },
+    {
+      "name": "wednesday.csv",
+      "raw_rows": 496641,
+      "valid_rows": 496640,
+      "sha256": "bf46c5f3c792e8817381f724511229569606918eaf07ac986d7a2592b6341bc2",
+      "bytes": 291290505
+    }
+  ],
+  "train_sample_rows": 80439,
+  "train_sample_labels": {
+    "BENIGN": 40000,
+    "DoS Hulk": 10000,
+    "DDoS": 10000,
+    "DoS GoldenEye": 6063,
+    "FTP-Patator": 3192,
+    "Infiltration - Portscan": 2771,
+    "DoS Slowloris": 2752,
+    "SSH-Patator": 2389,
+    "DoS Slowhttptest": 1406,
+    "Portscan": 1162,
+    "Botnet": 576,
+    "Web Attack - Brute Force": 62,
+    "Infiltration": 32,
+    "Web Attack - XSS": 15,
+    "Web Attack - SQL Injection": 10,
+    "Heartbleed": 9
+  },
+  "test_sample_rows": 45032,
+  "test_sample_labels": {
+    "BENIGN": 30000,
+    "DoS Hulk": 5000,
+    "DDoS": 5000,
+    "DoS GoldenEye": 1504,
+    "FTP-Patator": 780,
+    "DoS Slowloris": 698,
+    "Infiltration - Portscan": 684,
+    "SSH-Patator": 572,
+    "DoS Slowhttptest": 323,
+    "Portscan": 288,
+    "Botnet": 160,
+    "Web Attack - Brute Force": 11,
+    "Infiltration": 4,
+    "Web Attack - XSS": 3,
+    "Web Attack - SQL Injection": 3,
+    "Heartbleed": 2
+  },
+  "preparation_seconds": 16.41,
+  "split": "Feature-vector hash modulo 100: <80 train, >=80 holdout; capped unique samples per class",
+  "limitations": [
+    "Not a chronological or host/session-disjoint split",
+    "Fixed 15 features inherited from earlier project; retrospective benchmark",
+    "Per-class caps change prevalence; sample-weighted metrics are not full-population metrics",
+    "No UNSW-NB15 included"
+  ],
+  "features": [
+    "RST Flag Count",
+    "Bwd Packet Length Std",
+    "Packet Length Std",
+    "Flow Duration",
+    "Flow IAT Max",
+    "Bwd Packet Length Mean",
+    "Packet Length Variance",
+    "Fwd Packets/s",
+    "Packet Length Max",
+    "Fwd Segment Size Avg",
+    "Subflow Fwd Bytes",
+    "Bwd Segment Size Avg",
+    "Average Packet Size",
+    "Flow Packets/s",
+    "Packet Length Mean"
+  ]
 }

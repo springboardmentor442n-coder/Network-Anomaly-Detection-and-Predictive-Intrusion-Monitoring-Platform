@@ -1,0 +1,81 @@
+{
+  "scan_id": "219dce7c0d0d4795aacb876c6eecda74",
+  "status": "Completed",
+  "rows_read": 322078,
+  "scored": 322078,
+  "invalid": 0,
+  "skipped_rows": 0,
+  "alerts": 27152,
+  "risk_distribution": {
+    "Low": 314891,
+    "Medium": 7115,
+    "High": 72
+  },
+  "attack_types": {
+    "BENIGN": 313998,
+    "Infiltration - Portscan": 791,
+    "FTP-Patator": 3992,
+    "Portscan": 142,
+    "DoS GoldenEye": 107,
+    "DoS Hulk": 77,
+    "SSH-Patator": 2959,
+    "Heartbleed": 2,
+    "DDoS": 7,
+    "DoS Slowhttptest": 1,
+    "Botnet": 1,
+    "DoS Slowloris": 1
+  },
+  "protocols": {
+    "TCP": 121841,
+    "0": 311,
+    "UDP": 199803,
+    "ICMP": 123
+  },
+  "top_sources": {
+    "172.16.0.1": 6953,
+    "192.168.10.25": 472,
+    "192.168.10.12": 121,
+    "192.168.10.17": 102,
+    "192.168.10.16": 94,
+    "192.168.10.19": 84,
+    "192.168.10.9": 81,
+    "192.168.10.8": 46,
+    "192.168.10.14": 41,
+    "192.168.10.50": 30
+  },
+  "attack_timeline": {
+    "2017-07-04 12": 2828,
+    "2017-07-04 17": 2704,
+    "2017-07-04 13": 1433,
+    "2017-07-04 18": 605,
+    "2017-07-04 19": 177,
+    "2017-07-04 14": 137,
+    "2017-07-04 15": 93,
+    "2017-07-04 16": 93,
+    "2017-07-04 11": 10
+  },
+  "analytics_caps": {
+    "tracked_sources": 5000,
+    "time_buckets": 512
+  },
+  "model_agreement_rate": 0.9801693999590161,
+  "elapsed_seconds": 215.418,
+  "rows_per_second": 1495.13,
+  "pipeline_p50_ms": 1246.729,
+  "pipeline_p95_ms": 1421.33185,
+  "latency_window_chunks": 162,
+  "model_total_ms": {
+    "random_forest": 6745.393,
+    "xgboost": 4610.973000000001,
+    "extra_trees": 7781.749999999998
+  },
+  "process_rss_mb": null,
+  "dropped_messages": 0,
+  "scope": "REAL CICIDS2017 CNS2022: capped unique training and holdout samples drawn from all five original daily CSVs",
+  "risk_policy": "mentor-compatible-v1",
+  "saved_row_count_verified": 322078,
+  "grouped_incidents": 6751,
+  "csv": "tuesday.csv",
+  "benchmark_chunk_size": 2000,
+  "database_bytes": 687428296
+}

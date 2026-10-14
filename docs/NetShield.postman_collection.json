@@ -1,0 +1,486 @@
+{
+  "info": {
+    "name": "NetShield AI - Real CICIDS release Oct 13",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "username",
+      "value": "YOUR_USERNAME"
+    },
+    {
+      "key": "password",
+      "value": "YOUR_PASSWORD"
+    },
+    {
+      "key": "source",
+      "value": "cicids_demo_real_ips.csv"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "scan_id",
+      "value": ""
+    },
+    {
+      "key": "incident_id",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/health",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Signup",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/signup",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });",
+              "pm.collectionVariables.set(\"token\", pm.response.json().access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Me",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/me"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Model performance",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/models"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Backend CSV sources",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/sources"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create SSE scan",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/scans",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"source\": \"{{source}}\",\n  \"transport\": \"sse\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });",
+              "pm.collectionVariables.set(\"scan_id\", pm.response.json().scan_id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Stream SSE events",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/scans/{{scan_id}}/events"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Scan report",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/scans/{{scan_id}}/report"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Export rows",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/scans/{{scan_id}}/export"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Stop scan",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/api/scans/{{scan_id}}/stop"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create polling scan",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/scans",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"source\": \"{{source}}\",\n  \"transport\": \"polling\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });",
+              "pm.collectionVariables.set(\"scan_id\", pm.response.json().scan_id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Poll results",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/scans/{{scan_id}}/poll"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Scan history",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/scans"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List incidents",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/incidents"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Update incident",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/incidents/{{incident_id}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"Investigating\",\n  \"note\": \"Review source flow and supporting evidence.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Team (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/team"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Audit (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/audit"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", function () { pm.expect(pm.response.code).to.be.within(200, 299); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Printable scan report",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/scans/{{scan_id}}/report-html"
+      }
+    },
+    {
+      "name": "Delete completed scan results",
+      "request": {
+        "method": "DELETE",
+        "url": "{{base_url}}/api/scans/{{scan_id}}"
+      }
+    }
+  ]
+}
