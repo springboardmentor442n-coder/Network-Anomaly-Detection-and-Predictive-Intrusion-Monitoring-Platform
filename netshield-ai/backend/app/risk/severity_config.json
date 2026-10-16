@@ -1,0 +1,29 @@
+{
+  "comment": "NETSHIELD AI - CICIDS2017 Attack Severity Configuration. Edit this file to customize severity values. Unmapped attacks are flagged in the UI.",
+  "version": "1.0",
+  "default_fallback_severity": 50,
+  "severities": {
+    "BENIGN": 0,
+    "PortScan": 30,
+    "FTP-Patator": 50,
+    "SSH-Patator": 50,
+    "Brute Force": 50,
+    "Web Attack - Brute Force": 60,
+    "Web Attack - XSS": 60,
+    "Web Attack - SQL Injection": 65,
+    "DoS slowloris": 70,
+    "DoS Slowhttptest": 70,
+    "DoS Hulk": 75,
+    "DoS GoldenEye": 75,
+    "Infiltration": 80,
+    "Bot": 80,
+    "DDoS": 90,
+    "Heartbleed": 85
+  },
+  "risk_labels": {
+    "0-25": "Low",
+    "26-50": "Medium",
+    "51-75": "High",
+    "76-100": "Critical"
+  }
+}
