@@ -13,23 +13,16 @@ import api from '@/lib/api';
 const NAV_ITEMS = [
   { path: '/', label: 'Overview', icon: LayoutDashboard },
   { path: '/live-monitor', label: 'Live Monitor', icon: Activity },
-  { path: '/dataset', label: 'CICIDS2017 Dataset', icon: Database },
-  { path: '/traffic', label: 'Traffic Analysis', icon: BarChart2 },
-  { path: '/threat-detection', label: 'Threat Detection', icon: Shield },
   { path: '/alerts', label: 'Alerts', icon: Bell },
   { path: '/incidents', label: 'Incidents', icon: AlertTriangle },
-  { path: '/risk-analysis', label: 'Risk Analysis', icon: TrendingUp },
-  { path: '/analytics', label: 'Analytics', icon: LineChart },
-  { path: '/threat-intelligence', label: 'Threat Intelligence', icon: Globe },
-  { path: '/reports', label: 'Reports', icon: FileText },
-  { path: '/model-performance', label: 'Model Performance', icon: Cpu },
+  { path: '/analytics', label: 'Network Analytics', icon: LineChart },
+  { path: '/models', label: 'ML Threat Models', icon: Cpu },
+  { path: '/dataset', label: 'CICIDS2017 Dataset', icon: Database },
+  { path: '/threat-intel', label: 'Threat Intelligence', icon: Globe },
 ];
 
 const ADMIN_ITEMS = [
-  { path: '/admin/users', label: 'Users', icon: Users },
-  { path: '/admin/teams', label: 'Teams', icon: UsersRound },
-  { path: '/admin/audit-logs', label: 'Audit Logs', icon: ScrollText },
-  { path: '/admin/settings', label: 'Settings', icon: Settings },
+  { path: '/admin', label: 'Admin & Settings', icon: Settings },
 ];
 
 export function Sidebar() {

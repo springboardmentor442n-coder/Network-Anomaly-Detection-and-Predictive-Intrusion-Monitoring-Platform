@@ -65,20 +65,25 @@ export function App() {
             <Route element={<ProtectedLayout />}>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/live-monitor" element={<LiveMonitorPage />} />
-              <Route path="/dataset" element={<DatasetPage />} />
-              <Route path="/traffic" element={<AnalyticsPage />} />
-              <Route path="/threat-detection" element={<MLModelsPage />} />
               <Route path="/alerts" element={<AlertsPage />} />
               <Route path="/incidents" element={<IncidentsPage />} />
-              <Route path="/risk-analysis" element={<AnalyticsPage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
-              <Route path="/threat-intelligence" element={<ThreatIntelPage />} />
-              <Route path="/reports" element={<AnalyticsPage />} />
-              <Route path="/model-performance" element={<MLModelsPage />} />
-              <Route path="/admin/users" element={<AdminSettingsPage />} />
-              <Route path="/admin/teams" element={<AdminSettingsPage />} />
-              <Route path="/admin/audit-logs" element={<ThreatIntelPage />} />
-              <Route path="/admin/settings" element={<AdminSettingsPage />} />
+              <Route path="/models" element={<MLModelsPage />} />
+              <Route path="/dataset" element={<DatasetPage />} />
+              <Route path="/threat-intel" element={<ThreatIntelPage />} />
+              <Route path="/admin" element={<AdminSettingsPage />} />
+
+              {/* Clean redirects for legacy duplicate paths */}
+              <Route path="/traffic" element={<Navigate to="/analytics" replace />} />
+              <Route path="/risk-analysis" element={<Navigate to="/analytics" replace />} />
+              <Route path="/reports" element={<Navigate to="/analytics" replace />} />
+              <Route path="/threat-detection" element={<Navigate to="/models" replace />} />
+              <Route path="/model-performance" element={<Navigate to="/models" replace />} />
+              <Route path="/threat-intelligence" element={<Navigate to="/threat-intel" replace />} />
+              <Route path="/admin/users" element={<Navigate to="/admin" replace />} />
+              <Route path="/admin/teams" element={<Navigate to="/admin" replace />} />
+              <Route path="/admin/audit-logs" element={<Navigate to="/threat-intel" replace />} />
+              <Route path="/admin/settings" element={<Navigate to="/admin" replace />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
