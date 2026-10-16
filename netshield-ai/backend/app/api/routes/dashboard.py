@@ -41,7 +41,16 @@ async def get_dashboard_stats(
     detection_rate = (malicious_traffic / total_traffic * 100) if total_traffic > 0 else 0.0
 
     # Active model
+    from app.ml.predictor import get_active_predictor
+    predictor = get_active_predictor()
     active_model = db.query(ModelRun).filter(ModelRun.is_active == True).first()
+    if not predictor or not active_model:
+        from app.ml.loader import ensure_active_model_loaded
+        ensure_active_model_loaded(db)
+        active_model = db.query(ModelRun).filter(ModelRun.is_active == True).first()
+        predictor = get_active_predictor()
+
+    is_model_active = (active_model is not None) and (predictor is not None)
 
     return {
         "total_traffic": total_traffic,
@@ -52,9 +61,10 @@ async def get_dashboard_stats(
         "anomalies_detected": anomalies,
         "avg_risk_score": round(float(avg_risk), 1),
         "detection_rate": round(detection_rate, 1),
-        "model_active": active_model is not None,
-        "model_name": active_model.name if active_model else None,
-        "demo_mode": active_model is None,
+        "model_active": is_model_active,
+        "model_name": active_model.name if (active_model and is_model_active) else None,
+        "active_model_name": active_model.name if (active_model and is_model_active) else None,
+        "demo_mode": not is_model_active,
     }
 
 

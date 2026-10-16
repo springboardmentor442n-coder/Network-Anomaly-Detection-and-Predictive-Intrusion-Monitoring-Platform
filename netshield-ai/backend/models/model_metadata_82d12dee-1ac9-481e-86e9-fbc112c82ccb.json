@@ -1,0 +1,37 @@
+{
+  "model_run_id": "82d12dee-1ac9-481e-86e9-fbc112c82ccb",
+  "algorithm": "RandomForestClassifier",
+  "dataset": "CICIDS2017",
+  "trained_at": "2026-10-16T15:24:32.995155",
+  "accuracy": 1.0,
+  "precision_macro": 1.0,
+  "recall_macro": 1.0,
+  "f1_macro": 1.0,
+  "f1_weighted": 1.0,
+  "training_samples": 160,
+  "test_samples": 40,
+  "num_features": 8,
+  "num_classes": 4,
+  "class_names": [
+    "BENIGN",
+    "DDoS",
+    "FTP-Patator",
+    "PortScan"
+  ],
+  "feature_names": [
+    "Destination Port",
+    "Flow Duration",
+    "Total Fwd Packets",
+    "Total Backward Packets",
+    "Flow Bytes/s",
+    "Flow Packets/s",
+    "SYN Flag Count",
+    "Packet Length Mean"
+  ],
+  "training_time_seconds": 0.518855094909668,
+  "random_seed": 42,
+  "test_size": 0.2,
+  "model_path": "./models\\cicids2017_model_82d12dee-1ac9-481e-86e9-fbc112c82ccb.pkl",
+  "pipeline_path": "./models\\preprocessing_pipeline_82d12dee-1ac9-481e-86e9-fbc112c82ccb.pkl",
+  "encoder_path": "./models\\label_encoder_82d12dee-1ac9-481e-86e9-fbc112c82ccb.pkl"
+}

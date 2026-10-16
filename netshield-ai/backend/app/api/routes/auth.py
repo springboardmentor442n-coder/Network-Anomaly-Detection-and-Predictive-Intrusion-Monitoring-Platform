@@ -84,6 +84,7 @@ async def login(request: Request, body: LoginRequest, db: Session = Depends(get_
             "full_name": user.full_name,
             "role": user.role,
             "is_active": user.is_active,
+            "theme": user.theme or "dark",
         },
     }
 
@@ -121,6 +122,7 @@ async def register(request: Request, body: RegisterRequest, db: Session = Depend
             full_name=clean_name,
             hashed_password=get_password_hash(clean_password),
             role="ADMIN",
+            theme="dark",
             is_active=True,
         )
         db.add(user)
@@ -138,6 +140,7 @@ async def register(request: Request, body: RegisterRequest, db: Session = Depend
             "full_name": user.full_name,
             "role": user.role,
             "is_active": user.is_active,
+            "theme": user.theme or "dark",
         },
     }
 
@@ -152,9 +155,31 @@ async def get_me(current_user: User = Depends(get_current_user)):
         "full_name": current_user.full_name,
         "role": current_user.role,
         "is_active": current_user.is_active,
+        "theme": current_user.theme or "dark",
         "last_login": current_user.last_login.isoformat() if current_user.last_login else None,
         "created_at": current_user.created_at.isoformat(),
     }
+
+
+class ThemeUpdateRequest(BaseModel):
+    theme: str
+
+
+@router.patch("/theme")
+@router.put("/theme")
+async def update_theme(
+    body: ThemeUpdateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Save user theme preference to the backend database."""
+    clean_theme = body.theme.strip().lower()
+    if clean_theme not in ["dark", "light"]:
+        raise HTTPException(status_code=400, detail="Theme must be either 'dark' or 'light'")
+
+    current_user.theme = clean_theme
+    db.commit()
+    return {"message": "Theme preference updated successfully", "theme": clean_theme}
 
 
 @router.post("/logout")

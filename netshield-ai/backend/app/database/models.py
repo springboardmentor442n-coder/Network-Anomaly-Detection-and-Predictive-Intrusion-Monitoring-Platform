@@ -73,6 +73,7 @@ class User(Base):
     role = Column(String(32), nullable=False, default="ANALYST")
     team_id = Column(String, ForeignKey("teams.id"), nullable=True)
     is_active = Column(Boolean, default=True)
+    theme = Column(String(16), default="dark", nullable=True)
     last_login = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

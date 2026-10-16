@@ -1,5 +1,6 @@
 """Database initialization - creates tables and seeds default data."""
 import logging
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from app.database.session import engine, SessionLocal
 from app.database import models as db_models
@@ -16,6 +17,13 @@ async def init_db():
     except Exception as e:
         logger.warning(f"Database table creation notice: {e}")
     logger.info("Database tables initialized")
+
+    # Migrate theme column if missing
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE users ADD COLUMN theme VARCHAR(16) DEFAULT 'dark'"))
+    except Exception:
+        pass  # Column already exists
 
     # Seed default admin user
     db = SessionLocal()

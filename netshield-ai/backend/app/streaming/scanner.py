@@ -52,6 +52,9 @@ async def stream_scan(
     """
     chunk_size = chunk_size or settings.CHUNK_SIZE
     predictor = get_active_predictor()
+    if predictor is None:
+        from app.ml.loader import ensure_active_model_loaded
+        predictor = ensure_active_model_loaded()
     demo_mode = predictor is None
 
     def _sse(event: str, data: dict) -> str:

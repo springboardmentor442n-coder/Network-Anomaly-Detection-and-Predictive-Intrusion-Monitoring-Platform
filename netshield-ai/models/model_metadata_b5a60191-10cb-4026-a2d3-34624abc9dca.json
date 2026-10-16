@@ -1,0 +1,39 @@
+{
+  "model_run_id": "b5a60191-10cb-4026-a2d3-34624abc9dca",
+  "algorithm": "RandomForestClassifier",
+  "dataset": "CICIDS2017",
+  "trained_at": "2026-10-16T15:28:33.820846",
+  "accuracy": 0.917,
+  "precision_macro": 0.7514887827854854,
+  "recall_macro": 0.7979598311078971,
+  "f1_macro": 0.757575049606135,
+  "f1_weighted": 0.9039887616593738,
+  "training_samples": 8000,
+  "test_samples": 2000,
+  "num_features": 8,
+  "num_classes": 6,
+  "class_names": [
+    "BENIGN",
+    "DDoS",
+    "DoS Hulk",
+    "FTP-Patator",
+    "PortScan",
+    "SSH-Patator"
+  ],
+  "feature_names": [
+    "Destination Port",
+    "Flow Duration",
+    "Total Fwd Packets",
+    "Total Backward Packets",
+    "Flow Bytes/s",
+    "Flow Packets/s",
+    "SYN Flag Count",
+    "Packet Length Mean"
+  ],
+  "training_time_seconds": 0.8691954612731934,
+  "random_seed": 42,
+  "test_size": 0.2,
+  "model_path": "./models\\cicids2017_model_b5a60191-10cb-4026-a2d3-34624abc9dca.pkl",
+  "pipeline_path": "./models\\preprocessing_pipeline_b5a60191-10cb-4026-a2d3-34624abc9dca.pkl",
+  "encoder_path": "./models\\label_encoder_b5a60191-10cb-4026-a2d3-34624abc9dca.pkl"
+}

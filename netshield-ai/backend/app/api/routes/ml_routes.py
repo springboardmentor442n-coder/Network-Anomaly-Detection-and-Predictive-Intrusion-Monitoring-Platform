@@ -3,7 +3,7 @@ import os
 import asyncio
 import logging
 from datetime import datetime
-from typing import Dict
+from typing import Dict, Optional
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -21,7 +21,9 @@ logger = logging.getLogger(__name__)
 
 
 class TrainRequest(BaseModel):
-    filename: str
+    filename: Optional[str] = "CICIDS2017_sample.csv"
+    dataset_name: Optional[str] = None
+    model_type: Optional[str] = "RANDOM_FOREST"
     test_size: float = 0.2
     random_seed: int = 42
 
@@ -39,10 +41,16 @@ async def train_model(
 ):
     """Start model training in background."""
     data_dir = settings.DATA_DIR
-    filepath = os.path.join(data_dir, body.filename)
+    target_filename = body.filename or "CICIDS2017_sample.csv"
+    filepath = os.path.join(data_dir, target_filename)
 
     if not os.path.exists(filepath):
-        raise HTTPException(status_code=404, detail=f"Dataset file not found: {body.filename}")
+        # Fallback to look in parent data dir or sample file
+        alt_filepath = os.path.join(os.path.dirname(data_dir), "data", target_filename)
+        if os.path.exists(alt_filepath):
+            filepath = alt_filepath
+        else:
+            raise HTTPException(status_code=404, detail=f"Dataset file not found: {target_filename}")
 
     # Create model run record
     version = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
@@ -198,14 +206,21 @@ async def get_model_status(
     """Get current ML model status."""
     predictor = get_active_predictor()
     active_model = db.query(ModelRun).filter(ModelRun.is_active == True).first()
+    if not predictor or not active_model:
+        from app.ml.loader import ensure_active_model_loaded
+        ensure_active_model_loaded(db)
+        predictor = get_active_predictor()
+        active_model = db.query(ModelRun).filter(ModelRun.is_active == True).first()
+
+    is_active = (predictor is not None) and (active_model is not None)
 
     return {
-        "has_active_model": predictor is not None,
-        "demo_mode": predictor is None,
-        "model_run_id": active_model.id if active_model else None,
-        "model_name": active_model.name if active_model else None,
-        "accuracy": active_model.accuracy if active_model else None,
-        "class_names": active_model.class_names if active_model else None,
+        "has_active_model": is_active,
+        "demo_mode": not is_active,
+        "model_run_id": active_model.id if (active_model and is_active) else None,
+        "model_name": active_model.name if (active_model and is_active) else None,
+        "accuracy": active_model.accuracy if (active_model and is_active) else None,
+        "class_names": active_model.class_names if (active_model and is_active) else None,
     }
 
 

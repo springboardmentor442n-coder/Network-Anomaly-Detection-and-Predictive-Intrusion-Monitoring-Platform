@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Bell, User } from 'lucide-react';
+import { Search, Bell, User, Sun, Moon } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
@@ -9,7 +9,7 @@ interface TopbarProps {
 }
 
 export function Topbar({ title }: TopbarProps) {
-  const { user } = useAuth();
+  const { user, theme, toggleTheme } = useAuth();
   const [search, setSearch] = useState('');
 
   const { data: mlStatus } = useQuery({
@@ -63,6 +63,30 @@ export function Topbar({ title }: TopbarProps) {
           style={{ paddingLeft: 32, width: 200, padding: '6px 12px 6px 30px', fontSize: 12 }}
         />
       </div>
+
+      {/* Theme Toggle Button */}
+      <button
+        id="theme-toggle-btn"
+        type="button"
+        className="btn-icon"
+        onClick={toggleTheme}
+        title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 34,
+          height: 34,
+          borderRadius: 8,
+          border: '1px solid var(--border-default)',
+          background: 'var(--bg-elevated)',
+          color: theme === 'dark' ? '#fbbf24' : '#4f46e5',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+        }}
+      >
+        {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+      </button>
 
       {/* Notifications */}
       <button className="btn-icon">

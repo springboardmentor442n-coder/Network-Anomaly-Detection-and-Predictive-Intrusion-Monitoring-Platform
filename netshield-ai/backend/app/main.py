@@ -26,6 +26,11 @@ async def lifespan(app: FastAPI):
     logger.info("🚀 Starting NETSHIELD AI Backend...")
     await init_db()
     logger.info("✅ Database initialized")
+    try:
+        from app.ml.loader import ensure_active_model_loaded
+        ensure_active_model_loaded()
+    except Exception as e:
+        logger.error(f"Failed to auto-load active ML model: {e}", exc_info=True)
     yield
     logger.info("🛑 Shutting down NETSHIELD AI Backend...")
 

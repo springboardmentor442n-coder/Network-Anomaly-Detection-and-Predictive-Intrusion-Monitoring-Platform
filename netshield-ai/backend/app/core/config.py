@@ -29,11 +29,27 @@ class Settings(BaseSettings):
         return [o.strip() for o in self.CORS_ORIGINS.split(",")]
 
     # ML
-    MODEL_DIR: str = "./models"
-    DATA_DIR: str = "./data"
+    MODEL_DIR: str = os.getenv(
+        "MODEL_DIR",
+        os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "models")
+    )
+    DATA_DIR: str = os.getenv(
+        "DATA_DIR",
+        os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data")
+    )
     CHUNK_SIZE: int = 1000
     RANDOM_SEED: int = 42
     TEST_SIZE: float = 0.2
+
+    @property
+    def RESOLVED_MODEL_DIR(self) -> str:
+        p = os.path.abspath(self.MODEL_DIR)
+        if os.path.exists(p) and any(f.endswith(".pkl") for f in os.listdir(p)):
+            return p
+        backend_candidate = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "models")
+        if os.path.exists(backend_candidate) and any(f.endswith(".pkl") for f in os.listdir(backend_candidate)):
+            return backend_candidate
+        return p
 
     # Alert
     ALERT_ESCALATION_COUNT: int = 3

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import { Settings, Users, Shield, Database, Key, Server, Save, Check } from 'lucide-react';
 
 export function AdminSettingsPage() {
+  const { theme, toggleTheme } = useAuth();
   const [activeTab, setActiveTab] = useState<'users' | 'settings' | 'keys'>('settings');
   const [saved, setSaved] = useState(false);
 
@@ -100,6 +102,22 @@ export function AdminSettingsPage() {
                 <option value="AUTO_BLOCK">Automatic IP Blocking (High Confidence &gt; 90%)</option>
                 <option value="ALERT_ONLY">Notify SecOps Team Only</option>
                 <option value="QUARANTINE">Quarantine Subnet Segment</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 6 }}>
+                Platform Theme Preference (Synced with Backend)
+              </label>
+              <select
+                value={theme}
+                onChange={(e) => {
+                  if (e.target.value !== theme) toggleTheme();
+                }}
+                style={{ width: '100%', padding: '10px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: 6, color: 'var(--text-primary)' }}
+              >
+                <option value="dark">Dark Theme (SOC Night Mode)</option>
+                <option value="light">Light Theme (Executive Clean Mode)</option>
               </select>
             </div>
           </div>
