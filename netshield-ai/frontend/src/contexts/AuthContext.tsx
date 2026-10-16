@@ -16,6 +16,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<void>;
+  register: (email: string, password: string, fullName?: string, username?: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -24,6 +25,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   login: async () => {},
+  register: async () => {},
   logout: () => {},
   isAuthenticated: false,
 });
@@ -55,6 +57,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(userData);
   };
 
+  const register = async (email: string, password: string, fullName?: string, username?: string) => {
+    const res = await api.post('/auth/register', { email, password, full_name: fullName, username });
+    const { access_token, user: userData } = res.data;
+    localStorage.setItem('netshield_token', access_token);
+    localStorage.setItem('netshield_user', JSON.stringify(userData));
+    setUser(userData);
+  };
+
   const logout = async () => {
     try { await api.post('/auth/logout'); } catch {}
     localStorage.removeItem('netshield_token');
@@ -63,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

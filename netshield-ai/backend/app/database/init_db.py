@@ -26,31 +26,55 @@ async def init_db():
 
 
 def _seed_default_data(db: Session):
-    """Seed default roles and admin user."""
+    """Seed single primary admin profile."""
     from app.database.models import User
+    from sqlalchemy import func
     
-    users_data = [
-        ("admin", "admin@netshield.ai", "System Administrator", "NetShield@Admin123", "ADMIN"),
-        ("analyst", "analyst@netshield.ai", "Security Analyst", "NetShield@Analyst123", "ANALYST"),
-        ("operator", "operator@netshield.ai", "SOC Operator", "NetShield@Operator123", "SOC_OPERATOR"),
-    ]
+    # Clean up obsolete extra profiles if present
+    db.query(User).filter(User.username.in_(["analyst", "operator"])).delete(synchronize_session=False)
 
-    for username, email, full_name, raw_password, role in users_data:
-        user = db.query(User).filter(User.username == username).first()
-        hashed = get_password_hash(raw_password)
-        if user:
-            user.hashed_password = hashed
-            user.is_active = True
-        else:
-            new_user = User(
-                username=username,
-                email=email,
-                full_name=full_name,
-                hashed_password=hashed,
-                role=role,
-                is_active=True,
-            )
-            db.add(new_user)
+    single_email = "madhurichowdary2007@gmail.com"
+    default_pwd = "NetShield@Admin123"
+    hashed = get_password_hash(default_pwd)
+
+    # Seed or update primary user with email madhurichowdary2007@gmail.com
+    user = db.query(User).filter(
+        (func.lower(User.email) == single_email.lower()) | (func.lower(User.username) == "madhuri")
+    ).first()
+
+    if user:
+        user.username = "madhuri"
+        user.email = single_email
+        user.full_name = "Madhuri Chowdary"
+        user.hashed_password = hashed
+        user.role = "ADMIN"
+        user.is_active = True
+    else:
+        new_user = User(
+            username="madhuri",
+            email=single_email,
+            full_name="Madhuri Chowdary",
+            hashed_password=hashed,
+            role="ADMIN",
+            is_active=True,
+        )
+        db.add(new_user)
+
+    # Also keep/ensure 'admin' user maps with same password for convenience
+    admin_user = db.query(User).filter(User.username == "admin").first()
+    if admin_user:
+        admin_user.hashed_password = hashed
+        admin_user.is_active = True
+        admin_user.email = admin_user.email or single_email
+    else:
+        db.add(User(
+            username="admin",
+            email="admin@netshield.ai",
+            full_name="Madhuri Chowdary (Admin)",
+            hashed_password=hashed,
+            role="ADMIN",
+            is_active=True,
+        ))
 
     db.commit()
-    logger.info("Default users seeded/updated: admin, analyst, operator")
+    logger.info("Single primary profile configured: madhuri (%s)", single_email)
