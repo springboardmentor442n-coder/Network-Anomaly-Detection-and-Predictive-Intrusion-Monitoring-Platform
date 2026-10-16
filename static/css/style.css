@@ -1,0 +1,65 @@
+:root{--bg:#060d1f;--card:#0b1530;--line:#14264d;--tx:#e8eefc;--mut:#8ea0c4;--blue:#3b82f6;--green:#22c55e;--red:#ef4444;--org:#f97316;--yel:#facc15}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:"Segoe UI",Inter,system-ui,sans-serif}
+header{display:flex;align-items:center;gap:28px;padding:14px 28px;border-bottom:1px solid var(--line)}
+.logo{font-size:24px;font-weight:700}.logo b{color:var(--blue)}.logo small{display:block;font-size:11px;color:var(--mut);font-weight:400}
+nav{display:flex;gap:6px;flex:1}nav a{padding:10px 14px;color:var(--mut);text-decoration:none;border-bottom:2px solid transparent}
+nav a.on{color:var(--tx);border-color:var(--blue)}.on-dot{color:var(--green);font-size:13px}
+main{padding:24px 28px;max-width:1300px;margin:auto}h1{margin:0;font-size:32px}h1 b{color:var(--blue)}.sub{color:var(--mut);margin:6px 0 20px}
+.top{display:flex;justify-content:space-between;align-items:flex-end}
+button{background:var(--blue);color:#fff;border:0;border-radius:8px;padding:10px 22px;font-size:15px;cursor:pointer}button:focus-visible{outline:2px solid #fff}
+button.stop{background:var(--red)}
+.grid{display:grid;gap:16px}.kpis{grid-template-columns:repeat(5,1fr)}.two{grid-template-columns:1.4fr 1fr;margin-top:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px}.card h3{margin:0 0 12px;font-size:17px}
+.k small{color:var(--mut)}.k div{font-size:32px;font-weight:700;margin-top:4px}
+.chart{position:relative;height:250px}
+.legend{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px 14px;align-items:center;font-size:14px}.dot{width:14px;height:14px;border-radius:50%}
+.donutwrap{display:flex;align-items:center;gap:24px}.donut{position:relative;width:200px;height:200px;flex:none}
+.donut span{position:absolute;inset:0;display:grid;place-content:center;text-align:center;font-size:22px;font-weight:700}
+.donut span small{font-size:13px;font-weight:400;color:var(--mut)}
+.tbl{max-height:260px;overflow:auto}table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--mut);font-weight:500;padding:8px;position:sticky;top:0;background:var(--card)}td{padding:8px;border-top:1px solid var(--line)}
+.pill{padding:3px 12px;border-radius:5px;font-size:13px;border:1px solid}
+.Low{color:var(--green);border-color:var(--green);background:#22c55e22}.Medium{color:var(--yel);border-color:var(--yel);background:#facc1522}
+.High{color:var(--org);border-color:var(--org);background:#f9731622}.Critical{color:var(--red);border-color:var(--red);background:#ef444422}
+@media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}.donutwrap{flex-wrap:wrap}}
+.hdr{display:flex;align-items:center;gap:12px}button.alt{background:transparent;border:1px solid var(--line);color:var(--tx)}
+.modal{position:fixed;inset:0;background:#000a;display:grid;place-items:center;z-index:9}.modal[hidden]{display:none}
+.modal form{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:26px;width:340px;display:grid;gap:12px}
+.modal h2{margin:0}.modal label{display:grid;gap:4px;font-size:14px;color:var(--mut)}
+.modal input{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;color:var(--tx);font-size:15px}
+.link{background:none;color:var(--blue);padding:0;text-align:left}#mErr{color:var(--red);font-size:14px;min-height:18px}
+button:disabled{opacity:.4;cursor:not-allowed}
+.badge{background:var(--red);color:#fff;border-radius:10px;font-size:11px;padding:1px 6px;margin-left:4px}
+select{background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-size:14px}
+.card label{display:grid;gap:4px;font-size:14px;color:var(--mut);margin-bottom:10px}input[type=range]{width:100%}code{background:var(--bg);padding:1px 6px;border-radius:4px}
+nav{flex-wrap:wrap}nav a{padding:10px 9px;font-size:14px}
+.card input:not([type=range]):not([type=file]){background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:9px}
+/* role-based access: hide controls a viewer cannot use (the server enforces this too) */
+body[data-role="viewer"] #start,body[data-role="viewer"] #stop,body[data-role="viewer"] #start2,body[data-role="viewer"] #stop2,
+body[data-role="viewer"] #btn,body[data-role="viewer"] #up,body[data-role="viewer"] #aAll,body[data-role="viewer"] #mdTest,
+body[data-role="viewer"] #iNew,body[data-role="viewer"] #iAdd,body[data-role="viewer"] button[data-id],body[data-role="viewer"] button[data-inc],
+body[data-role="viewer"] button[data-use]{display:none}
+body:not([data-role="admin"]) .admin-only{display:none}
+body[data-role="viewer"] #pfEval{display:none}
+body[data-role="viewer"] :is(#lvSrc,#lvIface){display:none}
+
+/* small screens: the menu becomes a side drawer opened with the hamburger button */
+#menuBtn{display:none;background:transparent;border:1px solid var(--line);color:var(--tx);font-size:22px;line-height:1;padding:6px 12px}
+#navOverlay,.navhead{display:none}
+@media(max-width:1500px){#clock,.logo small{display:none}header{gap:16px}nav a{padding:10px 8px;font-size:13px}}
+@media(max-width:1260px){
+ header{gap:12px;padding:10px 14px;flex-wrap:wrap}
+ #menuBtn{display:block}.logo{font-size:20px;flex:1}.logo small{display:none}#clock{display:none}
+ nav{display:flex;position:fixed;top:0;left:0;bottom:0;width:270px;max-width:82vw;flex:none;flex-direction:column;flex-wrap:nowrap;gap:2px;padding:12px;background:var(--card);border-right:1px solid var(--line);overflow-y:auto;transform:translateX(-105%);transition:transform .22s ease;z-index:30}
+ nav a{padding:12px 14px;font-size:16px;border-bottom:0;border-left:3px solid transparent;border-radius:6px}
+ nav a.on{background:#1b2d63;border-left-color:var(--blue);color:var(--tx)}
+ .navhead{display:flex;justify-content:space-between;align-items:center;padding:4px 6px 14px;font-weight:700;font-size:18px}
+ .navhead button{background:transparent;border:0;color:var(--tx);font-size:20px;padding:4px 8px}
+ body.menu-open nav{transform:none;box-shadow:0 0 40px #000a}
+ body.menu-open #navOverlay{display:block;position:fixed;inset:0;background:#0009;z-index:20}
+ body.menu-open{overflow:hidden}
+}
+@media(max-width:900px){
+ main{padding:16px 14px}h1{font-size:26px}.top{flex-wrap:wrap;gap:12px}.hdr{flex-wrap:wrap}.card{overflow-x:auto}
+ .kpis{grid-template-columns:1fr 1fr!important}.two{grid-template-columns:1fr!important}
+}
