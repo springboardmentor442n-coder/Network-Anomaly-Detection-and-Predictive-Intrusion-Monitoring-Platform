@@ -1,0 +1,41 @@
+services:
+  # Backend Web Service (FastAPI)
+  - type: web
+    name: netshield-ai-backend
+    runtime: python
+    rootDir: netshield-ai/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: DATABASE_URL
+        value: sqlite:///./netshield.db
+
+  # Frontend Static Site (React + Vite)
+  - type: web
+    name: netshield-ai-frontend
+    runtime: static
+    rootDir: netshield-ai/frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_APP_NAME
+        value: "NETSHIELD AI"
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: netshield-ai-backend
+          property: host
