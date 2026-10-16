@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Topbar } from '@/components/layout/Topbar';
 import { Card, RiskBadge, StatusBadge, DemoBanner, ModelActiveBanner, ConfidenceBar } from '@/components/ui/Components';
-import { Play, Square, Trash2, Database, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
+import { Play, Square, Trash2, Database, Wifi, WifiOff, AlertTriangle, Activity } from 'lucide-react';
 import api from '@/lib/api';
 
 interface TrafficResult {
@@ -42,6 +42,7 @@ export default function LiveMonitorPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [scanMessage, setScanMessage] = useState('');
   const [demoMode, setDemoMode] = useState(false);
+  const [metadataDiag, setMetadataDiag] = useState<any>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
 
   const MAX_ROWS = 200;
@@ -97,6 +98,9 @@ export default function LiveMonitorPage() {
       const data = JSON.parse(e.data);
       setDemoMode(data.demo_mode);
       setScanMessage(data.message);
+      if (data.metadata_diagnostics) {
+        setMetadataDiag(data.metadata_diagnostics);
+      }
     });
 
     es.addEventListener('traffic_result', (e) => {
@@ -173,6 +177,7 @@ export default function LiveMonitorPage() {
     setResults([]);
     setStats({ processed_rows: 0, total_rows: null, threats_detected: 0, critical_alerts: 0, processing_rate: 0, elapsed_seconds: 0, progress: 0 });
     setScanMessage('');
+    setMetadataDiag(null);
   };
 
   const connColor = {
@@ -188,6 +193,27 @@ export default function LiveMonitorPage() {
 
         {demoMode ? <DemoBanner /> : mlStatus && !mlStatus.demo_mode && <ModelActiveBanner modelName={mlStatus.model_name} />}
         {demoMode && <div style={{ marginTop: 8 }} />}
+
+        {/* Dataset Metadata Diagnostics */}
+        {metadataDiag && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '10px 16px',
+            borderRadius: 8,
+            background: metadataDiag.status === 'ACTIVE' ? 'rgba(34,197,94,0.06)' : 'rgba(234,179,8,0.06)',
+            border: `1px solid ${metadataDiag.status === 'ACTIVE' ? 'rgba(34,197,94,0.2)' : 'rgba(234,179,8,0.2)'}`,
+            color: metadataDiag.status === 'ACTIVE' ? 'var(--status-healthy)' : 'var(--severity-medium)',
+            fontSize: 13,
+            marginTop: 12
+          }}>
+            <Activity size={16} style={{ flexShrink: 0 }} />
+            <span>
+              <strong>Stream Diagnostic:</strong> {metadataDiag.message}
+            </span>
+          </div>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 20, marginTop: 16 }}>
 

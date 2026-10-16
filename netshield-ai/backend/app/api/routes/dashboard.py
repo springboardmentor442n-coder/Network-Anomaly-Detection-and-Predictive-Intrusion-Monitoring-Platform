@@ -52,6 +52,23 @@ async def get_dashboard_stats(
 
     is_model_active = (active_model is not None) and (predictor is not None)
 
+    # Metadata diagnostic stats
+    records_with_src_ip = db.query(TrafficRecord).filter(
+        and_(TrafficRecord.source_ip != None, TrafficRecord.source_ip != "N/A", TrafficRecord.source_ip != "nan")
+    ).count()
+    has_real_ips = records_with_src_ip > 0
+
+    metadata_diag = {
+        "has_real_endpoints": has_real_ips,
+        "records_with_endpoint_metadata": records_with_src_ip,
+        "status": "ACTIVE" if has_real_ips else "MISSING_IN_SOURCE_CSV",
+        "message": (
+            "Network endpoints (Source IP, Destination IP, Protocol) mapped and active."
+            if has_real_ips else
+            "Columns for Source IP, Destination IP, or Protocol were not found in scanned dataset. Fields will display as N/A until a dataset with standard CICIDS2017 flow headers is scanned."
+        )
+    }
+
     return {
         "total_traffic": total_traffic,
         "malicious_traffic": malicious_traffic,
@@ -65,6 +82,7 @@ async def get_dashboard_stats(
         "model_name": active_model.name if (active_model and is_model_active) else None,
         "active_model_name": active_model.name if (active_model and is_model_active) else None,
         "demo_mode": not is_model_active,
+        "metadata_diagnostics": metadata_diag,
     }
 
 
@@ -82,22 +100,26 @@ async def get_live_threats(
         .limit(limit)
         .all()
     )
-    return [
-        {
+    threat_list = []
+    proto_map = {"6": "TCP", "17": "UDP", "1": "ICMP", "0": "HOPOPT"}
+    for r in records:
+        proto_raw = str(r.protocol).strip() if (r.protocol and r.protocol not in ("None", "nan", "")) else "N/A"
+        proto_display = proto_map.get(proto_raw, proto_raw.upper()) if proto_raw != "N/A" else "N/A"
+
+        threat_list.append({
             "id": r.id,
             "timestamp": r.timestamp.isoformat(),
-            "source_ip": r.source_ip or "N/A",
-            "destination_ip": r.destination_ip or "N/A",
-            "destination_port": r.destination_port,
-            "protocol": r.protocol or "N/A",
+            "source_ip": r.source_ip if (r.source_ip and r.source_ip not in ("None", "nan", "")) else "N/A",
+            "destination_ip": r.destination_ip if (r.destination_ip and r.destination_ip not in ("None", "nan", "")) else "N/A",
+            "destination_port": r.destination_port or "N/A",
+            "protocol": proto_display,
             "predicted_attack": r.predicted_class,
             "confidence": round(r.confidence, 4) if r.confidence else None,
             "risk_score": r.risk_score,
             "risk_level": r.risk_level,
             "status": "ACTIVE",
-        }
-        for r in records
-    ]
+        })
+    return threat_list
 
 
 @router.get("/attack-distribution")
@@ -194,7 +216,13 @@ async def get_top_source_ips(
             func.avg(Alert.risk_score).label("avg_risk"),
             func.max(Alert.risk_score).label("max_risk"),
         )
-        .filter(Alert.source_ip != None)
+        .filter(and_(
+            Alert.source_ip != None,
+            Alert.source_ip != "N/A",
+            Alert.source_ip != "nan",
+            Alert.source_ip != "None",
+            Alert.source_ip != "",
+        ))
         .group_by(Alert.source_ip)
         .order_by(func.count(Alert.id).desc())
         .limit(limit)

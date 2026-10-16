@@ -20,12 +20,14 @@ LABEL_COLUMN_CANDIDATES = [
     "Attack", "attack", "Class", "class"
 ]
 
-# Columns to drop (non-numeric or irrelevant identifiers)
+# Columns to drop (non-numeric, metadata, or irrelevant identifiers)
 COLUMNS_TO_DROP = [
-    "Flow ID", " Flow ID", "flow_id",
-    "Source IP", " Source IP", "source_ip", "Src IP",
-    "Destination IP", " Destination IP", "dst_ip", "Dst IP",
-    "Timestamp", " Timestamp", "timestamp",
+    "Flow ID", " Flow ID", "flow_id", "Flow_ID",
+    "Source IP", " Source IP", "source_ip", "Src IP", "src_ip", "Source_IP",
+    "Source Port", " Source Port", "source_port", "src_port", "Source_Port",
+    "Destination IP", " Destination IP", "dst_ip", "Dst IP", "destination_ip", "Destination_IP",
+    "Protocol", " Protocol", "protocol", "Proto", " Proto", "proto",
+    "Timestamp", " Timestamp", "timestamp", "Time", " Date",
 ]
 
 # CICIDS2017 known attack label normalization

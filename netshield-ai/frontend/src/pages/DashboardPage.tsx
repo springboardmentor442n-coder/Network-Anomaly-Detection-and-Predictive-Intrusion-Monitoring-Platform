@@ -84,12 +84,33 @@ export default function DashboardPage() {
       <div className="page-content">
 
         {/* Model status banner */}
-        <div style={{ marginBottom: 20 }}>
+        <div style={{ marginBottom: stats?.metadata_diagnostics ? 12 : 20 }}>
           {stats?.demo_mode
             ? <DemoBanner />
             : <ModelActiveBanner modelName={stats?.model_name || 'CICIDS2017 Model'} />
           }
         </div>
+
+        {/* Dataset Metadata Diagnostics */}
+        {stats?.metadata_diagnostics && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '10px 16px',
+            borderRadius: 8,
+            background: stats.metadata_diagnostics.status === 'ACTIVE' ? 'rgba(34,197,94,0.06)' : 'rgba(234,179,8,0.06)',
+            border: `1px solid ${stats.metadata_diagnostics.status === 'ACTIVE' ? 'rgba(34,197,94,0.2)' : 'rgba(234,179,8,0.2)'}`,
+            color: stats.metadata_diagnostics.status === 'ACTIVE' ? 'var(--status-healthy)' : 'var(--severity-medium)',
+            fontSize: 13,
+            marginBottom: 20
+          }}>
+            <Activity size={16} style={{ flexShrink: 0 }} />
+            <span>
+              <strong>Metadata Diagnostic:</strong> {stats.metadata_diagnostics.message}
+            </span>
+          </div>
+        )}
 
         {/* KPI Cards */}
         <div className="grid grid-cols-4 gap-4" style={{ marginBottom: 24 }}>
