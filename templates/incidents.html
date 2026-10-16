@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<section id="p-inc"><div class="top"><div><h1><b>Incidents</b></h1><p class="sub">Track an investigation from alert to resolution</p></div>
+<div class="hdr"><select id="iSt"><option value="">All statuses</option><option>open</option><option>investigating</option><option>resolved</option><option>closed</option></select><button id="iNew" class="alt">New incident</button></div></div>
+<div class="grid two" style="grid-template-columns:1.3fr 1fr;margin-top:0">
+<div class="card"><div class="tbl" style="max-height:560px"><table><thead><tr><th>#</th><th>Title</th><th>Severity</th><th>Status</th><th>Assignee</th><th>Updated</th></tr></thead><tbody id="irows"></tbody></table></div></div>
+<div class="card"><h3 id="iTitle">Select an incident</h3><div id="iBox" hidden>
+<label>Status<select id="iStat"><option>open</option><option>investigating</option><option>resolved</option><option>closed</option></select></label>
+<label>Assignee<select id="iAss"></select></label>
+<h3>Notes</h3><div id="iNotes" class="sub"></div>
+<label>Add a note<input id="iNote" maxlength="500"></label><button id="iAdd">Save note</button></div></div></div></section>
+{% endblock %}

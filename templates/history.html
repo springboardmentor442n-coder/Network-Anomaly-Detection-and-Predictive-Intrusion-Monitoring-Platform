@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<section id="p-hist">
+<div class="top"><div><h1>Activity <b>History</b></h1><p class="sub" id="hCount"></p></div>
+<div class="hdr"><select id="hHrs"><option value="0">All time</option><option value="1">Last hour</option><option value="24">Last 24 hours</option><option value="168">Last 7 days</option></select>
+<select id="hLvl"><option value="">All levels</option><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select>
+<select id="hCls"><option value="">All types</option></select>
+<select id="hSrc"><option value="">All sources</option><option value="live">Live</option><option value="network">Network (Wi-Fi)</option><option value="upload">Upload</option><option value="scan">Scan</option></select>
+<button id="hCsv" class="alt">Export CSV</button></div></div>
+<div class="card"><div class="tbl" style="max-height:560px"><table><thead><tr><th>ID</th><th>Time</th><th>Prediction</th><th>Confidence</th><th>Risk score</th><th>Level</th><th>Anomaly</th><th>Model</th><th>Source</th><th>Protocol</th><th>Service</th><th>Bytes (src / dst)</th></tr></thead><tbody id="hrows"></tbody></table></div>
+<div class="hdr" style="justify-content:center;margin-top:12px"><button id="hPrev" class="alt">‹ Prev</button><span id="hPage"></span><button id="hNext" class="alt">Next ›</button></div></div></section>
+{% endblock %}

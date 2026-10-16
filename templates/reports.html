@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<section id="p-rep"><div class="top"><div><h1>Threat Intelligence <b>Reports</b></h1><p class="sub">Attack trends, protocol analysis and risk over a period</p></div>
+<div class="hdr"><select id="rpDays"><option value="1">Last 24 hours</option><option value="7" selected>Last 7 days</option><option value="30">Last 30 days</option></select><button id="rpPrint" class="alt">Download report</button></div></div>
+<div class="grid kpis">
+<div class="card k"><small>Flows analyzed</small><div id="rpF">0</div></div>
+<div class="card k"><small>Attacks (rate)</small><div id="rpA" style="color:var(--red);font-size:24px">0</div></div>
+<div class="card k"><small>Critical</small><div id="rpC" style="color:var(--org)">0</div></div>
+<div class="card k"><small>Suspicious "Normal" (anomaly)</small><div id="rpS">0</div></div>
+<div class="card k"><small>Average risk</small><div id="rpV">0</div></div></div>
+<div class="grid two" style="grid-template-columns:1fr 1fr"><div class="card"><h3>Daily trend</h3><div class="chart"><canvas id="rpDaily"></canvas></div></div>
+<div class="card"><h3>Attack types</h3><div class="chart"><canvas id="rpType"></canvas></div></div></div>
+<div class="card" style="margin-top:16px"><h3>Intrusion forecast <small id="fcOut" style="color:var(--mut);font-weight:400"></small></h3><div class="chart"><canvas id="rpFc"></canvas></div><p class="sub" id="fcNote"></p></div>
+<div class="grid two" style="grid-template-columns:1fr 1fr"><div class="card"><h3>Protocol analysis</h3><table><thead><tr><th>Protocol</th><th>Flows</th><th>Attacks</th><th>Attack rate</th></tr></thead><tbody id="rpProto"></tbody></table></div>
+<div class="card"><h3>Highest-risk detections</h3><div class="tbl" style="max-height:300px"><table><thead><tr><th>Time</th><th>Attack</th><th>Risk</th><th>Level</th><th>Protocol</th></tr></thead><tbody id="rpTop"></tbody></table></div></div></div><div class="grid two" style="grid-template-columns:1fr 1fr"><div class="card"><h3>Top source IPs</h3><table><thead><tr><th>IP</th><th>Flows</th><th>Attacks</th><th>Highest risk</th><th>Blocklist</th></tr></thead><tbody id="rpIps"></tbody></table>
+<p class="sub">Addresses appear when flows come from packet capture, Zeek, or a file with a srcip column.</p></div>
+<div class="card"><h3>Check an IP (threat intelligence)</h3><div class="hdr"><input id="tiIp" placeholder="for example 203.0.113.66"><button id="tiBtn" class="alt">Check</button></div><div id="tiOut" class="sub" style="margin-top:10px"></div></div></div>
+</section>
+{% endblock %}

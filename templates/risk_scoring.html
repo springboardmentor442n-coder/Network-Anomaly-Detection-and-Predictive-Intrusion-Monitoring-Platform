@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<section id="p-risk">
+<h1><b>Risk Scoring</b></h1><p class="sub">Risk score = attack severity × model confidence, from 0 to 100</p>
+<div class="grid two" style="grid-template-columns:1fr 1fr;margin-top:0">
+<div class="card"><h3>Score calculator</h3>
+<label>Attack type<select id="rCls"></select></label>
+<label>Model confidence: <b id="rConfV">90%</b><input type="range" id="rConf" min="0" max="100" value="90"></label>
+<div id="rOut" style="font-size:34px;font-weight:700;margin:10px 0 4px"></div><p class="sub" id="rExp" style="margin:0 0 16px"></p>
+<h3>Level cutoffs</h3><div id="rCut" class="legend" style="grid-template-columns:auto 1fr"></div></div>
+<div class="card"><h3>Severity table and observed scores</h3><table><thead><tr><th>Attack type</th><th>Severity</th><th>Detections</th><th>Avg score</th><th>Max</th></tr></thead><tbody id="rTbl"></tbody></table></div></div></section>
+{% endblock %}

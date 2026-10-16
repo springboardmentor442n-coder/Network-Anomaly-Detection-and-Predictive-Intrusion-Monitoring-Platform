@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<section id="p-live">
+<div class="top"><div><h1>Live <b>Tracking</b></h1><p class="sub">Flows are scored the moment a sensor sends them</p></div>
+<div><div class="hdr"><button id="start2">▶ Start live</button><button id="stop2" class="stop">■ Stop live</button></div>
+<div class="hdr" style="justify-content:flex-end;margin-top:8px"><label style="margin:0;font-size:13px;color:var(--mut)">Source</label><select id="lvSrc"><option value="network">Real network (this device)</option><option value="demo">Demo replay of the dataset</option></select><select id="lvIface"></select></div>
+<div class="hdr" style="justify-content:flex-end;margin-top:8px;font-size:13px;color:var(--mut)"><span id="lstat2"></span></div></div></div>
+<div class="grid kpis" style="grid-template-columns:repeat(4,1fr)">
+<div class="card k"><small>Flows this session</small><div id="lN">0</div></div>
+<div class="card k"><small>Attacks</small><div id="lA" style="color:var(--red)">0</div></div>
+<div class="card k"><small>Highest risk score</small><div id="lM" style="color:var(--org)">0</div></div>
+<div class="card k"><small>Avg. risk score</small><div id="lV">0</div></div></div>
+<p class="sub" id="capInfo" style="margin-top:16px"></p>
+<p class="sub">Real network mode captures this computer's own traffic on the chosen adapter (plus broadcast traffic on the Wi-Fi). It needs scapy, Npcap on Windows, and the app started as Administrator. The models were trained on UNSW-NB15, so results on modern encrypted traffic are approximate: treat alerts as indicators and check them.</p>
+<div class="card" style="margin-top:16px"><h3>Live feed</h3><div class="tbl" style="max-height:480px"><table><thead><tr><th>Time</th><th>Prediction</th><th>Risk score</th><th>Risk Level</th></tr></thead><tbody id="lrows"></tbody></table></div>
+<p class="sub">Press Start live, then send traffic with <code>simulator.py</code> or a sensor.</p></div><div class="card" style="margin-top:16px"><h3>Live tracking history</h3><div class="tbl" style="max-height:300px"><table><thead><tr><th>Started</th><th>Stopped</th><th>By</th><th>Source</th><th>Flows</th><th>Attacks</th><th>Alerts</th><th>Max risk</th><th>Status</th></tr></thead><tbody id="lhist"></tbody></table></div></div>
+</section>
+{% endblock %}
