@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, monospace;
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: #060b14;
+  color: #e6edf7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Thin, SOC-styled scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1c2e4a #0b1424;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #0b1424;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #1c2e4a;
+  border-radius: 9999px;
+  border: 2px solid #0b1424;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #27476f;
+}
+
+@layer components {
+  .soc-panel {
+    @apply rounded-xl border border-soc-border bg-soc-panel/80 shadow-panel;
+  }
+
+  .soc-input {
+    @apply w-full rounded-lg border border-soc-border bg-soc-bg px-3 py-2 text-sm text-soc-text
+      placeholder:text-soc-muted/70 focus:border-soc-accent focus:outline-none
+      focus:ring-1 focus:ring-soc-accent/40 disabled:opacity-50;
+  }
+
+  .soc-label {
+    @apply mb-1 block text-xs font-medium uppercase tracking-wide text-soc-muted;
+  }
+
+  .soc-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border px-3.5 py-2 text-sm
+      font-medium transition-colors focus:outline-none focus-visible:ring-2
+      focus-visible:ring-soc-accent/60 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .soc-btn-primary {
+    @apply soc-btn border-soc-accent/40 bg-soc-accent/15 text-soc-accent
+      hover:bg-soc-accent/25 disabled:hover:bg-soc-accent/15;
+  }
+
+  .soc-btn-ghost {
+    @apply soc-btn border-soc-border bg-soc-panel2 text-soc-text hover:bg-soc-panel3;
+  }
+
+  .soc-btn-danger {
+    @apply soc-btn border-soc-critical/40 bg-soc-critical/10 text-soc-critical
+      hover:bg-soc-critical/20;
+  }
+
+  .soc-table {
+    @apply w-full border-collapse text-sm;
+  }
+
+  .soc-table thead th {
+    @apply sticky top-0 z-10 whitespace-nowrap border-b border-soc-border bg-soc-panel2 px-3 py-2
+      text-left text-xs font-semibold uppercase tracking-wide text-soc-muted;
+  }
+
+  .soc-table tbody td {
+    @apply whitespace-nowrap border-b border-soc-border/50 px-3 py-2 text-soc-text/90;
+  }
+
+  .soc-table tbody tr:hover {
+    @apply bg-soc-panel2/60;
+  }
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .soc-panel {
+    border-color: #d1d5db !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+  }
+}
