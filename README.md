@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## Contributing Guidelines (For Interns / Collaborators)
 
 All interns added as collaborators to this repository must follow the branch workflow below. **Direct commits or pushes to the `main` branch are not allowed.**
@@ -55,3 +56,30 @@ git push origin your-name
 | Push/upload code to your own branch | ✅ Yes |
 | Push/upload code to someone else's branch | ❌ No |
 | Open a Pull Request | Not required |
+=======
+# NetShield AI — Network Anomaly Detection & Predictive Intrusion Monitoring
+
+**Run:** `./run.sh` (Linux/Mac) or double-click `run.bat` (Windows), then open http://localhost:8000
+First run installs packages, generates sample data and trains the models (~1-2 min). Needs Python 3.10+ and internet for pip.
+Logins: `admin/admin123` (also sees the audit log) · `analyst/analyst123`.
+Docker alternative: `docker compose up --build`.
+
+## What's inside
+- XGBoost multi-class classifier (predict_proba -> confidence) + Isolation Forest anomaly score (trained on normal traffic only)
+- Risk scoring (`backend/app/risk.py`): severity table x confidence + 0.3 x anomaly, capped at 100, +15 escalation for 3+ alerts from one IP in 10 min, Low/Medium/High/Critical labels
+- SSE streaming `/api/stream/scan`: fixed 250-row chunks from row 1 on every scan (no cursor), scoring in a worker thread, increasing message IDs, 20 s heartbeat, JWT in the URL, stops on disconnect, no silent auto-restart
+- JWT auth + role-based access, SQLite incident queue (open/investigating/resolved) and audit log
+- Dashboard `frontend/index.html` (no build step): KPIs, live feed capped at 200 rows, attack distribution, incidents
+
+## Use the real CICIDS2017 data
+1. Put `cicids2017_cleaned.csv` (Kaggle: ericanacletoribeiro/cicids2017-cleaned-and-preprocessed) in `backend/data/`
+2. `cd backend && python train.py` (samples 300k rows; add `--max-rows 2000000` for more)
+3. Restart the server. It auto-prefers the real CSV over the sample.
+
+## Tests
+`cd backend && pytest` runs the 5 risk-scoring cases from the guide.
+
+## Notes
+- CICIDS2017-cleaned has no IP columns, so IPs are simulated (attack flows come from a small attacker pool) to demonstrate escalation; real `Source IP` columns are used when present.
+- For production: set `JWT_SECRET`, replace demo users with a DB, move to PostgreSQL/MongoDB (SQLite keeps this zero-setup), and use Redis for shared escalation state across multiple workers.
+>>>>>>> 3946e5c (Completed NetShield AI project implementation)

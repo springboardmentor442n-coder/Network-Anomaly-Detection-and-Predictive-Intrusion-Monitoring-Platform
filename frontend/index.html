@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NetShield AI</title>
+<style>
+:root{--bg:#020617;--card:#0f172a;--bd:#1e293b;--tx:#e2e8f0;--mu:#94a3b8;--cy:#22d3ee}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px system-ui,sans-serif}
+.wrap{max-width:1250px;margin:auto;padding:20px}.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:16px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:800px){.grid{grid-template-columns:1fr 1fr}}
+h1{margin:0;font-size:22px}.mu{color:var(--mu)}.big{font-size:28px;font-weight:700;margin-top:4px}
+button{border:0;border-radius:8px;padding:9px 16px;font-weight:600;cursor:pointer;color:#fff;background:#0891b2}button:disabled{opacity:.4;cursor:default}
+button.red{background:#e11d48}button.sm{padding:3px 8px;font-size:12px;background:#334155}
+input{padding:9px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);margin:4px 0;width:100%}
+table{width:100%;border-collapse:collapse;font-family:ui-monospace,monospace;font-size:12px}th,td{padding:7px 9px;text-align:left}
+th{color:var(--mu);position:sticky;top:0;background:#0b1224}tr{border-top:1px solid var(--bd)}.scroll{max-height:430px;overflow:auto}
+.b{padding:2px 9px;border-radius:99px;border:1px solid;font-size:11px}.Low{color:#34d399;border-color:#065f46}.Medium{color:#fbbf24;border-color:#92400e}
+.High{color:#fb923c;border-color:#9a3412}.Critical{color:#fb7185;border-color:#9f1239}
+.bar{height:10px;border-radius:5px;background:#0891b2}.two{display:grid;grid-template-columns:2fr 1fr;gap:16px}@media(max-width:900px){.two{grid-template-columns:1fr}}
+#login{max-width:340px;margin:12vh auto}.hide{display:none}
+</style></head><body><div class="wrap">
+<div id="login" class="card"><h1>🛡️ NetShield AI</h1><p class="mu">SOC login — demo users: <b>admin/admin123</b>, <b>analyst/analyst123</b></p>
+<input id="u" placeholder="username" value="analyst"><input id="p" type="password" placeholder="password" value="analyst123">
+<button onclick="login()" style="width:100%;margin-top:8px">Sign in</button><p id="lerr" class="mu"></p></div>
+
+<div id="app" class="hide">
+<div class="card row"><div><h1>🛡️ NetShield AI — SOC Threat Monitor</h1>
+<span class="mu">User: <b id="who"></b> · Transport: SSE · Status: <b id="st" style="color:var(--cy)">Idle</b></span></div>
+<div><button id="go" onclick="start()">Start Scan</button> <button id="stop" class="red" onclick="stop('Stopped by user')" disabled>Stop</button>
+<button class="sm" onclick="logout()">Logout</button></div></div>
+<div class="grid"><div class="card"><span class="mu">Flows analysed</span><div class="big" id="k1">0</div></div>
+<div class="card"><span class="mu">Detected intrusions</span><div class="big" id="k2" style="color:#fbbf24">0</div></div>
+<div class="card"><span class="mu">Critical alerts</span><div class="big" id="k3" style="color:#fb7185">0</div></div>
+<div class="card"><span class="mu">Avg anomaly score</span><div class="big" id="k4">0</div></div></div>
+<div class="two"><div class="card"><b>Live flow feed (latest 200)</b><div class="scroll"><table><thead><tr><th>Time</th><th>Source</th><th>Dest</th><th>Class</th><th>Conf</th><th>Anom</th><th>Risk</th><th>Severity</th></tr></thead><tbody id="feed"></tbody></table></div></div>
+<div><div class="card"><b>Attack distribution</b><div id="dist" style="margin-top:10px"></div></div>
+<div class="card"><b>Incident queue</b> <span class="mu">(Critical)</span><div class="scroll" style="max-height:260px"><table><tbody id="alerts"></tbody></table></div></div></div></div>
+<div id="auditbox" class="card hide"><b>Audit log (admin)</b><div class="scroll" style="max-height:180px"><table><tbody id="audit"></tbody></table></div></div>
+</div></div>
+<script>
+const $=id=>document.getElementById(id),MAX=200;let tok,role,es,lastId=0,rows=[],S,dist;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const api=(p,o={})=>fetch(p,{...o,headers:{'Content-Type':'application/json',Authorization:'Bearer '+tok}}).then(r=>r.json());
+async function login(){const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:$('u').value,password:$('p').value})});
+ const d=await r.json();if(!r.ok){$('lerr').textContent=d.detail;return}
+ tok=d.access_token;role=d.role;$('who').textContent=d.username+' ('+role+')';$('login').classList.add('hide');$('app').classList.remove('hide');
+ if(role==='admin'){$('auditbox').classList.remove('hide');loadAudit()}loadAlerts()}
+function logout(){stop();location.reload()}
+function reset(){rows=[];lastId=0;dist={};S={t:0,a:0,c:0,an:0};draw()}
+function start(){stop();reset();$('st').textContent='Scanning live (SSE)';$('go').disabled=true;$('stop').disabled=false;
+ es=new EventSource('/api/stream/scan?token='+encodeURIComponent(tok));
+ es.onmessage=e=>{const p=JSON.parse(e.data);if(p.id<=lastId)return;lastId=p.id;if(p.type!=='chunk_result')return;
+  for(const r of p.rows){S.t++;S.an+=r.anomaly_score;if(r.predicted_class!=='BENIGN'){S.a++;dist[r.predicted_class]=(dist[r.predicted_class]||0)+1}if(r.risk_label==='Critical')S.c++}
+  rows=p.rows.slice().reverse().concat(rows).slice(0,MAX);draw()};
+ es.addEventListener('warning',e=>console.warn(e.data));
+ es.addEventListener('done',()=>{stop('Scan complete')});
+ es.addEventListener('error',e=>{if(e.data){stop('Error: '+JSON.parse(e.data).error)}});
+ es.onerror=()=>{if(es)stop('Disconnected / stopped')}}   // explicit close -> no silent auto-restart from row 1
+function stop(msg){if(es){es.close();es=null}if(msg)$('st').textContent=msg;$('go').disabled=false;$('stop').disabled=true;if(tok)loadAlerts()}
+function draw(){$('k1').textContent=S.t.toLocaleString();$('k2').textContent=S.a.toLocaleString();$('k3').textContent=S.c.toLocaleString();$('k4').textContent=S.t?(S.an/S.t).toFixed(1):0;
+ $('feed').innerHTML=rows.map(r=>`<tr><td class="mu">${new Date(r.timestamp).toLocaleTimeString()}</td><td>${esc(r.source_ip)}</td><td>${esc(r.destination_ip)}</td><td style="color:var(--cy)">${esc(r.predicted_class)}</td><td>${(r.confidence*100).toFixed(1)}%</td><td>${r.anomaly_score}</td><td><b>${r.risk_score}</b></td><td><span class="b ${r.risk_label}">${r.risk_label}</span></td></tr>`).join('');
+ const mx=Math.max(1,...Object.values(dist));$('dist').innerHTML=Object.entries(dist).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="mu">${esc(k)} — ${v}</div><div class="bar" style="width:${v/mx*100}%;margin:3px 0 9px"></div>`).join('')||'<span class="mu">No attacks yet</span>'}
+async function loadAlerts(){const a=await api('/api/alerts?limit=30');if(!Array.isArray(a))return;
+ $('alerts').innerHTML=a.map(x=>`<tr><td>#${x.id}<br><span class="mu">${esc(x.src)}</span></td><td>${esc(x.cls)}<br><b>${x.score}</b></td><td><span class="mu">${x.status}</span><br>${x.status==='open'?`<button class="sm" onclick="setS(${x.id},'investigating')">Investigate</button>`:x.status==='investigating'?`<button class="sm" onclick="setS(${x.id},'resolved')">Resolve</button>`:''}</td></tr>`).join('')||'<tr><td class="mu">No incidents</td></tr>'}
+async function setS(id,s){await api('/api/alerts/'+id,{method:'PATCH',body:JSON.stringify({status:s})});loadAlerts();if(role==='admin')loadAudit()}
+async function loadAudit(){const a=await api('/api/audit');if(Array.isArray(a))$('audit').innerHTML=a.map(x=>`<tr><td class="mu">${x.ts.slice(0,19)}</td><td>${esc(x.user)}</td><td>${esc(x.action)}</td></tr>`).join('')}
+reset();
+</script></body></html>

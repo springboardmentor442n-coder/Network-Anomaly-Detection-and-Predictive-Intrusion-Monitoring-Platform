@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+backend/netshield.db
+backend/models/*.joblib
