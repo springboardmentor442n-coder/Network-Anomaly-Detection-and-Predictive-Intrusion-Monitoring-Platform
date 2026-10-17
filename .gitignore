@@ -1,6 +1,14 @@
+# Local environment
 venv/
+.venv/
 __pycache__/
 *.pyc
+.env
+*.db
+node_modules/
+dist/
+.vscode/
+.ipynb_checkpoints/
 
-datasets/
-model/
+# Large model file that the app does not use
+model/random_forest_model*.pkl

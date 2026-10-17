@@ -1,57 +1,59 @@
-## Contributing Guidelines (For Interns / Collaborators)
+# ThreatRadar: Network Anomaly Detection and Threat Monitoring
 
-All interns added as collaborators to this repository must follow the branch workflow below. **Direct commits or pushes to the `main` branch are not allowed.**
+An AI-powered platform that analyzes network traffic, classifies attacks, scores their risk, and
+helps security analysts manage alerts and incidents.
 
-> Note: `main` only contains the `LICENSE` and `README.md` — it is not used for active development. There is no need to pull the latest `main` into your branch at any point.
+## Features
+- **Authentication and roles:** JWT login with Admin, Analyst and Viewer roles enforced on the server.
+- **Threat classification:** XGBoost model trained on UNSW-NB15 (Normal plus 9 attack types) with a confidence score.
+- **Risk scoring:** severity x confidence, grouped into Low, Medium, High and Critical.
+- **Anomaly detection:** Isolation Forest trained on normal traffic (unsupervised).
+- **CSV analysis:** large files are processed in chunks; every run is saved with date, time and analyst.
+- **Live monitoring:** dataset replay through the model, or optional real packet capture; includes an intrusion forecast.
+- **Alerts and incidents:** High and Critical detections open incidents (New, Investigating, Resolved) and notifications (Slack or email when configured).
+- **Model evaluation:** accuracy, precision, recall, F1, false positive rate, detection rate and confusion matrix on a labeled CSV.
+- **Reports:** downloadable detection and threat intelligence reports (CSV).
+- **Team management and audit log:** Admin can change roles and review all activity.
 
-### 1. Branch Naming
+## Tech stack
+FastAPI, SQLAlchemy (SQLite), XGBoost, scikit-learn, pandas, React + Vite.
 
-- Every intern must create their own branch off `main`, named after themselves.
-- Suggested naming convention: `firstname-lastname` (all lowercase, hyphen-separated).
-  - Example: `john-doe`, `aisha-khan`
-
-### 2. How to Create Your Branch
-
-**Option A — Clone and push (recommended)**
-
-```bash
-# Clone the repository
-git clone https://github.com/springboardmentor442n-coder/Network-Anomaly-Detection-and-Predictive-Intrusion-Monitoring-Platform.git
-
-# Move into the project folder
-cd Network-Anomaly-Detection-and-Predictive-Intrusion-Monitoring-Platform
-
-# Create and switch to your own branch (off main)
-git checkout -b your-name
-
-# ... make your changes ...
-
-# Stage, commit, and push your changes to YOUR branch only
-git add .
-git commit -m "Describe your change here"
-git push origin your-name
+## Project structure
+```
+backend/    FastAPI app (main.py, extras.py, models.py, models_extra.py, capture.py)
+frontend/   React dashboard (src/App.jsx)
+model/      trained model and encoders
+datasets/   UNSW-NB15 training data
+notebooks/  model training and comparison
 ```
 
-**Option B — GitHub UI upload**
+## Setup
+Backend:
+```
+cd backend
+pip install -r requirements.txt
+python init_db.py
+python create_demo_user.py     # creates Admin, Analyst and Viewer demo accounts
+python -m uvicorn main:app --reload
+```
+Frontend:
+```
+cd frontend
+npm install
+npm run dev
+```
+Open the URL Vite prints (usually http://localhost:5173).
 
-1. Go to the repository on GitHub.
-2. Switch the branch dropdown from `main` to your own branch (create it first via **Branch: main → View all branches → New branch**, named after yourself).
-3. Once on your branch, use **Add file → Upload files** to upload your code.
-4. Commit directly to your branch (not `main`).
-
-### 3. Rules
-
-- ❌ Do **not** push or upload code directly to `main`.
-- ❌ Do **not** push code to another intern's branch.
-- ✅ Only push/upload code to the branch that carries your own name.
-- Keep uploading/pushing your code to your branch regularly as you make progress. No pull requests are required — your branch itself is the deliverable.
-
-### 4. Summary
-
-| Action | Allowed? |
+## Roles
+| Role | Can do |
 |---|---|
-| Push to `main` directly | ❌ No |
-| Create your own branch from `main` | ✅ Yes |
-| Push/upload code to your own branch | ✅ Yes |
-| Push/upload code to someone else's branch | ❌ No |
-| Open a Pull Request | Not required |
+| Admin | Everything, plus user management and the audit log |
+| Analyst | Upload and analyze traffic, run evaluations, manage incidents |
+| Viewer | Read-only access |
+
+## Model results
+Test accuracy 83.63% and weighted F1 0.819 on UNSW-NB15 (see `notebooks/`).
+
+## Limitations and future work
+- Live Monitoring replays UNSW-NB15 flows by default. Real capture is experimental: features are approximated from packets.
+- Not done yet: Docker and cloud deployment, PostgreSQL, CICIDS2017, SIEM integrations, deep learning models.
