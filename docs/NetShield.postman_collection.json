@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "NetShield AI - Real CICIDS release Oct 13",
+    "name": "TraceVigil AI - Verified accounts and investigations",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -19,8 +19,8 @@
       "value": "http://127.0.0.1:8000"
     },
     {
-      "key": "username",
-      "value": "YOUR_USERNAME"
+      "key": "email",
+      "value": "YOUR_VERIFIED_EMAIL"
     },
     {
       "key": "password",
@@ -40,6 +40,22 @@
     },
     {
       "key": "incident_id",
+      "value": ""
+    },
+    {
+      "key": "incident_id",
+      "value": "1"
+    },
+    {
+      "key": "captcha_token",
+      "value": "FRESH_REAL_TURNSTILE_TOKEN"
+    },
+    {
+      "key": "challenge_id",
+      "value": ""
+    },
+    {
+      "key": "email_code",
       "value": ""
     }
   ],
@@ -79,7 +95,7 @@
         "url": "{{base_url}}/api/signup",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+          "raw": "{\"username\": \"YOUR_NEW_USERNAME\", \"display_name\": \"YOUR_NAME\", \"email\": \"{{email}}\", \"password\": \"{{password}}\", \"confirm_password\": \"{{password}}\", \"invitation_code\": \"YOUR_PRIVATE_INVITATION\", \"accept_policy\": true, \"captcha_token\": \"{{captcha_token}}\"}",
           "options": {
             "raw": {
               "language": "json"
@@ -88,7 +104,8 @@
         },
         "auth": {
           "type": "noauth"
-        }
+        },
+        "description": "Use the browser enrollment form for invitation, CAPTCHA and email verification. No username-only signup exists."
       },
       "event": [
         {
@@ -115,7 +132,7 @@
         "url": "{{base_url}}/api/login",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+          "raw": "{\"email\": \"{{email}}\", \"password\": \"{{password}}\", \"captcha_token\": \"{{captcha_token}}\"}",
           "options": {
             "raw": {
               "language": "json"
@@ -480,6 +497,71 @@
       "request": {
         "method": "DELETE",
         "url": "{{base_url}}/api/scans/{{scan_id}}"
+      }
+    },
+    {
+      "name": "Investigation add-ons",
+      "item": [
+        {
+          "name": "Saved overview",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/overview"
+          }
+        },
+        {
+          "name": "Incident case",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/incidents/{{incident_id}}/case"
+          }
+        },
+        {
+          "name": "Local TreeSHAP",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/incidents/{{incident_id}}/explanation"
+          }
+        },
+        {
+          "name": "Download case PDF",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/incidents/{{incident_id}}/case.pdf"
+          }
+        },
+        {
+          "name": "Download incident XLSX",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/incidents-export.xlsx"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Verify signup email",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/auth/verify",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"challenge_id\": \"{{challenge_id}}\", \"code\": \"{{email_code}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
       }
     }
   ]

@@ -3,15 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>NetShield AI</title>
+    <title>TraceVigil AI</title>
     <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="/static/visuals.css" />
   </head>
   <body>
     <aside>
-      <h2>◈ NETSHIELD <em>AI</em></h2>
+      <h2>◈ TRACEVIGIL <em>AI</em></h2>
       <small>SECURITY OPERATIONS</small>
       <nav>
-        <button data-page="monitor">◎ Traffic monitor</button
+        <button data-page="overview">▥ Executive overview</button><button data-page="reportsHub">▤ Reports & exports</button><button data-page="monitor">◎ Traffic monitor</button
         ><button data-page="models">▥ Model laboratory</button
         ><button data-page="incidents">⚑ Incident queue</button
         ><button data-page="history">↻ Scan history</button
@@ -27,32 +28,57 @@
           <small>NETWORK ANOMALY DETECTION</small>
           <h1>Analyst workspace</h1>
         </div>
-        <span id="identity">Secure login</span>
+        <div><span id="identity" role="status">Secure login</span></div>
       </header>
       <div id="notice" role="status" hidden></div>
       <section id="auth" class="panel auth">
         <h2>Your security workspace.</h2>
         <p>Compare predictions. Understand the evidence. Investigate alerts.</p>
         <form id="authform">
-          <label
-            >Username<input
-              id="username"
-              required
-              minlength="3"
-              autocomplete="username" /></label
-          ><label
-            >Password<input
-              id="password"
-              required
-              minlength="10"
-              type="password"
-              autocomplete="current-password" /></label
-          ><button class="primary">Log in</button
-          ><button type="button" id="signup">Create analyst account</button>
+          <label>Email address<input id="username" type="email" required autocomplete="username" maxlength="254" /></label>
+          <label>Password<input id="password" required minlength="1" maxlength="128" type="password" autocomplete="current-password" /></label>
+          <div id="authCaptcha"></div>
+          <button class="primary" id="loginSubmit">Log in</button>
+          <button type="button" id="signup">Create or link account</button>
         </form>
-        <p>No shared default credentials. Passwords are securely hashed.</p>
+        <form id="enrollform" hidden>
+          <h3>Verify your account once</h3>
+          <label>Display name<input id="enrollName" required minlength="2" maxlength="80" autocomplete="name" /></label>
+          <label>Username<input id="enrollUsername" required pattern="[a-zA-Z0-9_.-]{3,40}" maxlength="40" autocomplete="nickname" /></label>
+          <label>Email<input id="enrollEmail" type="email" required maxlength="254" autocomplete="email" /></label>
+          <label>Password or existing account password<input id="enrollPassword" type="password" minlength="12" maxlength="128" required autocomplete="new-password" /></label>
+          <label>Confirm password<input id="enrollConfirm" type="password" required autocomplete="new-password" /></label>
+          <label>Administrator invitation code<input id="enrollInvite" type="password" required autocomplete="off" /></label>
+          <details><summary>Link my old username account and keep its scans</summary><label>Existing username (optional)<input id="legacyUsername" maxlength="120" autocomplete="off" /></label><p>Enter your existing account password above. Email verification links your account without changing scan ownership. Existing passwords shorter than 12 characters require local administrator reset before linking.</p></details>
+          <label class="check-label"><input id="enrollConsent" type="checkbox" required />I am authorised to access this workspace. I understand my email is used for verification, and Cloudflare processes the human-verification challenge.</label>
+          <div id="enrollCaptcha"></div>
+          <button class="primary" id="enrollSubmit">Send verification code</button><button type="button" id="backLogin">Back to login</button>
+        </form>
+        <form id="verifyform" hidden>
+          <label>Email verification code<input id="emailCode" pattern="[0-9]{6}" inputmode="numeric" maxlength="6" required autocomplete="one-time-code" /></label>
+          <button class="primary" id="verifySubmit">Verify email</button><button type="button" id="restartEnroll">Request a new code</button>
+          <p>Expires in 10 minutes. Five attempts maximum. Requesting a new code requires the signup form and a fresh human verification.</p>
+        </form>
+        <p id="authSetup" role="status"></p>
       </section>
       <div id="workspace" hidden>
+        <section id="overview" class="page" hidden>
+          <div class="banner"><h2>Saved security activity</h2><p>Historical summaries within your access permissions.</p></div>
+          <button id="refreshOverview">Refresh overview</button><div id="overviewData"></div>
+        </section>
+        <section id="reportsHub" class="page panel" hidden>
+          <h2>Reports & exports</h2><p>Case PDFs contain selected incident evidence and reference comparisons. Excel exports the latest 10,000 visible incident groups, not raw network packets or the administrator audit trail.</p>
+          <button id="exportIncidents">Download incident Excel workbook</button><button id="showReportHistory">Open saved scans</button>
+          <p>Open an incident to download its PDF case file. Scan history retains the existing scan summaries and full NDJSON row exports.</p>
+        </section>
+        <section id="caseConsole" class="page panel" hidden>
+          <h2>Incident investigation</h2><p id="caseScope"></p>
+          <button id="casePdf">Download PDF case file</button><button id="caseExplain">Explain first row with XGBoost TreeSHAP</button><div id="localExplanation" tabindex="-1" role="status" aria-live="polite">Request an explanation to calculate model contributions.</div>
+          <div id="caseSummary"></div><h3>Earlier source IP reference</h3><p id="baselineScope"></p><div class="tablewrap" id="baselineTable"></div>
+
+          <h3>Related review flows</h3><div class="tablewrap" id="caseFlows"></div><h3>Analyst next steps</h3><div id="caseSteps"></div>
+          <p>Update status and investigation notes in the incident queue. These predictions do not confirm compromise.</p>
+        </section>
         <section id="monitor" class="page">
           <div class="banner">
             <h2>Flow analysis, as it happens.</h2>
@@ -97,14 +123,14 @@
           <div class="twocol">
             <div class="panel">
               <h2>Risk distribution</h2>
-              <div id="riskbars"></div>
+              <small>CURRENT SCAN · SCORED FLOWS</small><div id="scanRiskDonut"></div><div id="riskbars"></div>
               <small
                 >0–25 Low · 26–50 Medium · 51–75 High · 76–100 Critical</small
               >
             </div>
             <div class="panel">
-              <h2>Predicted traffic types</h2>
-              <div id="types"></div>
+              <h2>Top predicted attack types</h2><small>CURRENT SCAN · BENIGN EXCLUDED · TOP 6 + OTHER</small><div id="scanAttackChart"></div><details><summary>All predicted classes including BENIGN</summary>
+              <div id="types"></div></details>
             </div>
           </div>
           <div class="twocol">
@@ -118,10 +144,10 @@
             </div>
           </div>
           <div class="panel">
-            <h2>Predicted attacks by capture hour</h2>
+            <h2>Traffic volume by capture hour</h2>
             <div id="timeline"></div>
             <small
-              >Dataset capture times, not the current wall clock. At most 512
+              >Dataset capture times, not the last 24 hours or current wall clock. At most 512
               distinct buckets tracked.</small
             >
           </div>
@@ -209,6 +235,15 @@
           <div id="historyList"></div>
         </section>
         <section id="learn" class="page panel prose" hidden>
+          <h2>Quick concept cards</h2><p>Select a question to reveal its answer. These explain the system; they are not live detection results.</p>
+          <div class="concept-cards">
+            <details class="panel"><summary>What does risk 72 mean?</summary><p>A priority of 72 out of 100. For example, DDoS severity 90 × confidence 0.80 = 72, High. It is not a 72% probability of compromise.</p></details>
+            <details class="panel"><summary>Is confidence the same as accuracy?</summary><p>No. Confidence is the model estimate for one prediction. Accuracy requires verified labels across examples. Current confidence estimates are uncalibrated.</p></details>
+            <details class="panel"><summary>Why can BENIGN need review?</summary><p>Models may disagree or Isolation Forest may flag unusual behaviour. Review alerts are investigation leads, not confirmed attacks.</p></details>
+            <details class="panel"><summary>Does scanning train the models?</summary><p>No. Scanning uses saved models. Model laboratory shows saved holdout evaluation; uploading another CSV does not change those metrics.</p></details>
+            <details class="panel"><summary>Are these live network packets?</summary><p>The backend streams results while analysing stored CSV flow records. One flow can contain many packets. Live packet capture is not implemented.</p></details>
+            <details class="panel"><summary>What does TreeSHAP explain?</summary><p>Contributions to one XGBoost class margin, before softmax. It does not explain policy risk, majority vote or causal responsibility.</p></details>
+          </div>
           <h2>Understand your system</h2>
           <h3>Input: a network flow</h3>
           <p>
@@ -280,5 +315,6 @@
       <pre id="detailText"></pre>
     </dialog>
     <script src="/static/app.js"></script>
+    <script src="/static/experience.js"></script>
   </body>
 </html>

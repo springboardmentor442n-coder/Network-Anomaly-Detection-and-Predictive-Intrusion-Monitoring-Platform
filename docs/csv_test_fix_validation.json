@@ -1,0 +1,15 @@
+{
+  "date_local": "2026-10-18",
+  "platform": "Linux",
+  "python": "3.12",
+  "result": "21 passed, 1 warning in 11.20s",
+  "reproduction": "Minimal checkout with only committed real-IP CSV in data; no legacy sample CSV or .env",
+  "inherited_allowlist": "restrictive dummy value",
+  "fixtures": "302 temporary feature-only rows derived from the committed CICIDS demo; repeated rows are not independent evaluation samples",
+  "providers": "CAPTCHA and email mocked",
+  "syntax_check": "passed",
+  "whitespace_check": "passed",
+  "theme_css_unchanged": true,
+  "windows_rerun": "required on user PC",
+  "port_conflict": "Windows listener identification and restart must be performed on user PC"
+}

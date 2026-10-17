@@ -2,30 +2,62 @@ import json, os, tempfile, shutil, uuid, time
 from pathlib import Path
 import pytest, pandas as pd
 
-TMP = Path(tempfile.mkdtemp())
+ROOT = Path(__file__).resolve().parents[1]
+TMP = Path(tempfile.mkdtemp(prefix="tracevigil-tests-"))
 os.environ["NETSHIELD_DATA"] = str(TMP)
 os.environ["CHUNK_SIZE"] = "50"
-ROOT = Path(__file__).resolve().parents[1]
-for f in (ROOT / "data").glob("*.csv"):
-    shutil.copy(f, TMP / f.name)
+# Only the small committed real-IP demo is needed. Do not copy a user's large
+# datasets or depend on the ignored legacy data/sample_traffic.csv file.
+DEMO = ROOT / "data/cicids_demo_real_ips.csv"
+SAMPLE = TMP / "sample_traffic.csv"
+demo_rows = pd.read_csv(DEMO, nrows=302)
+if demo_rows.empty:
+    raise ValueError("The committed CICIDS demo must contain rows for integration tests")
+features = json.loads((ROOT / "models/metrics.json").read_text(encoding="utf-8"))["features"]
+# Repeated rows provide a deterministic 302-row streaming test fixture only.
+# They are not a new evaluation dataset or evidence of model accuracy.
+sample_rows = demo_rows.iloc[[i % len(demo_rows) for i in range(302)]]
+sample_rows.loc[:, features].to_csv(SAMPLE, index=False)
+shutil.copy(DEMO, TMP / DEMO.name)
 from backend import main
 from backend.engine import Engine, risk, ip
 from fastapi.testclient import TestClient
 
 
 @pytest.fixture(scope="module")
-def client():
-    with TestClient(main.app) as c:
-        yield c
-    shutil.rmtree(TMP)
+def client(auth_providers):
+    try:
+        with TestClient(main.app) as c:
+            yield c
+    finally:
+        shutil.rmtree(TMP)
 
 
+@pytest.fixture(scope="module", autouse=True)
+def auth_providers():
+    from backend import secure_auth
+    patch=pytest.MonkeyPatch()
+    patch.setenv("REGISTRATION_CODE","test-invitation")
+    # Local .env allowlists must not reject the suite's dummy email accounts.
+    # This is scoped to the test process; never edit the user's .env file.
+    patch.setenv("AUTHORIZED_EMAILS", "")
+    for key in ["SMTP_HOST","SMTP_FROM","SMTP_USER","SMTP_PASSWORD"]:patch.setenv(key,"test-only")
+    global REAL_CAPTCHA
+    REAL_CAPTCHA=secure_auth.captcha
+    patch.setattr(secure_auth,"captcha",lambda token,request:None)
+    patch.setattr(secure_auth,"send_code",lambda email,code: TEST_MAIL.__setitem__(email,code))
+    yield
+    patch.undo()
+
+TEST_MAIL={}
 def account(c, name):
-    body = {"username": name, "password": "StrongPassword2026!"}
-    assert c.post("/api/signup", json=body).status_code == 200
-    r = c.post("/api/login", json=body)
-    assert r.status_code == 200
-    return {"Authorization": "Bearer " + r.json()["access_token"]}
+    body={"username":name,"display_name":name,"email":name+"@example.test","password":"StrongPassword2026!","confirm_password":"StrongPassword2026!","invitation_code":"test-invitation","accept_policy":True,"captcha_token":"mock"}
+    with main.connection() as conn:conn.execute("DELETE FROM auth_limits")
+    r=c.post("/api/signup",json=body);assert r.status_code==200,r.text
+    assert c.post("/api/auth/verify",json={"challenge_id":r.json()["challenge_id"],"code":TEST_MAIL[body['email']]}).status_code==200
+    r=c.post("/api/login",json={"email":body['email'],"password":body['password'],"captcha_token":"mock"})
+    assert r.status_code==200,r.text
+    return {"Authorization":"Bearer "+r.json()["access_token"]}
 
 
 @pytest.fixture(scope="module")
@@ -59,6 +91,37 @@ def test_ip():
     assert ip("192.0.2.1")["status"] == "valid"
     assert ip("2001:db8::1")["status"] == "valid"
     assert ip("bad")["status"] == "invalid"
+
+
+def test_connection_commit_rollback_and_close(client):
+    with main.connection() as c:
+        c.execute("CREATE TABLE connection_probe(value TEXT)")
+        c.execute("INSERT INTO connection_probe VALUES ('committed')")
+    with pytest.raises(main.sqlite3.ProgrammingError, match="closed"):
+        c.execute("SELECT 1")
+    with pytest.raises(RuntimeError, match="rollback probe"):
+        with main.connection() as failed:
+            failed.execute("INSERT INTO connection_probe VALUES ('rolled back')")
+            raise RuntimeError("rollback probe")
+    with pytest.raises(main.sqlite3.ProgrammingError, match="closed"):
+        failed.execute("SELECT 1")
+    with main.connection() as check:
+        assert [r[0] for r in check.execute("SELECT value FROM connection_probe")] == ["committed"]
+
+
+def test_signup_email_allowlist(client, monkeypatch):
+    monkeypatch.setenv("AUTHORIZED_EMAILS", "approvedanalyst@example.test")
+    rejected = client.post("/api/signup", json={
+        "username": "blockedanalyst", "display_name": "Blocked Analyst",
+        "email": "blockedanalyst@example.test", "password": "StrongPassword2026!",
+        "confirm_password": "StrongPassword2026!", "invitation_code": "test-invitation",
+        "accept_policy": True, "captcha_token": "mock",
+    })
+    assert rejected.status_code == 403
+    assert rejected.json()["detail"] == "This email is not authorised for the workspace"
+    assert "blockedanalyst@example.test" not in TEST_MAIL
+    approved = account(client, "approvedanalyst")
+    assert client.get("/api/me", headers=approved).status_code == 200
 
 
 def test_health_auth_roles(client, auth):
@@ -106,7 +169,7 @@ def test_path_validation(client, auth, source):
 
 
 def test_schema_invalid_values_and_truth_not_used(client, auth):
-    df = pd.read_csv(ROOT / "data/sample_traffic.csv").head(6)
+    df = pd.read_csv(SAMPLE).head(6)
     original = df.copy()
     df[df.columns[0]] = df[df.columns[0]].astype(float)
     df.loc[0, df.columns[0]] = float("inf")
@@ -165,7 +228,7 @@ def test_ownership_upload_incident_rbac(client, auth):
         files={
             "file": (
                 "flows.csv",
-                (ROOT / "data/sample_traffic.csv").read_bytes(),
+                SAMPLE.read_bytes(),
                 "text/csv",
             )
         },
@@ -298,7 +361,7 @@ def test_real_ip_demo_and_grouped_incidents(client, auth):
     assert all("review_reasons" in r and len(r["feature_evidence"]) == 15 for r in rows)
     html = client.get("/api/scans/" + sid + "/report-html", headers=auth)
     assert html.status_code == 200
-    assert "NetShield AI Security Analysis Report" in html.text
+    assert "TraceVigil AI Security Analysis Report" in html.text
     assert "Top predicted attack sources" in html.text
     with main.connection() as c:
         incidents = c.execute(
@@ -311,7 +374,7 @@ def test_real_ip_demo_and_grouped_incidents(client, auth):
 def test_nested_source_and_cleanup(client, auth):
     nested = TMP / "cicids"
     nested.mkdir(exist_ok=True)
-    shutil.copy(ROOT / "data/sample_traffic.csv", nested / "tiny.csv")
+    shutil.copy(SAMPLE, nested / "tiny.csv")
     assert "cicids/tiny.csv" in [
         r["name"] for r in client.get("/api/sources", headers=auth).json()
     ]
@@ -327,3 +390,115 @@ def test_nested_source_and_cleanup(client, auth):
             ]
             == 0
         )
+
+
+def test_native_xgboost_artifact_and_missing_file(tmp_path):
+    import joblib
+
+    bundle = joblib.load(ROOT / "models/bundle.joblib")
+    assert "xgboost" not in bundle["models"]
+    assert bundle["native_xgboost"] == "xgboost_model.json"
+    assert list(main.engine.models) == ["random_forest", "xgboost", "extra_trees"]
+    shutil.copy(ROOT / "models/bundle.joblib", tmp_path / "bundle.joblib")
+    with pytest.raises(FileNotFoundError, match="Missing native XGBoost model"):
+        Engine(tmp_path / "bundle.joblib")
+
+
+def test_investigation_addons(client, auth):
+    from backend.investigation import baseline
+    from openpyxl import load_workbook
+    import io
+    uid='addon-'+uuid.uuid4().hex
+    import pandas as pd
+    demo=pd.read_csv(ROOT/'data/cicids_demo_real_ips.csv').head(25)
+    evidence,_=main.engine.score(demo,0)
+    first=next(r for r in evidence if r['status']=='scored')
+    source=first['src_ip']['value'] or 'Unavailable';dest=first['dst_ip']['value'] or 'Unavailable'
+    first['needs_review']=True
+    first['row_number']=25
+    first['timestamp']='2026-10-15 12:00:00'
+    summary={'rows_read':1,'scored':1,'alerts':1,'attack_types':{first['consensus']:1}}
+    with main.connection() as c:
+        c.execute('INSERT INTO scans(id,owner,source,status,created,summary) VALUES(?,?,?,?,?,?)',(uid,'testanalyst','demo.csv','Completed',main.now(),json.dumps(summary)))
+        for num in range(1,25):
+            earlier=dict(first);earlier['row_number']=num
+            earlier['timestamp']='2026-10-14 12:00:00' if num<24 else '2026-10-16 12:00:00'
+            earlier['needs_review']=False
+            c.execute('INSERT INTO flows(scan_id,row_number,payload) VALUES(?,?,?)',(uid,num,json.dumps(earlier)))
+        c.execute('INSERT INTO flows(scan_id,row_number,payload) VALUES(?,?,?)',(uid,first['row_number'],json.dumps(first)))
+        cur=c.execute('INSERT INTO incidents(scan_id,row_number,owner,label,risk,status,note,created,group_key,occurrences,src_ip,dst_ip) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',(uid,first['row_number'],'testanalyst',first['consensus'],first['risk_score'],'Open','=1+1',main.now(),uid,1,source,dest));iid=cur.lastrowid
+    base='/api/incidents/'+str(iid)
+    r=client.get(base+'/case',headers=auth);assert r.status_code==200,r.text
+    assert r.json()['anchor']['row_number']==first['row_number']
+    assert all(r['status']=='available' and r['samples']==23 for r in r.json()['baseline'])
+    explain=client.get(base+'/explanation',headers=auth);assert explain.status_code==200,explain.text
+    assert explain.json()['sum_check'] and len(explain.json()['features'])==15
+    pdf=client.get(base+'/case.pdf',headers=auth);assert pdf.content.startswith(b'%PDF-')
+    book=client.get('/api/incidents-export.xlsx',headers=auth);assert book.status_code==200
+    wb=load_workbook(io.BytesIO(book.content));cells=[c for row in wb.active for c in row if c.value=='=1+1'];assert cells and all(c.data_type=='s' for c in cells)
+    overview=client.get('/api/overview',headers=auth);assert overview.json()['totals']['rows_read']>=1
+    other=account(client,'other'+uuid.uuid4().hex[:8])
+    for route in ['/case','/explanation','/case.pdf']:assert client.get(base+route,headers=other).status_code==403
+    for route in ['/api/overview',base+'/case','/api/incidents-export.xlsx']:assert client.get(route).status_code in [401,403]
+    # Constant histories are explicit rather than dividing by zero.
+    b=baseline([{'feature_evidence':{'x':2}}]*20,{'feature_evidence':{'x':5}},['x'])[0]
+    assert b['constant_reference_deviation'] and b['z_score'] is None
+
+
+def test_verified_auth_lifecycle(client):
+    from backend import secure_auth
+    from starlette.requests import Request
+    def payload(name):return {"username":name,"display_name":"Mansi G","email":name+"@example.test","password":"StrongPassword2026!","confirm_password":"StrongPassword2026!","invitation_code":"test-invitation","accept_policy":True,"captcha_token":"mock"}
+    with main.connection() as c:c.execute('DELETE FROM auth_limits')
+    b=payload('security'+uuid.uuid4().hex[:6]);r=client.post('/api/signup',json=b);assert r.status_code==200,r.text
+    challenge=r.json()['challenge_id'];code=TEST_MAIL[b['email']]
+    assert 'code' not in r.json() and 'access_token' not in r.json()
+    assert client.post('/api/login',json={'email':b['email'],'password':b['password']}).status_code==401
+    wrong='000000' if code!='000000' else '111111'
+    assert client.post('/api/auth/verify',json={'challenge_id':challenge,'code':wrong}).status_code==400
+    assert client.post('/api/auth/verify',json={'challenge_id':challenge,'code':code}).status_code==200
+    assert client.post('/api/auth/verify',json={'challenge_id':challenge,'code':code}).status_code==400
+    login=client.post('/api/login',json={'email':b['email'],'password':b['password']});assert login.status_code==200
+    headers={'Authorization':'Bearer '+login.json()['access_token']}
+    assert client.get('/api/me',headers=headers).json()['display_name']=='Mansi G'
+    assert client.get('/api/me',headers=headers).headers['cache-control']=='no-store'
+    with main.connection() as c:c.execute('UPDATE users SET auth_version=auth_version+1 WHERE username=?',(b['username'],))
+    assert client.get('/api/me',headers=headers).status_code==401
+    # Expiry and attempt exhaustion persist in the database.
+    with main.connection() as c:c.execute('DELETE FROM auth_limits')
+    b2=payload('expiry'+uuid.uuid4().hex[:6]);r=client.post('/api/signup',json=b2);cid=r.json()['challenge_id']
+    for _ in range(5):assert client.post('/api/auth/verify',json={'challenge_id':cid,'code':'000000' if TEST_MAIL[b2['email']]!='000000' else '111111'}).status_code==400
+    assert client.post('/api/auth/verify',json={'challenge_id':cid,'code':TEST_MAIL[b2['email']]}).status_code==400
+    with main.connection() as c:c.execute('DELETE FROM auth_limits')
+    b3=payload('expired'+uuid.uuid4().hex[:6]);r=client.post('/api/signup',json=b3);cid=r.json()['challenge_id']
+    with main.connection() as c:c.execute('UPDATE enrollment SET expires=0 WHERE id=?',(cid,))
+    assert client.post('/api/auth/verify',json={'challenge_id':cid,'code':TEST_MAIL[b3['email']]}).status_code==400
+    with main.connection() as c:c.execute('DELETE FROM auth_limits')
+    b4=payload('legacy'+uuid.uuid4().hex[:6])
+    with main.connection() as c:c.execute('INSERT INTO users(username,password,role,created) VALUES(?,?,?,?)',(b4['username'],main.password_hash(b4['password']),'Analyst',main.now()))
+    b4['legacy_username']=b4['username'];r=client.post('/api/signup',json=b4);assert r.status_code==200,r.text
+    assert client.post('/api/auth/verify',json={'challenge_id':r.json()['challenge_id'],'code':TEST_MAIL[b4['email']]}).status_code==200
+    assert client.post('/api/login',json={'email':b4['email'],'password':b4['password']}).status_code==200
+    assert client.post('/api/login',json={'username':b4['username'],'password':b4['password']}).status_code==422
+    # Missing provider configuration fails closed; hostname and action are checked.
+    request=Request({'type':'http','headers':[],'client':('127.0.0.1',1)})
+    with pytest.MonkeyPatch.context() as patch:
+        patch.delenv('TURNSTILE_SECRET_KEY',raising=False)
+        with pytest.raises(main.HTTPException) as e:REAL_CAPTCHA('token',request)
+        assert e.value.status_code==503
+        patch.setenv('TURNSTILE_SECRET_KEY','secret');patch.setenv('TURNSTILE_HOSTNAME','localhost')
+        class Fake:
+            def json(self):return {'success':True,'hostname':'evil.example','action':'auth'}
+        patch.setattr(secure_auth.httpx,'post',lambda *a,**k:Fake())
+        with pytest.raises(main.HTTPException) as e:REAL_CAPTCHA('token',request)
+        assert e.value.status_code==400
+
+
+def test_capture_hour_and_auth_limits(client):
+    assert main.capture_hour('2017-07-05 13:12:00')=='2017-07-05 13'
+    assert main.capture_hour('05/07/2017 13:12')=='2017-07-05 13'
+    assert main.capture_hour('missing') is None
+    with main.connection() as c:c.execute('DELETE FROM auth_limits')
+    body={'email':'absent@example.test','password':'wrong'}
+    for _ in range(15):assert client.post('/api/login',json=body).status_code==401
+    assert client.post('/api/login',json=body).status_code==429

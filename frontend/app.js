@@ -33,7 +33,7 @@ async function api(path, opts = {}) {
     Authorization: "Bearer " + token,
     ...opts.headers,
   };
-  const r = await fetch("/api" + path, { ...opts, headers });
+  const r = await fetch("/api" + path, { cache: "no-store", ...opts, headers });
   if (!r.ok) {
     let b;
     try {
@@ -79,34 +79,6 @@ function detail(data) {
   $("detail").showModal();
 }
 $("close").onclick = () => $("detail").close();
-function credentials() {
-  return { username: $("username").value, password: $("password").value };
-}
-$("authform").onsubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const b = await json("/login", {
-      method: "POST",
-      body: JSON.stringify(credentials()),
-    });
-    token = b.access_token;
-    sessionStorage.setItem("token", token);
-    await boot();
-  } catch (e) {
-    notice(e.message);
-  }
-};
-$("signup").onclick = async () => {
-  try {
-    await json("/signup", {
-      method: "POST",
-      body: JSON.stringify(credentials()),
-    });
-    notice("Account created. Log in with these credentials.");
-  } catch (e) {
-    notice(e.message);
-  }
-};
 $("logout").onclick = async () => {
   if (running) await stop();
   sessionStorage.removeItem("token");
@@ -119,7 +91,8 @@ async function boot() {
     $("auth").hidden = true;
     $("workspace").hidden = false;
     $("logout").hidden = false;
-    $("identity").textContent = u.username + " · " + role;
+    $("identity").textContent = "● " + (u.display_name || u.username) + (u.display_name && u.display_name !== u.username ? " · @" + u.username : "") + " is active · " + role;
+    $("identity").classList.add("identity-active");
     $("teamNav").hidden = role !== "Admin";
     $("scan").disabled = role === "Viewer";
     $("upload").disabled = role === "Viewer";
@@ -139,6 +112,7 @@ async function boot() {
       "</tbody></table>";
     renderModelDetails(meta);
     notice("");
+    return u;
   } catch (e) {
     notice(e.message);
   }
@@ -225,6 +199,9 @@ $("scan").onclick = async () => {
   try {
     notice("");
     rows = [];
+    drawScanVisuals({}, {});
+    drawTimeline({}, {});
+    $("rate").textContent = "—";
     lastId = 0;
     draw();
     $("summaryPanel").hidden = true;
@@ -344,11 +321,12 @@ function handle(m) {
     if (m.rows_per_second) $("rate").textContent = m.rows_per_second;
     bars("topSources", m.top_sources || {});
     bars("protocolBars", m.protocols || {});
-    bars("timeline", m.attack_timeline || {});
+    drawTimeline(m.traffic_timeline, m.attack_timeline || {});
     rows = rows.concat(m.rows).slice(-200);
     $("read").textContent = m.processed;
     $("scored").textContent = m.scored;
     $("alerts").textContent = m.alerts;
+    drawScanVisuals(m.risk_distribution, m.attack_types);
     bars("riskbars", m.risk_distribution);
     bars("types", m.attack_types);
     draw();
@@ -360,11 +338,12 @@ function handle(m) {
     $("scored").textContent = m.summary.scored;
     $("alerts").textContent = m.summary.alerts;
     $("rate").textContent = m.summary.rows_per_second;
+    drawScanVisuals(m.summary.risk_distribution, m.summary.attack_types);
     bars("riskbars", m.summary.risk_distribution);
     bars("types", m.summary.attack_types);
     bars("topSources", m.summary.top_sources || {});
     bars("protocolBars", m.summary.protocols || {});
-    bars("timeline", m.summary.attack_timeline || {});
+    drawTimeline(m.summary.traffic_timeline, m.summary.attack_timeline || {});
     $("summary").textContent = JSON.stringify(m.summary, null, 2);
     $("summaryPanel").hidden = false;
     $("progress").textContent =
@@ -419,9 +398,10 @@ async function incidents() {
     list
       .map(
         (r) =>
-          `<div class="incident"><b>#${r.id} · ${esc(r.label)} · ${r.risk}/100</b><small> · ${r.occurrences || 1} related review flows · ${esc(r.src_ip || "Unavailable")} → ${esc(r.dst_ip || "Unavailable")} · scan ${esc(r.scan_id.slice(0, 8))}, first row ${r.row_number}</small><div class="controls"><select id="status${r.id}">${["Open", "Investigating", "Resolved", "False Positive"].map((s) => `<option ${s === r.status ? "selected" : ""}>${s}</option>`).join("")}</select><input id="note${r.id}" value="${esc(r.note)}" placeholder="Investigation note" maxlength="2000"><button data-incident="${r.id}" ${role === "Viewer" ? "disabled" : ""}>Save</button></div></div>`,
+          `<div class="incident"><b>#${r.id} · ${esc(r.label)} · ${r.risk}/100</b><small> · ${r.occurrences || 1} related review flows · ${esc(r.src_ip || "Unavailable")} → ${esc(r.dst_ip || "Unavailable")} · scan ${esc(r.scan_id.slice(0, 8))}, first row ${r.row_number}</small><div class="controls"><button data-case="${r.id}">Investigate / PDF</button><select id="status${r.id}">${["Open", "Investigating", "Resolved", "False Positive"].map((s) => `<option ${s === r.status ? "selected" : ""}>${s}</option>`).join("")}</select><input id="note${r.id}" value="${esc(r.note)}" placeholder="Investigation note" maxlength="2000"><button data-incident="${r.id}" ${role === "Viewer" ? "disabled" : ""}>Save</button></div></div>`,
       )
       .join("") || "<p>No incidents.</p>";
+  $("incidentList").querySelectorAll("[data-case]").forEach(b => b.onclick = () => openCase(b.dataset.case).catch(e => notice(e.message)));
   $("incidentList")
     .querySelectorAll("[data-incident]")
     .forEach(
@@ -534,6 +514,7 @@ document.querySelectorAll("[data-page]").forEach(
         .querySelectorAll("[data-page]")
         .forEach((n) => n.classList.toggle("selected", n === b));
       try {
+        if (b.dataset.page === "overview") await loadOverview();
         if (b.dataset.page === "incidents") await incidents();
         if (b.dataset.page === "history") await history();
         if (b.dataset.page === "team") await team();
@@ -587,3 +568,78 @@ function renderMatrix() {
     "</tbody></table>";
 }
 $("matrixModel").onchange = renderMatrix;
+
+// Investigation add-ons reuse the existing theme classes and authenticated API.
+let selectedCase = null;
+function simpleTable(headers, entries) {
+  return "<table><thead><tr>" + headers.map(x=>"<th>"+esc(x)+"</th>").join("") +
+    "</tr></thead><tbody>" + entries.map(row=>"<tr>"+row.map(x=>"<td>"+esc(x)+"</td>").join("")+"</tr>").join("") + "</tbody></table>";
+}
+async function saveAddon(path, filename) {
+  const response = await api(path), blob = await response.blob();
+  const url = URL.createObjectURL(blob), link = document.createElement("a");
+  link.href = url; link.download = filename; document.body.appendChild(link); link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
+}
+async function loadOverview() {
+  const data=await json("/overview");
+  const t=data.totals;
+  $("overviewData").innerHTML="<p>"+esc(data.scope)+"</p><div class='stats'>"+
+    [["Scans",t.scans],["Flows scored",t.scored],["Review flow alerts",t.review_flows],["Open / investigating groups",t.open_incidents],["Critical groups · all statuses",t.critical_groups],["Rows read",t.rows_read]].map(([k,v])=>"<article><small>"+esc(k)+"</small><strong>"+esc(v)+"</strong></article>").join("")+"</div><div class='panel'><h3>Predicted types across saved summaries</h3>"+simpleTable(["Class","Records"],Object.entries(data.traffic_types))+"</div><div class='twocol'><div class='panel'><h3>Historical risk distribution</h3><small>SAVED SCAN SUMMARIES · SCORED FLOWS</small>"+riskDonut(data.risk_distribution||{})+"</div><div class='panel'><h3>Historical predicted attacks</h3><small>SAVED SCAN SUMMARIES · BENIGN EXCLUDED</small>"+attackChart(data.traffic_types||{})+"</div></div>";
+}
+async function openCase(id) {
+  const data=await json("/incidents/"+id+"/case"); selectedCase=id;
+  document.querySelectorAll(".page").forEach(p=>p.hidden=p.id!=="caseConsole");
+  document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("selected",b.dataset.page==="incidents"));
+  const i=data.incident;
+  $("caseScope").textContent=data.coverage;
+  $("caseSummary").innerHTML=simpleTable(["Field","Value"],[["Case",i.id],["Prediction",i.label],["Priority",i.risk+"/100"],["Status",i.status],["Source",i.src_ip],["Destination",i.dst_ip],["Occurrences",i.occurrences],["Notes",i.note]]);
+  $("baselineScope").textContent=data.baseline_scope;
+  $("baselineTable").innerHTML=simpleTable(["Feature","Observed","Earlier mean","Samples","Deviation"],data.baseline.map(r=>[r.feature,r.observed??"—",r.reference_mean??"—",r.samples,r.status!=="available"?"Insufficient history":r.z_score===null?(r.constant_reference_deviation?"Changed from constant reference":"Constant reference"):r.z_score.toFixed(3)+" standard deviations"]));
+  $("localExplanation").textContent="Not calculated. TreeSHAP explains XGBoost only; it does not explain consensus priority.";
+  $("caseFlows").innerHTML=simpleTable(["Row","Capture time","Class","Priority","Review reasons"],data.flows.map(r=>[r.row_number,r.timestamp,r.consensus,r.risk_score,r.review_reasons.join("; ")]));
+  $("caseSteps").innerHTML="<ol>"+data.next_steps.map(x=>"<li>"+esc(x)+"</li>").join("")+"</ol>";
+}
+$("refreshOverview").onclick=()=>loadOverview().catch(e=>notice(e.message));
+$("exportIncidents").onclick=()=>saveAddon("/incidents-export.xlsx","tracevigil-incidents-latest-10000.xlsx").catch(e=>notice(e.message));
+$("showReportHistory").onclick=()=>document.querySelector('[data-page="history"]').click();
+$("casePdf").onclick=()=>selectedCase&&saveAddon("/incidents/"+selectedCase+"/case.pdf","tracevigil-case-"+selectedCase+".pdf").catch(e=>notice(e.message));
+$("caseExplain").onclick=async()=>{
+  if(!selectedCase)return;
+  const requested=selectedCase;$("caseExplain").disabled=true;
+  $("caseExplain").classList.add("is-loading");$("caseExplain").setAttribute("aria-busy","true");
+  $("localExplanation").textContent="Calculating XGBoost TreeSHAP contributions…";
+  $("localExplanation").scrollIntoView({block:"nearest",behavior:"auto"});
+  try {
+    const data=await json("/incidents/"+requested+"/explanation");if(selectedCase!==requested)return;
+    $("localExplanation").innerHTML="<p>"+esc(data.scope)+"</p><p>Class: "+esc(data.class)+" · Units: "+esc(data.units)+"</p><p>Base margin "+esc(data.base_value)+" + contributions = "+esc(data.margin)+" · additive check: "+esc(data.sum_check)+"</p>"+simpleTable(["Feature","Observed","Signed contribution"],data.features.map(r=>[r.feature,r.observed,r.contribution.toFixed(5)]));
+  }catch(e){$("localExplanation").textContent="Explanation unavailable: "+e.message;notice(e.message);}
+  finally{$("caseExplain").disabled=false;$("caseExplain").classList.remove("is-loading");$("caseExplain").removeAttribute("aria-busy");}
+};
+
+// Dependency-free charts: SVG is responsive, legends include exact counts.
+function riskDonut(distribution) {
+  const bands=[['Low','#72ff9a'],['Medium','#ffe082'],['High','#ffad66'],['Critical','#ff718d']];
+  const values=bands.map(([label])=>Math.max(0,Number(distribution[label])||0));
+  const total=values.reduce((a,b)=>a+b,0);
+  if(!total)return '<p class="chart-empty">No scored flows yet. No risk proportions to display.</p>';
+  let offset=0;
+  const segments=bands.map(([label,color],i)=>{
+    const percent=values[i]/total*100;
+    const arc=percent?'<circle cx="70" cy="70" r="52" fill="none" stroke="'+color+'" stroke-width="18" pathLength="100" stroke-dasharray="'+percent+' '+(100-percent)+'" stroke-dashoffset="'+(-offset)+'" transform="rotate(-90 70 70)"/>':'';
+    offset+=percent;return arc;
+  }).join('');
+  return '<div class="risk-chart"><svg viewBox="0 0 140 140" role="img" aria-label="Risk proportions; exact counts follow in the legend"><circle cx="70" cy="70" r="52" fill="none" stroke="#17291e" stroke-width="18"/>'+segments+'<text x="70" y="68" text-anchor="middle" fill="#e5f5eb" font-size="15">'+esc(total.toLocaleString())+'</text><text x="70" y="85" text-anchor="middle" fill="#a0b6a8" font-size="9">SCORED FLOWS</text></svg><ul class="risk-legend">'+bands.map(([label,color],i)=>'<li><span class="chart-dot" style="background:'+color+'"></span><span>'+label+'</span><b>'+values[i].toLocaleString()+'</b><small>'+((values[i]/total)*100).toFixed(1)+'%</small></li>').join('')+'</ul></div>';
+}
+function attackChart(distribution) {
+  const sorted=Object.entries(distribution).filter(([k,v])=>k!=='BENIGN'&&Number(v)>0).sort((a,b)=>b[1]-a[1]);
+  if(!sorted.length)return '<p class="chart-empty">No non-BENIGN predictions in this scope.</p>';
+  const shown=sorted.slice(0,6).map(([k,v])=>[k,Number(v)]),other=sorted.slice(6).reduce((s,[k,v])=>s+Number(v),0);
+  if(other)shown.push(['Other attack classes',other]);
+  const max=Math.max(...shown.map(x=>x[1]));
+  return '<div class="attack-chart">'+shown.map(([label,value])=>'<div class="attack-chart-row"><span>'+esc(label)+'</span><div class="bar"><i style="width:'+value/max*100+'%"></i></div><b>'+value.toLocaleString()+'</b></div>').join('')+'</div>';
+}
+function drawScanVisuals(risks,types) {
+  $("scanRiskDonut").innerHTML=riskDonut(risks||{});
+  $("scanAttackChart").innerHTML=attackChart(types||{});
+}
+drawScanVisuals({},{});

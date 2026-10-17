@@ -1,0 +1,10 @@
+{
+  "backend_tests": 17,
+  "backend_status": "passed",
+  "dom_checks": 7,
+  "dom_status": "passed mocked transport",
+  "theme_sha256": "c2cda3ae4ef73b4c3269e3435b7a9559bb1f1c1b14607e130a3517b1f1c55344",
+  "theme_unchanged": true,
+  "browser_layout": "not verified",
+  "windows_installation": "pending local verification"
+}

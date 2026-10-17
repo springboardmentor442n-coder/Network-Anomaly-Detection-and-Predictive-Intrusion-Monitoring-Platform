@@ -1,0 +1,20 @@
+{
+  "date_local": "2026-10-18",
+  "platform": "Linux",
+  "python": "3.12",
+  "command": "AUTHORIZED_EMAILS=mentor-only@example.test python -m pytest -q",
+  "result": "21 passed, 1 warning in 13.06s",
+  "providers": "CAPTCHA and email mocked",
+  "regressions": [
+    "commit and close",
+    "rollback and close",
+    "unapproved email denied",
+    "approved email signup, verification and login",
+    "inherited restrictive email allowlist isolated"
+  ],
+  "syntax_check": "passed",
+  "trailing_whitespace_check": "passed",
+  "windows_python_313_check": "requires user rerun",
+  "warning": "StarletteDeprecationWarning: httpx TestClient transport deprecated",
+  "theme_css_unchanged": true
+}

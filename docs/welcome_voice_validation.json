@@ -1,0 +1,28 @@
+{
+  "scenario_groups": 14,
+  "result": "passed",
+  "coverage": [
+    "controls removed",
+    "automatic success only",
+    "before dashboard fetches",
+    "saved mute ignored",
+    "restored session silent",
+    "failed login silent",
+    "delayed voices",
+    "default fallback",
+    "non-local English fallback",
+    "unsupported speech",
+    "errors never replay",
+    "session invalidation",
+    "pagehide cancellation",
+    "first login after verification",
+    "no repeat on data refresh",
+    "strong utterance reference"
+  ],
+  "actual_audio_verified": false,
+  "speech_provider": "mocked browser SpeechSynthesis",
+  "turnstile_regressions": "passed with mocked provider",
+  "javascript_syntax": "passed",
+  "theme_css_unchanged": true,
+  "theme_css_sha256": "c2cda3ae4ef73b4c3269e3435b7a9559bb1f1c1b14607e130a3517b1f1c55344"
+}

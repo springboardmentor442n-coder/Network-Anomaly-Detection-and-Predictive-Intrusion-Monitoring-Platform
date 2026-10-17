@@ -53,3 +53,29 @@ This log starts the continuing record requested on October 13. Future changes sh
 ### Current remaining goals
 
 UNSW-NB15 pipeline, live packet capture/flow exporter, future intrusion forecasting, external reputation/notifications, optional LLM chatbot and actual cloud deployment are not implemented in this release. React/Next.js and PostgreSQL/MongoDB from the reference stack are not used; the working implementation uses HTML/JS and SQLite. Full source inspection and capped real-data training do not equal fitting or independently validating all original records.
+
+## October 13 2026 XGBoost startup serialization correction
+
+26. User startup on Windows Python 3.13.9 failed with XGBoostError input stream corrupted while joblib restored the XGBoost estimator's internal memory snapshot. Package installation and FastAPI import had succeeded. The stack identifies XGBoost snapshot restoration as the failing path; it does not establish that Python 3.13 itself is unsupported or identify whether version/platform differences or corrupted bytes were the precise cause.
+27. Corrected the distributed artifact format. The authoritative joblib bundle now holds only sklearn models, encoder, anomaly pipeline and metadata. XGBoost is exported separately using save_model into models/xgboost_model.json, and engine.py restores it through native load_model on CPU. The model order is explicitly RF, XGB, Extra Trees. Missing native files produce an actionable error.
+28. Updated complete train_cicids.py and train.py exports so regeneration never puts XGBoost back into the joblib bundle. The standalone XGBoost export is backend/model_xgb.json. The prior model_xgb.pkl remains a historical, unused file if it exists in an older extracted project.
+29. Validation: native XGB probabilities matched exactly for the 243 real-IP demo records; RF and Extra Trees class decisions matched with probability differences within 1e-12 from parallel floating-point aggregation. Sixteen backend regression checks passed, including native artifact and missing-file checks. No retraining or changed thresholds were introduced. Windows Python 3.13 startup is not directly tested here and must be confirmed locally.
+30. Delivered complete replacement engine/model/training files, installation instructions and this updated continuing Word log. The patch merges into the existing project, preserving accounts and raw data. Challenge: using a pickled native-library memory snapshot for distribution was too fragile; stable native model persistence removes that startup path without discarding learned trees.
+
+## October 15 2026 investigation add-ons
+- Preserved hacker stylesheet byte for byte; reused existing theme classes.
+- Added role-scoped historical overview, investigation console and related saved flows.
+- Added timestamp-restricted source-IP reference comparisons with minimum history and explicit constant-reference handling.
+- Added native XGBoost TreeSHAP for one saved incident row, with raw-margin units and additive check.
+- Added authenticated PDF case download and XLSX incident register with formula-safe text.
+- Added report navigation, two export dependencies and regression checks.
+- See INVESTIGATION_ADDONS.md and the Word addendum for scope, limits, installation and evidence.
+
+## October 17 2026 TraceVigil identity and verified signup
+- Renamed visible runtime brand to TraceVigil AI; preserved model artifacts, database path and original hacker stylesheet.
+- Added chronological interactive capture-hour series from actual scored rows, with legacy attack-only fallback.
+- Added visible refresh progress/completion, active user header and local optional welcome speech.
+- Moved TreeSHAP results under its button and added loading/error feedback.
+- Replaced username-only web login with email login; added invitation/allowlist gates, server-validated free Turnstile, SMTP email OTP and one-time legacy linking.
+- Added code hashing, expiration, attempt/rate limits, session versions, no-store API responses, frame denial and local administrator recovery.
+- Added environment template, setup instructions and updated API collection/tests. External email/CAPTCHA settings require the user's own account keys. No fake verification mode exists.

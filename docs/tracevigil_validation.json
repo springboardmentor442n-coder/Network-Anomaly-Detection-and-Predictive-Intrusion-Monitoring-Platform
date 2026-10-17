@@ -1,0 +1,10 @@
+{
+  "backend_tests": 19,
+  "backend_result": "passed",
+  "ui_assertions": 21,
+  "ui_result": "passed with mocked transport",
+  "external_providers": "mocked; no live email sent",
+  "theme_sha256": "c2cda3ae4ef73b4c3269e3435b7a9559bb1f1c1b14607e130a3517b1f1c55344",
+  "original_theme_unchanged": true,
+  "live_turnstile_smtp_browser_speech": "pending user configuration and verification"
+}

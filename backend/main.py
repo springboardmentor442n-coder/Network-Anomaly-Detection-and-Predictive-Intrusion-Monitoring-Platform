@@ -16,6 +16,8 @@ try:
 except ImportError:
     from engine import Engine
 ROOT = Path(__file__).resolve().parents[1]
+from dotenv import load_dotenv
+load_dotenv(ROOT / ".env", override=False)
 DATA = Path(os.getenv("NETSHIELD_DATA", str(ROOT / "data"))).resolve()
 DATA.mkdir(parents=True, exist_ok=True)
 DB = DATA / "netshield.db"
@@ -42,6 +44,18 @@ def now():
     return datetime.now(timezone.utc).isoformat()
 
 
+def capture_hour(value):
+    """Use CSV capture time, never ingestion time; ambiguous slash dates are day-first."""
+    if not value:return None
+    text=str(value).strip()
+    try:return datetime.fromisoformat(text.replace("Z", "+00:00")).strftime("%Y-%m-%d %H")
+    except ValueError:pass
+    for fmt in ("%d/%m/%Y %H:%M:%S", "%d/%m/%Y %H:%M", "%d-%m-%Y %H:%M:%S"):
+        try:return datetime.strptime(text,fmt).strftime("%Y-%m-%d %H")
+        except ValueError:pass
+    return None
+
+
 def memory_rss():
     try:
         return round(psutil.Process().memory_info().rss / 1024**2, 2)
@@ -49,11 +63,18 @@ def memory_rss():
         return None
 
 
+@contextlib.contextmanager
 def connection():
     c = sqlite3.connect(DB, timeout=30)
-    c.row_factory = sqlite3.Row
-    c.execute("PRAGMA journal_mode=WAL")
-    return c
+    try:
+        c.row_factory = sqlite3.Row
+        c.execute("PRAGMA journal_mode=WAL")
+        # SQLite's own context manager commits or rolls back, but does not close
+        # its connection. Always release the handle, including on exceptions.
+        with c:
+            yield c
+    finally:
+        c.close()
 
 
 def init():
@@ -124,7 +145,7 @@ async def lifespan(app):
     pool.shutdown(wait=True, cancel_futures=True)
 
 
-app = FastAPI(title="NetShield AI", lifespan=lifespan)
+app = FastAPI(title="TraceVigil AI", lifespan=lifespan)
 
 
 class Credentials(BaseModel):
@@ -138,9 +159,9 @@ def user(auth: HTTPAuthorizationCredentials = Depends(security)):
         name = payload["sub"]
         with connection() as c:
             row = c.execute(
-                "SELECT username,role FROM users WHERE username=?", (name,)
+                "SELECT username,role,email,display_name,email_verified,auth_version FROM users WHERE username=?", (name,)
             ).fetchone()
-        if not row:
+        if not row or not row["email_verified"] or payload.get("v") != row["auth_version"]:
             raise ValueError()
         return dict(row)
     except Exception:
@@ -377,6 +398,7 @@ async def produce(scan, j, path, owner):
     model_totals = Counter()
     source_counts = Counter()
     trends = Counter()
+    traffic_trends = {}
     status = "Completed"
     try:
         reader = await loop.run_in_executor(
@@ -430,6 +452,11 @@ async def produce(scan, j, path, owner):
                     risks[r["risk_label"]] += 1
                     labels[r["consensus"]] += 1
                     agree += int(r["models_agree"])
+                    bucket = capture_hour(r.get("timestamp"))
+                    if bucket and (bucket in traffic_trends or len(traffic_trends) < 512):
+                        entry = traffic_trends.setdefault(bucket, {"benign": 0, "attacks": 0, "total": 0})
+                        entry["total"] += 1
+                        entry["benign" if r["consensus"] == "BENIGN" else "attacks"] += 1
                     if r["consensus"] != "BENIGN":
                         address = r["src_ip"]["value"] or "Unavailable"
                         if address in source_counts or len(source_counts) < 5000:
@@ -454,7 +481,8 @@ async def produce(scan, j, path, owner):
                 attack_types=dict(labels),
                 protocols=dict(protocols),
                 top_sources=dict(source_counts.most_common(10)),
-                attack_timeline=dict(sorted(trends.most_common(20))),
+                attack_timeline=dict(sorted(trends.items())),
+                traffic_timeline=dict(sorted(traffic_trends.items())),
                 dropped_messages=j["dropped"],
             )
             await asyncio.sleep(0.01)
@@ -484,7 +512,8 @@ async def produce(scan, j, path, owner):
             "attack_types": dict(labels),
             "protocols": dict(protocols),
             "top_sources": dict(source_counts.most_common(10)),
-            "attack_timeline": dict(sorted(trends.most_common(20))),
+            "attack_timeline": dict(sorted(trends.items())),
+            "traffic_timeline": dict(sorted(traffic_trends.items())),
             "analytics_caps": {"tracked_sources": 5000, "time_buckets": 512},
             "model_agreement_rate": agree / scored if scored else None,
             "elapsed_seconds": round(elapsed, 3),
@@ -798,5 +827,11 @@ def audits(u=Depends(admin)):
 def index():
     return FileResponse(ROOT / "frontend/index.html")
 
+
+from .investigation import install as install_investigation
+import sys
+install_investigation(sys.modules[__name__])
+from .secure_auth import install as install_secure_auth
+install_secure_auth(sys.modules[__name__])
 
 app.mount("/static", StaticFiles(directory=ROOT / "frontend"), name="static")
