@@ -47,6 +47,8 @@ async def login(request: Request, body: LoginRequest, db: Session = Depends(get_
         log = AuditLog(
             username=body.username,
             action="LOGIN_FAILED",
+            resource_type="AUTH",
+            resource_id=body.username,
             ip_address=request.client.host if request.client else None,
             result="FAILURE",
             details={"reason": "Invalid credentials"},
@@ -66,6 +68,8 @@ async def login(request: Request, body: LoginRequest, db: Session = Depends(get_
         user_id=user.id,
         username=user.username,
         action="LOGIN",
+        resource_type="USER_SESSION",
+        resource_id=user.id,
         ip_address=request.client.host if request.client else None,
         result="SUCCESS",
     )
@@ -189,6 +193,8 @@ async def logout(request: Request, current_user: User = Depends(get_current_user
         user_id=current_user.id,
         username=current_user.username,
         action="LOGOUT",
+        resource_type="USER_SESSION",
+        resource_id=current_user.id,
         ip_address=request.client.host if request.client else None,
         result="SUCCESS",
     )

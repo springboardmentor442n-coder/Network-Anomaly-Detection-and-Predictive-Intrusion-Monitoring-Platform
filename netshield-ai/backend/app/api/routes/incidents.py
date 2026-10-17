@@ -1,7 +1,7 @@
 """Incidents routes."""
 from typing import Optional
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -34,6 +34,7 @@ class UpdateIncidentRequest(BaseModel):
 @router.post("/")
 async def create_incident(
     body: CreateIncidentRequest,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_analyst),
 ):
@@ -65,12 +66,14 @@ async def create_incident(
     db.refresh(incident)
 
     # Audit
+    client_ip = request.client.host if request.client else None
     log = AuditLog(
         user_id=current_user.id,
         username=current_user.username,
         action="INCIDENT_CREATED",
         resource_type="incident",
         resource_id=incident.id,
+        ip_address=client_ip,
         result="SUCCESS",
         details={"title": body.title},
     )
@@ -130,6 +133,7 @@ async def get_incident(
 async def update_incident(
     incident_id: str,
     body: UpdateIncidentRequest,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_analyst),
 ):
@@ -160,12 +164,14 @@ async def update_incident(
     db.commit()
     db.refresh(incident)
 
+    client_ip = request.client.host if request.client else None
     log = AuditLog(
         user_id=current_user.id,
         username=current_user.username,
         action="INCIDENT_UPDATED",
         resource_type="incident",
         resource_id=incident_id,
+        ip_address=client_ip,
         result="SUCCESS",
         details={"status": body.status},
     )

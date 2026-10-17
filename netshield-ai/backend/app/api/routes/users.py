@@ -1,6 +1,6 @@
 """Users management routes."""
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
@@ -42,6 +42,7 @@ async def list_users(
 @router.post("/")
 async def create_user(
     body: CreateUserRequest,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin),
 ):
@@ -66,9 +67,16 @@ async def create_user(
     db.commit()
     db.refresh(user)
 
+    client_ip = request.client.host if request.client else None
     log = AuditLog(
-        user_id=current_user.id, username=current_user.username,
-        action="USER_CREATED", resource_type="user", resource_id=user.id, result="SUCCESS",
+        user_id=current_user.id,
+        username=current_user.username,
+        action="USER_CREATED",
+        resource_type="user",
+        resource_id=user.id,
+        ip_address=client_ip,
+        result="SUCCESS",
+        details={"username": user.username, "role": user.role},
     )
     db.add(log)
     db.commit()
@@ -78,7 +86,9 @@ async def create_user(
 
 @router.patch("/{user_id}")
 async def update_user(
-    user_id: str, body: UpdateUserRequest,
+    user_id: str,
+    body: UpdateUserRequest,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin),
 ):
@@ -97,12 +107,28 @@ async def update_user(
 
     db.commit()
     db.refresh(user)
+
+    client_ip = request.client.host if request.client else None
+    log = AuditLog(
+        user_id=current_user.id,
+        username=current_user.username,
+        action="USER_UPDATED",
+        resource_type="user",
+        resource_id=user.id,
+        ip_address=client_ip,
+        result="SUCCESS",
+        details={"username": user.username, "role": user.role, "is_active": user.is_active},
+    )
+    db.add(log)
+    db.commit()
+
     return _user_dict(user)
 
 
 @router.delete("/{user_id}")
 async def delete_user(
     user_id: str,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin),
 ):
@@ -111,6 +137,19 @@ async def delete_user(
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
+    client_ip = request.client.host if request.client else None
+    log = AuditLog(
+        user_id=current_user.id,
+        username=current_user.username,
+        action="USER_DELETED",
+        resource_type="user",
+        resource_id=user.id,
+        ip_address=client_ip,
+        result="SUCCESS",
+        details={"username": user.username},
+    )
+    db.add(log)
     db.delete(user)
     db.commit()
     return {"message": "User deleted"}

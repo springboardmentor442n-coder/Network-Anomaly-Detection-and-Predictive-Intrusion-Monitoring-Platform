@@ -4,7 +4,7 @@ import asyncio
 import logging
 from datetime import datetime
 from typing import Dict, Optional
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -36,6 +36,7 @@ class PredictRequest(BaseModel):
 async def train_model(
     body: TrainRequest,
     background_tasks: BackgroundTasks,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_analyst),
 ):
@@ -69,12 +70,14 @@ async def train_model(
     model_run_id = model_run.id
 
     # Audit log
+    client_ip = request.client.host if request.client else None
     log = AuditLog(
         user_id=current_user.id,
         username=current_user.username,
         action="MODEL_TRAINING_STARTED",
         resource_type="model_run",
         resource_id=model_run_id,
+        ip_address=client_ip,
         result="SUCCESS",
         details={"filename": body.filename, "version": version},
     )
@@ -150,6 +153,7 @@ async def _run_training_background(model_run_id: str, filepath: str, test_size: 
 @router.post("/models/{model_run_id}/activate")
 async def activate_model(
     model_run_id: str,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_analyst),
 ):
@@ -184,12 +188,14 @@ async def activate_model(
     )
 
     # Audit log
+    client_ip = request.client.host if request.client else None
     log = AuditLog(
         user_id=current_user.id,
         username=current_user.username,
         action="MODEL_ACTIVATED",
         resource_type="model_run",
         resource_id=model_run_id,
+        ip_address=client_ip,
         result="SUCCESS",
     )
     db.add(log)

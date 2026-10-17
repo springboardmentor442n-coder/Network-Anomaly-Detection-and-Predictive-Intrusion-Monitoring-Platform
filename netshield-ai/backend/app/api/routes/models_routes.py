@@ -1,6 +1,6 @@
 """Model performance routes."""
 import os
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
@@ -99,6 +99,7 @@ async def get_active_model_metrics(
 @router.post("/{model_run_id}/activate")
 async def activate_model(
     model_run_id: str,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_analyst),
 ):
@@ -133,12 +134,14 @@ async def activate_model(
         feature_names=model_run.feature_names or [],
     )
 
+    client_ip = request.client.host if request.client else None
     log = AuditLog(
         user_id=current_user.id,
         username=current_user.username,
         action="MODEL_ACTIVATED",
         resource_type="model_run",
         resource_id=model_run_id,
+        ip_address=client_ip,
         result="SUCCESS",
     )
     db.add(log)

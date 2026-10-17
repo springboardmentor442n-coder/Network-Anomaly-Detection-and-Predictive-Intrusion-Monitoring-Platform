@@ -1,6 +1,6 @@
 """Alerts routes."""
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -64,6 +64,7 @@ async def get_alert(
 async def update_alert(
     alert_id: str,
     body: UpdateAlertRequest,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_operator),
 ):
@@ -86,12 +87,14 @@ async def update_alert(
     db.refresh(alert)
 
     # Audit log
+    client_ip = request.client.host if request.client else None
     log = AuditLog(
         user_id=current_user.id,
         username=current_user.username,
         action="ALERT_UPDATED",
         resource_type="alert",
         resource_id=alert_id,
+        ip_address=client_ip,
         result="SUCCESS",
         details={"status": body.status, "assigned_to": body.assigned_to},
     )
