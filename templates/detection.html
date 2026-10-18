@@ -1,7 +1,0 @@
-{% extends "base.html" %}
-{% block content %}
-<section id="p-detect"><div class="top"><div><h1><b>Detection</b></h1><p class="sub">Analyze a file of network flows with the trained model</p></div></div>
-<div class="card"><h3>Upload a file</h3><p class="sub">A .csv or .parquet file with the same columns as the training data. A copy is kept in <code>uploads/</code>, and every row is scored and saved to MySQL.</p>
-<div class="hdr"><button id="up">Upload file</button><input type="file" id="file" accept=".csv,.parquet" hidden><span id="fstat" style="color:var(--mut)"></span></div>
-<p class="sub">Results appear in <a href="/" style="color:var(--blue)">Dashboard</a>, <a href="/alerts" style="color:var(--blue)">Alerts</a> and <a href="/history" style="color:var(--blue)">Activity History</a>.</p></div></section>
-{% endblock %}
