@@ -1,0 +1,3 @@
+# One IP or CIDR range per line. Lines starting with # are comments.
+# Example (documentation range, not a real attacker):
+203.0.113.66   # test entry

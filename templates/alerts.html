@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<section id="p-alerts">
+<div class="top"><div><h1><b>Alerts</b></h1><p class="sub">High and Critical detections that need attention</p></div>
+<div class="hdr"><select id="aLvl"><option value="">All levels</option><option>Critical</option><option>High</option></select>
+<select id="aSt"><option value="open">Open</option><option value="ack">Acknowledged</option><option value="all">All</option></select>
+<button id="aAll" class="alt">Acknowledge all</button></div></div>
+<div class="card"><div class="tbl" style="max-height:600px"><table><thead><tr><th>Time</th><th>Prediction</th><th>Confidence</th><th>Risk score</th><th>Level</th><th></th></tr></thead><tbody id="arows"></tbody></table></div></div></section>
+{% endblock %}

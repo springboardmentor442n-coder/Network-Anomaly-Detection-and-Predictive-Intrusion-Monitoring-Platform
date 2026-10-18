@@ -1,0 +1,100 @@
+/* ===== NetShield visual effects: 3D background, cursor, card tilt and Uiverse-style components ===== */
+html{background:var(--bg)}body{background:transparent}
+/* background video (static/video/bg.mp4) with a dark shade so text stays readable; the network animation sits on top of it */
+#bgvideo{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-3;pointer-events:none;background:var(--bg)}
+#bgshade{position:fixed;inset:0;z-index:-2;pointer-events:none;
+ background:radial-gradient(ellipse at 50% 12%,rgba(6,13,31,.5),transparent 55%),linear-gradient(180deg,rgba(6,13,31,.66),rgba(6,13,31,.84))}
+#bg3d{opacity:.6}
+.fx-off #bgvideo,.fx-off #bgshade{display:none}
+@media(prefers-reduced-motion:reduce){#bgvideo,#bgshade{display:none}}
+#bg3d{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+header{background:rgba(6,13,31,.62)}
+.card{position:relative;background:rgba(11,21,48,.66);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+
+/* spotlight that follows the cursor over a card, and a lift on hover */
+.card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .25s;
+ background:radial-gradient(280px circle at var(--mx,50%) var(--my,50%),rgba(96,165,250,.17),transparent 62%)}
+.card:hover::after{opacity:1}
+.card:hover{border-color:rgba(96,165,250,.55);box-shadow:0 10px 34px rgba(37,99,235,.2)}
+
+/* 3D tilt (set by fx.js on small cards) */
+.tilt{transition:transform .18s ease-out,box-shadow .25s,border-color .25s;transform-style:preserve-3d;will-change:transform}
+.card.k small,.card.k div{transform:translateZ(22px)}
+
+/* number tiles: a light that runs around the border */
+@property --ang{syntax:"<angle>";initial-value:0deg;inherits:false}
+.card.k::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;pointer-events:none;
+ background:conic-gradient(from var(--ang),transparent 0 68%,#3b82f6 84%,#22d3ee 100%);
+ -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:angspin 4s linear infinite}
+@keyframes angspin{to{--ang:360deg}}
+
+/* page entrance */
+@keyframes rise{from{opacity:0;transform:translateY(18px)}}
+main>section>*,main .grid>.card{animation:rise .55s cubic-bezier(.2,.7,.2,1) backwards}
+main>section>*:nth-child(2),main .grid>.card:nth-child(2){animation-delay:.07s}
+main>section>*:nth-child(3),main .grid>.card:nth-child(3){animation-delay:.14s}
+main>section>*:nth-child(4),main .grid>.card:nth-child(4){animation-delay:.21s}
+main>section>*:nth-child(5),main .grid>.card:nth-child(5){animation-delay:.28s}
+main>section>*:nth-child(n+6){animation-delay:.34s}
+
+/* Uiverse-style buttons: lift, glow and a light sweep */
+button{position:relative;overflow:hidden;transition:transform .15s,box-shadow .25s,filter .25s}
+button::after{content:"";position:absolute;top:0;left:-120%;width:55%;height:100%;pointer-events:none;
+ background:linear-gradient(120deg,transparent,rgba(255,255,255,.38),transparent);transform:skewX(-20deg)}
+button:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 22px rgba(59,130,246,.5)}
+button:hover:not(:disabled)::after{left:150%;transition:left .65s}
+button.stop:hover:not(:disabled){box-shadow:0 8px 22px rgba(239,68,68,.55)}
+button:active:not(:disabled){transform:scale(.95)}
+button#fxBtn{padding:6px 10px;background:transparent;border:1px solid var(--line);font-size:16px;line-height:1}
+.fx-off button#fxBtn{opacity:.45}
+
+/* glowing risk pills and status text */
+@keyframes glowRed{0%,100%{box-shadow:0 0 0 rgba(239,68,68,0)}50%{box-shadow:0 0 14px rgba(239,68,68,.8)}}
+.pill.Critical{animation:glowRed 1.8s ease-in-out infinite}
+@keyframes glowText{50%{text-shadow:0 0 10px currentColor}}
+.on-dot,.live-on #lstat,.live-on #lstat2{animation:glowText 2.4s ease-in-out infinite}
+.live-on #lstat,.live-on #lstat2{animation-duration:1.1s}
+
+/* shimmering brand text */
+.logo b,h1 b{background:linear-gradient(90deg,#3b82f6,#22d3ee,#818cf8,#3b82f6);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 5s linear infinite}
+@keyframes shimmer{to{background-position:250% 0}}
+
+/* menu links: sliding underline */
+nav a{position:relative}
+nav a:not(.on)::after{content:"";position:absolute;left:12%;right:12%;bottom:4px;height:2px;background:linear-gradient(90deg,#3b82f6,#22d3ee);transform:scaleX(0);transition:transform .25s}
+nav a:hover::after{transform:scaleX(1)}
+
+/* new rows flash in */
+@keyframes rowIn{from{background:rgba(34,211,238,.28);transform:translateX(-8px);opacity:.2}}
+#lrows tr:nth-child(-n+5),#rows tr:nth-child(-n+5){animation:rowIn .7s ease-out}
+
+/* login window pops in */
+#modal{backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#af{animation:pop .3s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes pop{from{opacity:0;transform:scale(.9) translateY(10px)}}
+
+/* spinner (loader) and the progress bar at the top while the page talks to the server */
+.spin{display:inline-block;width:14px;height:14px;margin-right:6px;vertical-align:-2px;border:2px solid rgba(96,165,250,.3);border-top-color:#22d3ee;border-radius:50%;animation:rot .8s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+#topbar{position:fixed;top:0;left:0;height:3px;width:0;opacity:0;z-index:300;pointer-events:none;
+ background:linear-gradient(90deg,#3b82f6,#22d3ee);box-shadow:0 0 10px #22d3ee;transition:width .35s ease,opacity .4s}
+
+/* cursor ring, sparks and click ripple */
+#cur-ring{position:fixed;left:0;top:0;width:34px;height:34px;margin:-17px 0 0 -17px;border:1.5px solid rgba(96,165,250,.7);border-radius:50%;pointer-events:none;z-index:200;
+ transition:width .2s,height .2s,margin .2s,background .2s,border-color .2s;mix-blend-mode:screen;opacity:0}
+#cur-ring.on{opacity:1}
+#cur-ring.hot{width:54px;height:54px;margin:-27px 0 0 -27px;background:rgba(59,130,246,.14);border-color:#22d3ee}
+.spark{position:fixed;width:8px;height:8px;margin:-4px;border-radius:50%;pointer-events:none;z-index:199;
+ background:radial-gradient(circle,#fff,#60a5fa 50%,transparent 72%);animation:spark .75s ease-out forwards}
+@keyframes spark{to{transform:translateY(16px) scale(.2);opacity:0}}
+.ripple{position:fixed;width:12px;height:12px;margin:-6px;border-radius:50%;border:2px solid #22d3ee;pointer-events:none;z-index:199;animation:ripple .6s ease-out forwards}
+@keyframes ripple{to{transform:scale(7);opacity:0}}
+@media(hover:none){#cur-ring,.spark{display:none}}
+
+/* switched off: the sparkle button in the header, or the system's "reduce motion" setting */
+.fx-off #bg3d,.fx-off #cur-ring,.fx-off .spark,.fx-off .ripple{display:none}
+.fx-off *,.fx-off *::before,.fx-off *::after{animation:none!important}
+.fx-off .tilt{transform:none!important}
+.fx-off .card{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--card)}
+.fx-off header{background:transparent}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important}}

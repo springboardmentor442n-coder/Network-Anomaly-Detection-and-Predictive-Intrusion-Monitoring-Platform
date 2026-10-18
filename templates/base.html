@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NetShield AI</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<link rel="stylesheet" href="/static/css/style.css"><link rel="stylesheet" href="/static/css/fx.css"></head><body data-page="{{ page }}"><video id="bgvideo" autoplay muted loop playsinline preload="auto" poster="/static/video/bg-poster.jpg" aria-hidden="true" tabindex="-1"><source src="/static/video/bg.mp4" type="video/mp4"></video><div id="bgshade"></div><canvas id="bg3d" aria-hidden="true"></canvas><div id="cur-ring" aria-hidden="true"></div><div id="topbar"></div>
+<header><button id="menuBtn" aria-label="Open menu">☰</button><div class="logo">NetShield <b>AI</b><small>Network Intrusion Detection &amp; Response</small></div>
+<nav><div class="navhead"><span>Menu</span><button id="menuClose" aria-label="Close menu">✕</button></div><a href="/">Home</a><a href="/live">Live</a><a href="/alerts">Alerts <span class="badge" id="badge" hidden>0</span></a><a href="/incidents">Incidents</a><a href="/risk">Risk Scoring</a><a href="/reports">Reports</a><a href="/history">Activity History</a><a href="/models">Models</a><a href="/performance">Performance</a><a href="/detection">Detection</a><a href="/admin" class="admin-only">Admin</a></nav>
+<span id="clock" style="color:var(--mut);font-size:13px"></span><span class="on-dot" id="status">● System Online</span><button id="fxBtn" title="Turn visual effects on or off" aria-label="Toggle visual effects">✨</button><div class="hdr" id="auth"></div></header>
+<div id="navOverlay"></div>
+<main>
+{% block content %}{% endblock %}
+</main>
+<div class="modal" id="modal" hidden><form id="mForm"><h2 id="mTitle">Login</h2>
+<label>Username<input id="u" autocomplete="username" required minlength="3" maxlength="32"></label>
+<label>Password<input id="p" type="password" autocomplete="current-password" required minlength="8"></label>
+<div id="mErr" role="alert"></div><button id="mGo">Login</button>
+<button type="button" class="link" id="mSwitch">No account? Register</button><button type="button" class="link" id="mClose" style="color:var(--mut)">Cancel</button></form></div>
+<script src="/static/js/fx.js"></script><script src="/static/js/app.js"></script></body></html>
