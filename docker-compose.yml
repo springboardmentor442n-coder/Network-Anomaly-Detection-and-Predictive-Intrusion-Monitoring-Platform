@@ -1,0 +1,31 @@
+# Run everything with:  docker compose up --build      then open http://localhost:8000
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-netshield}
+      MARIADB_DATABASE: netshield
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      NETSHIELD_DB_HOST: db
+      NETSHIELD_DB_PASSWORD: ${DB_ROOT_PASSWORD:-netshield}
+    volumes:
+      - ./model:/app/model:ro
+      - ./dataset:/app/dataset:ro
+      - ./uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  dbdata:
