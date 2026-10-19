@@ -6,6 +6,7 @@
     <title>TraceVigil AI</title>
     <link rel="stylesheet" href="/static/style.css" />
     <link rel="stylesheet" href="/static/visuals.css" />
+    <link rel="stylesheet" href="/static/security.css" />
   </head>
   <body>
     <aside>
@@ -16,8 +17,9 @@
         ><button data-page="models">▥ Model laboratory</button
         ><button data-page="incidents">⚑ Incident queue</button
         ><button data-page="history">↻ Scan history</button
+        ><button data-page="securityOps">⌕ Security events & IP investigation</button
         ><button data-page="learn">◇ Explain the system</button
-        ><button data-page="team" id="teamNav" hidden>♙ Team & audit</button>
+        ><button data-page="team" id="teamNav" hidden>♙ Team roles</button>
       </nav>
       <p>Internship edition · real CICIDS<br />CSV flow analysis</p>
       <button id="logout" hidden>Sign out</button>
@@ -62,6 +64,52 @@
         <p id="authSetup" role="status"></p>
       </section>
       <div id="workspace" hidden>
+        <section id="securityOps" class="page" hidden>
+          <div class="banner"><h2>Security events & IP investigation</h2><p>Recorded application activity and evidence from your permitted saved scans.</p><span>UTC EVENT TRAIL · LOCAL IP EVIDENCE</span></div>
+          <div class="panel">
+            <h3>Investigate an IPv4 or IPv6 address</h3>
+            <form id="ipInvestigationForm" class="security-filters">
+              <label>IP address<input id="investigateIp" required maxlength="64" placeholder="192.168.10.50 or 2001:db8::1" autocomplete="off" /></label>
+              <label>Scan scope<select id="ipScanScope"><option value="">All permitted scans</option></select></label>
+              <button id="investigateIpButton" class="primary">Investigate IP</button>
+            </form>
+            <p class="security-muted">Local evidence only. No paid service, active probe or external reputation query. A missing match does not establish that an IP is safe.</p>
+            <div id="ipInvestigationResult" hidden>
+              <h3 id="ipInvestigationTitle"></h3><p id="ipCoverage"></p>
+              <div id="ipSummary" class="stats"></div>
+              <div class="controls"><button id="ipExport">Export IP evidence JSON</button><button id="ipPrint">Print / Save IP report PDF</button></div>
+              <div id="ipFacts" class="tablewrap"></div>
+              <h3>Analyst findings and next steps</h3><div id="ipFindings"></div>
+              <div class="twocol"><div class="panel"><h3>Predicted classes</h3><div id="ipClasses"></div></div><div class="panel"><h3>Risk distribution</h3><div id="ipRisks"></div></div></div>
+              <div class="twocol"><div class="panel"><h3>Top peer addresses</h3><div id="ipPeers" class="tablewrap"></div></div><div class="panel"><h3>Remote ports and protocols</h3><div id="ipPorts" class="tablewrap"></div><div id="ipProtocols" class="tablewrap"></div></div></div>
+              <details><summary>Capture hours from the CSV</summary><div id="ipCaptureHours" class="tablewrap"></div></details>
+              <h3>Latest matching flow evidence</h3><p>Up to 100 saved rows. Capture time and recorded time have different meanings.</p><div id="ipFlows" class="tablewrap"></div>
+              <h3>Related incident groups</h3><div id="ipIncidents"></div>
+              <h3>Application requests from this IP</h3><p>Request-peer matches are separate from CSV traffic; they do not prove the same device or person.</p><div id="ipApplicationEvents" class="tablewrap"></div>
+              <h3>Your IP investigation note</h3>
+              <form id="ipNoteForm" class="security-note"><label>Disposition<select id="ipNoteStatus"><option>Open</option><option>Investigating</option><option>Resolved</option><option>False Positive</option></select></label><label>Evidence and reasoning<textarea id="ipNote" maxlength="2000" rows="4" placeholder="Describe the evidence, what you checked and the next action."></textarea></label><button id="ipNoteSave">Save investigation note</button><small id="ipNoteSaved" role="status"></small></form>
+              <details><summary>Visible analyst notes</summary><div id="ipCaseHistory" class="tablewrap"></div></details>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>System audit logs & security events</h3><p id="securityScope"></p>
+            <div class="stats" id="securityStats"></div>
+            <form id="securityFilterForm" class="security-filters">
+              <label>Search actor, action, resource or request ID<input id="securitySearch" maxlength="120" placeholder="Search recorded activity" /></label>
+              <label>Action<select id="securityAction"><option value="">All actions</option></select></label>
+              <label>Outcome<select id="securityOutcome"><option value="">All outcomes</option><option>Success</option><option>Denied</option><option>Failure</option><option>Recorded</option></select></label>
+              <label>Severity<select id="securitySeverity"><option value="">All severities</option><option>Info</option><option>Warning</option></select></label>
+              <label>From your local time<input type="datetime-local" id="securitySince" /></label>
+              <label>Until your local time<input type="datetime-local" id="securityUntil" /></label>
+              <button id="securityApply">Apply filters</button><button id="securityClear" type="button">Clear filters</button>
+            </form>
+            <div class="controls"><button id="refreshSecurity">Refresh events</button><label class="check-label"><input id="securityAuto" type="checkbox" checked />Refresh every 10 seconds while this section is open</label><button id="securityExport">Export filtered events NDJSON</button></div>
+            <p id="securityUpdated" role="status" aria-live="polite"></p><p id="securityTimeBasis" class="security-muted"></p>
+            <div class="tablewrap"><table class="security-event-table"><thead><tr><th>Recorded UTC</th><th>User / service</th><th>Action / category</th><th>Resource</th><th>Request peer IP</th><th>Outcome</th><th>Evidence</th></tr></thead><tbody id="securityEvents"></tbody></table></div>
+            <div class="controls"><button id="securityNewest">Newest events</button><button id="securityOlder">Older events</button></div>
+            <p class="security-muted">Events are append only through the application. They are not a tamper-proof external SIEM archive. Passwords, OTPs, invitation codes, CAPTCHA tokens and access tokens are excluded.</p>
+          </div>
+        </section>
         <section id="overview" class="page" hidden>
           <div class="banner"><h2>Saved security activity</h2><p>Historical summaries within your access permissions.</p></div>
           <button id="refreshOverview">Refresh overview</button><div id="overviewData"></div>
@@ -303,8 +351,7 @@
         <section id="team" class="page panel" hidden>
           <h2>Team roles</h2>
           <div id="teamList"></div>
-          <h2>Audit log</h2>
-          <pre id="auditList"></pre>
+          <p>Use Security events & IP investigation in the navigation to search the structured audit trail.</p>
         </section>
       </div>
     </main>
@@ -316,5 +363,6 @@
     </dialog>
     <script src="/static/app.js"></script>
     <script src="/static/experience.js"></script>
+    <script src="/static/security.js"></script>
   </body>
 </html>

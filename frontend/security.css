@@ -1,0 +1,42 @@
+/* Additive layout only: the finalized hacker theme and style.css stay intact. */
+#securityOps .security-filters { display:flex; gap:12px; flex-wrap:wrap; align-items:end; margin:18px 0; }
+#securityOps .security-filters label { display:flex; flex-direction:column; gap:7px; flex:1 1 180px; font-size:11px; color:var(--muted); }
+#securityOps .security-filters input, #securityOps .security-filters select { width:100%; min-width:0; }
+#securityOps .security-filters button { align-self:end; }
+#securityOps .security-muted { color:var(--muted); font-size:11px; line-height:1.8; }
+#securityOps .security-event-table { min-width:1020px; }
+#ipFlows table, #ipApplicationEvents table { min-width:900px; }
+#ipCaseHistory table { min-width:650px; }
+#securityOps td { overflow-wrap:anywhere; }
+#securityOps td small { display:block; margin-top:6px; }
+#securityOps .security-badge { display:inline-block; padding:4px 7px; border:1px solid var(--edge); color:var(--teal); font-size:10px; }
+#securityOps .security-badge.warning { color:#ffad66; }
+#securityOps .security-badge.failure, #securityOps .security-badge.denied { color:#ff718d; }
+#securityOps .stats { margin:18px 0; }
+#securityOps details { margin:20px 0; }
+#securityOps summary { cursor:pointer; color:var(--teal); }
+#securityOps .security-note { display:grid; gap:14px; }
+#securityOps .security-note label { display:grid; gap:8px; }
+#securityOps textarea { width:100%; box-sizing:border-box; background:var(--panel); border:1px solid var(--edge); color:var(--text); font:inherit; padding:12px; resize:vertical; }
+#securityOps textarea:focus-visible { outline:2px solid var(--teal); }
+#securityOps .check-label { margin:0; }
+#securityOps .security-ip-button { padding:3px 6px; font-size:11px; }
+#securityOps .security-note button { justify-self:start; }
+@media(max-width:680px) { #securityOps .security-filters label { flex-basis:100%; } #securityOps .twocol { grid-template-columns:1fr; } }
+@media print {
+  body.security-print main { display:block !important; margin:0; padding:0; }
+  body.security-print dialog { display:none !important; }
+  body.security-print, body.security-print #securityOps .panel { background:white; color:black; box-shadow:none; }
+  body.security-print #securityOps .stats strong, body.security-print #securityOps p,
+  body.security-print #securityOps small, body.security-print #securityOps th,
+  body.security-print #securityOps summary { color:black; }
+  body.security-print #securityOps svg text { fill:black; }
+  body.security-print aside, body.security-print header, body.security-print #notice,
+  body.security-print .page:not(#securityOps), body.security-print #securityOps > .banner,
+  body.security-print #securityOps > .panel:last-child,
+  body.security-print #ipInvestigationForm, body.security-print #securityOps button,
+  body.security-print #ipNoteForm { display:none !important; }
+  body.security-print #securityOps .tablewrap { overflow:visible; }
+  body.security-print #securityOps table { min-width:0; font-size:8px; }
+  body.security-print #securityOps .panel { break-inside:auto; }
+}

@@ -1,0 +1,76 @@
+{
+  "release": "TraceVigil security events and IP investigation",
+  "date": "2026-10-18",
+  "based_on_branch": "mansi-gaikwad",
+  "based_on_commit": "26f7d89f9bb41579cd60a998d772dadf872e5f7e",
+  "backend": {
+    "result": "28 passed, 1 warning",
+    "elapsed_seconds": 28.3,
+    "environment": "Linux Python 3.12.14 with project pinned requirements",
+    "warning": "Existing Starlette TestClient httpx deprecation",
+    "auth_providers": "Mocked only in isolated test processes; no production provider bypass shipped"
+  },
+  "browser": {
+    "checks": [
+      "Dedicated section renders real API event data with 50-row cursor page",
+      "Refresh has visible spinner and completion timestamp",
+      "Cursor pagination loads older and newest events",
+      "Filters, request peer IP, detail dialog and event NDJSON download",
+      "IP investigation renders capture times, counts, flows, peers, risks and incidents",
+      "IP note saves and text is escaped without script execution",
+      "Authenticated IP evidence JSON download",
+      "IP print view overrides legacy dialog-only print CSS",
+      "Invalid IP is rejected without external calls",
+      "Mobile layout contains tables within horizontal scroll wrappers",
+      "Related incident opens existing TreeSHAP investigation",
+      "Sign out revokes token and returns to login"
+    ],
+    "page_errors": [],
+    "check_count": 12,
+    "scope": "Chromium 134 local test server; isolated generated accounts and genuine 243-row CICIDS demo; CAPTCHA mocked only in test process."
+  },
+  "document": {
+    "pages": 4,
+    "rendered_and_visually_reviewed": true
+  },
+  "static_checks": {
+    "unique_html_ids": 137,
+    "javascript_syntax": "app.js and security.js pass node --check",
+    "python_compile": "main.py, secure_auth.py, security_ops.py compile",
+    "git_diff_check": "pass"
+  },
+  "preserved_file_sha256": {
+    "frontend/style.css": "c2cda3ae4ef73b4c3269e3435b7a9559bb1f1c1b14607e130a3517b1f1c55344",
+    "frontend/experience.js": "055d95b17e774e8b01b9fcf38f9bdd6c2ae0c7eee161450954b1e21e30bad6e3",
+    "backend/engine.py": "5493a3cfa5593e06c9b056d6a6266426925320b34a0fa3a6077f59c374176cd5",
+    "models/bundle.joblib": "9258af4f38b6d0653e05f60a5decf775f5ed883496bf910d63f4cf8085ac5916",
+    "models/xgboost_model.json": "2e35c97abdc3abfc7a9328649177e9a234a967d9be86006a6e2f4a9e38ad594e",
+    "data/cicids_demo_real_ips.csv": "b36ace4ebe5f9cf68809c1dafec148771ae46469559608645ae6bc7aafcee54f",
+    "requirements.txt": "bd036717870160561860a0688c2e609313ab16cc7e62d4aac7900f27a20ca6b8"
+  },
+  "changed_complete_files": [
+    "backend/main.py",
+    "backend/secure_auth.py",
+    "backend/security_ops.py",
+    "frontend/index.html",
+    "frontend/app.js",
+    "frontend/security.js",
+    "frontend/security.css",
+    "tests/test_system.py",
+    "docs/NetShield.postman_collection.json",
+    "docs/POSTMAN.md",
+    "docs/CHANGELOG.md",
+    "docs/SECURITY_EVENTS.md",
+    "docs/TraceVigil_Security_Events_Change_Log_20261018.docx",
+    "docs/security_events_validation.json",
+    "INSTALL_SECURITY_EVENTS.md"
+  ],
+  "scope_limits": [
+    "Real application events and saved CSV evidence; no Windows host event collector or live packet capture",
+    "External IP reputation is Not checked; no network probe or feed request",
+    "Admin sees anonymous failures; other roles only their own attributed events and scans",
+    "Latest 50000 matching flow window; up to 100 displayed samples; limits disclosed",
+    "Append-only local database controls are not a tamper-proof external archive",
+    "Windows startup and real SMTP/Turnstile must be verified on the user machine; existing configuration is unchanged"
+  ]
+}

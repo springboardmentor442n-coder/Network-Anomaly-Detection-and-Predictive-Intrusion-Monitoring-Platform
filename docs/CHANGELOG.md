@@ -79,3 +79,18 @@ UNSW-NB15 pipeline, live packet capture/flow exporter, future intrusion forecast
 - Replaced username-only web login with email login; added invitation/allowlist gates, server-validated free Turnstile, SMTP email OTP and one-time legacy linking.
 - Added code hashing, expiration, attempt/rate limits, session versions, no-store API responses, frame denial and local administrator recovery.
 - Added environment template, setup instructions and updated API collection/tests. External email/CAPTCHA settings require the user's own account keys. No fake verification mode exists.
+
+
+## October 18 2026 security events and IP investigations
+
+- Added a dedicated role-scoped Security events and IP investigation section, replacing the admin-only raw JSON presentation. Kept the older admin audit endpoint for compatibility and preserved upload ownership checks.
+- Added structured events for authentication, registration failures, denied access, rate limits, uploads, scan lifecycle, review batches, incident and role changes, exports, IP investigations, notes and sign out. Events include UTC time, actor, outcome, safe reason, peer IP and request ID where known; secrets and request bodies are excluded.
+- Migrated legacy audit records without inventing missing facts. Added batched IP indexing of existing saved rows; new flow records store their actual ingestion time. Users, scans, incidents, CSVs and model artifacts are preserved.
+- Added filtered event counts, search, local-to-UTC time filters, cursor pages, visible refresh animation, toggleable ten-second refresh, NDJSON export and SHA-256 byte checksums.
+- Added normalized IPv4/IPv6 investigation of saved flows: class/risk summaries, capture and ingestion times, peer/port/protocol counts, disagreement/anomaly evidence, related incidents and explicit no-evidence/coverage limits. No external feed, network probe or verified reputation is simulated.
+- Added versioned per-analyst IP dispositions/notes, JSON evidence export and browser PDF print view. Added one-click IP pivots from monitored flows and incident groups.
+- Added current-token revocation on sign out and a unique jti per new login. Other separately issued sessions remain valid.
+- Added append-only SQLite event triggers, parameterized filters, HTML escaping and permission regression checks. These do not make a local database tamper-proof or turn the app into a host-wide SIEM collector.
+- Preserved finalized frontend/style.css and frontend/experience.js byte for byte. Added only section-specific CSS and JavaScript. Added no runtime dependency and changed no model or risk policy.
+- Challenges: preserving legacy data and upload authorisation, separating 2017 capture times from current audit time, avoiding forged forwarding-header identities, bounding investigation work and preventing stale-note overwrites. Browser print rules explicitly override the old dialog-only print stylesheet.
+- See docs/security_events_validation.json for the final measured checks, docs/SECURITY_EVENTS.md for interpretation and limits, and the separate Word change log for the complete change record.

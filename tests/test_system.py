@@ -502,3 +502,165 @@ def test_capture_hour_and_auth_limits(client):
     body={'email':'absent@example.test','password':'wrong'}
     for _ in range(15):assert client.post('/api/login',json=body).status_code==401
     assert client.post('/api/login',json=body).status_code==429
+
+
+@pytest.fixture(scope="module")
+def security_admin(client):
+    headers = account(client, "securityadmin")
+    with main.connection() as c:
+        c.execute("UPDATE users SET role='Admin' WHERE username='securityadmin'")
+    return headers
+
+
+def test_security_events_failures_privacy_and_peer(client, auth, security_admin):
+    secret_marker = "NEVER_LOG_THIS_PASSWORD_OR_OTP"
+    with main.connection() as c:
+        c.execute("DELETE FROM auth_limits")
+    response = client.post("/api/login", json={"email": "missing-security@example.test",
+                           "password": secret_marker, "captcha_token": "NEVER_LOG_CAPTCHA"},
+                           headers={"X-Forwarded-For": "1.2.3.4", "X-Request-ID": "forged-request"})
+    assert response.status_code == 401
+    request_id = response.headers["X-Request-ID"]
+    assert request_id != "forged-request"
+    events = client.get("/api/security/events", params={"q": request_id}, headers=security_admin).json()
+    event = next(e for e in events["items"] if e["action"] == "login_rejected")
+    assert event["actor"] == "anonymous" and event["outcome"] == "Denied"
+    assert event["http_status"] == 401 and event["created"].endswith("+00:00")
+    assert event["client_ip"] != "1.2.3.4"
+    assert secret_marker not in json.dumps(events) and "NEVER_LOG_CAPTCHA" not in json.dumps(events)
+    assert "missing-security@example.test" not in json.dumps(events)
+    own = client.get("/api/security/events", headers=auth).json()
+    assert all(e["actor"] == "testanalyst" for e in own["items"])
+    assert not client.get("/api/security/events", params={"q": request_id}, headers=auth).json()["items"]
+    assert client.get("/api/security/events").status_code in (401, 403)
+
+
+def test_security_event_search_pagination_time_and_export(client, auth):
+    import hashlib
+    for n in range(7):
+        main.security_event("testanalyst", "search_probe", "test fixture", resource="literal%_" + str(n))
+    first = client.get("/api/security/events", params={"q": "literal%_", "limit": 3}, headers=auth).json()
+    assert first["totals"]["total"] == 7 and len(first["items"]) == 3
+    second = client.get("/api/security/events", params={"q": "literal%_", "limit": 3, "before": first["next_before"]}, headers=auth).json()
+    assert not {e["id"] for e in first["items"]} & {e["id"] for e in second["items"]}
+    assert client.get("/api/security/events", params={"q": "' OR 1=1 --"}, headers=auth).json()["totals"]["total"] == 0
+    assert client.get("/api/security/events", params={"since": "2026-10-18"}, headers=auth).status_code == 422
+    assert client.get("/api/security/events", params={"until": "2000-01-01T00:00:00Z"}, headers=auth).json()["totals"]["total"] == 0
+    exported = client.get("/api/security/events/export", params={"action": "search_probe"}, headers=auth)
+    assert exported.status_code == 200 and len(exported.content.splitlines()) == 7
+    assert exported.headers["X-Content-SHA256"] == hashlib.sha256(exported.content).hexdigest()
+    assert exported.headers["X-Export-Truncated"] == "false"
+    assert all(json.loads(line)["actor"] == "testanalyst" for line in exported.content.splitlines())
+
+
+def test_security_append_only_and_legacy_migration(client, auth):
+    old_stamp = "2017-07-05T09:00:00+00:00"
+    with main.connection() as c:
+        legacy = c.execute("INSERT INTO audit(actor,action,detail,created) VALUES(?,?,?,?)",
+                           ("testanalyst", "old_probe", "Original audit", old_stamp)).lastrowid
+        old_scan = "migration-" + uuid.uuid4().hex
+        c.execute("INSERT INTO scans VALUES(?,?,?,?,?,?)", (old_scan, "testanalyst", "legacy.csv", "Completed", old_stamp, None))
+        payload = {"src_ip": {"value": "2001:0db8:0:0:0:0:0:2", "status": "valid"},
+                   "dst_ip": {"value": "192.0.2.1", "status": "valid"}, "row_number": 1,
+                   "status": "invalid", "timestamp": "05/07/2017 09:00:00"}
+        c.execute("INSERT INTO flows(scan_id,row_number,payload) VALUES(?,?,?)", (old_scan, 1, json.dumps(payload)))
+        c.execute("DELETE FROM security_migrations WHERE name='flow_ip_v1'")
+    main.init()
+    main.init()
+    with main.connection() as c:
+        records = c.execute("SELECT * FROM security_events WHERE legacy_audit_id=?", (legacy,)).fetchall()
+    assert len(records) == 1
+    assert records[0]["created"] == old_stamp
+    assert records[0]["client_ip"] is None and records[0]["outcome"] == "Recorded"
+    migrated = client.get("/api/security/ip", params={"ip": "2001:db8::2", "scan_id": old_scan}, headers=auth).json()
+    assert migrated["coverage"]["matching_saved_flows"] == 1
+    assert migrated["flows"][0]["recorded_at"] is None
+    assert migrated["totals"]["invalid"] == 1
+    for sql in ["UPDATE security_events SET detail='changed' WHERE id=?", "DELETE FROM security_events WHERE id=?"]:
+        with pytest.raises(main.sqlite3.IntegrityError, match="append only"):
+            with main.connection() as c:
+                c.execute(sql, (records[0]["id"],))
+
+
+@pytest.fixture(scope="module")
+def investigated_scan(client, auth):
+    sid = scan(client, auth, "cicids_demo_real_ips.csv")
+    client.get("/api/scans/" + sid + "/events", headers=auth)
+    rows = [json.loads(line) for line in client.get("/api/scans/" + sid + "/export", headers=auth).text.splitlines()]
+    from collections import Counter
+    counts = Counter(ip for r in rows for ip in set([r["src_ip"]["value"], r["dst_ip"]["value"]]))
+    target = counts.most_common(1)[0][0]
+    matched = [r for r in rows if target in (r["src_ip"]["value"], r["dst_ip"]["value"])]
+    return sid, target, matched
+
+
+def test_ip_evidence_exact_counts_and_capture_time(client, auth, investigated_scan):
+    sid, target, rows = investigated_scan
+    response = client.get("/api/security/ip", params={"ip": target, "scan_id": sid}, headers=auth)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["coverage"]["matching_saved_flows"] == len(rows)
+    assert data["coverage"]["inspected_flows"] == len(rows)
+    assert data["totals"]["review_flows"] == sum(bool(r.get("needs_review")) for r in rows)
+    assert data["totals"]["max_risk"] == max(r["risk_score"] for r in rows)
+    assert data["totals"]["predicted_attacks"] == sum(r["consensus"] != "BENIGN" for r in rows)
+    assert data["capture_time"]["first"] and "2017" in data["capture_time"]["first"]
+    assert data["capture_time"]["latest_recorded_at_utc"].endswith("+00:00")
+    assert data["reputation"]["status"] == "Not checked"
+    assert all(r["scan_id"] == sid for r in data["flows"])
+    assert len(data["flows"]) <= 100
+    assert client.get("/api/security/ip", params={"ip": "https://127.0.0.1/"}, headers=auth).status_code == 422
+    assert client.get("/api/security/ip", params={"ip": "fe80::1%eth0"}, headers=auth).status_code == 422
+
+
+def test_ip_ownership_limits_no_evidence_and_export(client, auth, security_admin, investigated_scan, monkeypatch):
+    from backend import security_ops
+    import hashlib
+    sid, target, rows = investigated_scan
+    other = account(client, "ipother")
+    assert client.get("/api/security/ip", params={"ip": target, "scan_id": sid}, headers=other).status_code == 403
+    blank = client.get("/api/security/ip", params={"ip": "203.0.113.250"}, headers=other).json()
+    assert blank["coverage"]["matching_saved_flows"] == 0 and blank["totals"]["max_risk"] is None
+    assert blank["reputation"]["status"] == "Not checked"
+    assert not blank["incidents"] and not blank["flows"]
+    monkeypatch.setattr(security_ops, "IP_WINDOW", 2)
+    capped = client.get("/api/security/ip", params={"ip": target, "scan_id": sid}, headers=auth).json()
+    assert capped["coverage"]["truncated"] and capped["coverage"]["inspected_flows"] == 2
+    assert capped["coverage"]["matching_saved_flows"] == len(rows)
+    exported = client.get("/api/security/ip/export", params={"ip": target, "scan_id": sid}, headers=auth)
+    assert exported.headers["X-Content-SHA256"] == hashlib.sha256(exported.content).hexdigest()
+    assert exported.json()["address"]["ip"] == target
+    admin = client.get("/api/security/ip", params={"ip": target, "scan_id": sid}, headers=security_admin)
+    assert admin.status_code == 200
+
+
+def test_ip_notes_scope_conflicts_and_viewer(client, auth, security_admin):
+    body = {"ip": "2001:0db8:0:0:0:0:0:1", "status": "Investigating", "note": "<script>Evidence only</script>", "version": 0}
+    saved = client.put("/api/security/ip/case", json=body, headers=auth)
+    assert saved.status_code == 200 and saved.json()["version"] == 1
+    assert saved.json()["ip"] == "2001:db8::1"
+    assert client.put("/api/security/ip/case", json=body, headers=auth).status_code == 409
+    data = client.get("/api/security/ip", params={"ip": "2001:db8::1"}, headers=auth).json()
+    assert data["cases"][0]["note"] == body["note"]
+    viewer = account(client, "securityviewer")
+    with main.connection() as c:
+        c.execute("UPDATE users SET role='Viewer' WHERE username='securityviewer'")
+    assert client.put("/api/security/ip/case", json=body, headers=viewer).status_code == 403
+    assert not client.get("/api/security/ip", params={"ip": "2001:db8::1"}, headers=viewer).json()["cases"]
+    assert client.get("/api/security/events", headers=viewer).status_code == 200
+    admin = client.get("/api/security/ip", params={"ip": "2001:db8::1"}, headers=security_admin).json()
+    assert any(c["owner"] == "testanalyst" for c in admin["cases"])
+
+
+def test_logout_revokes_only_current_token(client, security_admin):
+    one = account(client, "logoutanalyst")
+    two = client.post("/api/login", json={"email": "logoutanalyst@example.test",
+                      "password": "StrongPassword2026!", "captcha_token": "mock"})
+    other_session = {"Authorization": "Bearer " + two.json()["access_token"]}
+    assert other_session != one
+    response = client.post("/api/logout", headers=one)
+    assert response.status_code == 200
+    assert client.get("/api/me", headers=one).status_code == 401
+    assert client.get("/api/me", headers=other_session).status_code == 200
+    events = client.get("/api/security/events", params={"action": "logout"}, headers=security_admin).json()["items"]
+    assert any(e["actor"] == "logoutanalyst" for e in events)

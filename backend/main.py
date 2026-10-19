@@ -138,11 +138,13 @@ async def lifespan(app):
     # Interrupted history is preserved, but scan positions are never resumed.
     with connection() as c:
         c.execute("UPDATE scans SET status='Interrupted' WHERE status='Running'")
+    security_event("system", "application_started", "Application initialization completed", category="System")
     yield
     for j in jobs.values():
         j["stop"].set()
     await asyncio.gather(*(j["task"] for j in jobs.values()), return_exceptions=True)
     pool.shutdown(wait=True, cancel_futures=True)
+    security_event("system", "application_stopped", "Application shutdown completed", category="System")
 
 
 app = FastAPI(title="TraceVigil AI", lifespan=lifespan)
@@ -153,16 +155,21 @@ class Credentials(BaseModel):
     password: str = Field(min_length=10, max_length=128)
 
 
-def user(auth: HTTPAuthorizationCredentials = Depends(security)):
+def user(request: Request, auth: HTTPAuthorizationCredentials = Depends(security)):
     try:
         payload = jwt.decode(auth.credentials, SECRET, algorithms=["HS256"])
         name = payload["sub"]
         with connection() as c:
+            revoked = c.execute(
+                "SELECT 1 FROM revoked_tokens WHERE digest=? AND expires>?",
+                (hashlib.sha256(auth.credentials.encode()).hexdigest(), time.time()),
+            ).fetchone()
             row = c.execute(
                 "SELECT username,role,email,display_name,email_verified,auth_version FROM users WHERE username=?", (name,)
             ).fetchone()
-        if not row or not row["email_verified"] or payload.get("v") != row["auth_version"]:
+        if revoked or not row or not row["email_verified"] or payload.get("v") != row["auth_version"]:
             raise ValueError()
+        request.state.security_actor = row["username"]
         return dict(row)
     except Exception:
         raise HTTPException(401, "Invalid or expired access token")
@@ -261,11 +268,7 @@ async def upload(file: UploadFile = File(...), u=Depends(user)):
                     raise HTTPException(413, "File exceeds upload size limit")
                 target.write(data)
         # Uploads remain private: the API lists only each user's own files and demo files.
-        with connection() as c:
-            c.execute(
-                "INSERT INTO audit(actor,action,detail,created) VALUES(?,?,?,?)",
-                (u["username"], "upload", name, now()),
-            )
+        audit(u["username"], "upload", name)
     except BaseException:
         path.unlink(missing_ok=True)
         raise
@@ -328,9 +331,12 @@ def work_chunk(chunk, offset, scan, owner):
     rows, performance = engine.score(chunk, offset)
     with connection() as c:
         c.executemany(
-            "INSERT INTO flows(scan_id,row_number,payload) VALUES(?,?,?)",
+            "INSERT INTO flows(scan_id,row_number,payload,source_ip,destination_ip,recorded_at) VALUES(?,?,?,?,?,?)",
             [
-                (scan, r["row_number"], json.dumps(r, separators=(",", ":")))
+                (scan, r["row_number"], json.dumps(r, separators=(",", ":")),
+                 r["src_ip"]["value"] if r["src_ip"]["status"] == "valid" else None,
+                 r["dst_ip"]["value"] if r["dst_ip"]["status"] == "valid" else None,
+                 now())
                 for r in rows
             ],
         )
@@ -376,6 +382,10 @@ def work_chunk(chunk, offset, scan, owner):
                 for key, g in grouped.items()
             ],
         )
+    if alerts:
+        security_event(owner, "review_flows_recorded",
+                       f"{len(alerts)} model review flags in rows {offset+1}-{offset+len(rows)}; not confirmed attacks",
+                       category="Detection", outcome="Recorded", severity="Warning", resource=scan)
     return rows, performance, len(alerts)
 
 
@@ -429,6 +439,8 @@ async def produce(scan, j, path, owner):
             except Exception as e:
                 skipped += len(chunk)
                 log.exception("Chunk scoring failure scan=%s", scan)
+                security_event(owner, "scan_chunk_failed", f"Rows {processed+1}-{processed+len(chunk)} skipped",
+                               category="Scan", outcome="Failure", severity="Warning", resource=scan)
                 put(
                     j,
                     "error",
@@ -773,7 +785,7 @@ def incident_update(incident: int, body: IncidentUpdate, u=Depends(user)):
         raise HTTPException(422, "Invalid status")
     with connection() as c:
         row = c.execute(
-            "SELECT owner FROM incidents WHERE id=?", (incident,)
+            "SELECT owner,status FROM incidents WHERE id=?", (incident,)
         ).fetchone()
         if not row:
             raise HTTPException(404, "Incident not found")
@@ -783,7 +795,7 @@ def incident_update(incident: int, body: IncidentUpdate, u=Depends(user)):
             "UPDATE incidents SET status=?,note=? WHERE id=?",
             (body.status, body.note, incident),
         )
-    audit(u["username"], "incident_updated", str(incident))
+    audit(u["username"], "incident_updated", f"{incident}: {row['status']} -> {body.status}; note saved")
     return {"status": body.status}
 
 
@@ -833,5 +845,7 @@ import sys
 install_investigation(sys.modules[__name__])
 from .secure_auth import install as install_secure_auth
 install_secure_auth(sys.modules[__name__])
+from .security_ops import install as install_security_ops
+install_security_ops(sys.modules[__name__])
 
 app.mount("/static", StaticFiles(directory=ROOT / "frontend"), name="static")

@@ -166,4 +166,4 @@ def install(m):
         valid=m.password_ok(body.password,stored)
         if not row or not valid or not row['email_verified']:raise HTTPException(401,'Incorrect credentials or unverified account')
         m.audit(row['username'],'login')
-        return {'access_token':m.jwt.encode({'sub':row['username'],'v':row['auth_version'],'exp':datetime.now(timezone.utc)+timedelta(hours=2)},m.SECRET,algorithm='HS256'),'token_type':'bearer','role':row['role'],'display_name':row['display_name'] or row['username']}
+        return {'access_token':m.jwt.encode({'sub':row['username'],'v':row['auth_version'],'jti':secrets.token_urlsafe(24),'exp':datetime.now(timezone.utc)+timedelta(hours=2)},m.SECRET,algorithm='HS256'),'token_type':'bearer','role':row['role'],'display_name':row['display_name'] or row['username']}

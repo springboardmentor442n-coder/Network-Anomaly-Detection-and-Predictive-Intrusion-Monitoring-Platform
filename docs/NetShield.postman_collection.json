@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "TraceVigil AI - Verified accounts and investigations",
+    "name": "TraceVigil AI - Verified accounts investigations and security events",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -43,10 +43,6 @@
       "value": ""
     },
     {
-      "key": "incident_id",
-      "value": "1"
-    },
-    {
       "key": "captcha_token",
       "value": "FRESH_REAL_TURNSTILE_TOKEN"
     },
@@ -57,6 +53,10 @@
     {
       "key": "email_code",
       "value": ""
+    },
+    {
+      "key": "ip_address",
+      "value": "192.168.10.50"
     }
   ],
   "item": [
@@ -563,6 +563,89 @@
           }
         }
       }
+    },
+    {
+      "name": "Security events and IP investigation",
+      "item": [
+        {
+          "name": "List permitted security events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/security/events?limit=50"
+          }
+        },
+        {
+          "name": "Filter authentication failures",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/security/events?action=login_rejected&outcome=Denied"
+          }
+        },
+        {
+          "name": "Export filtered security events NDJSON",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/security/events/export"
+          }
+        },
+        {
+          "name": "Investigate IP in permitted saved scans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/security/ip?ip={{ip_address}}"
+          }
+        },
+        {
+          "name": "Investigate IP in selected scan",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/security/ip?ip={{ip_address}}&scan_id={{scan_id}}"
+          }
+        },
+        {
+          "name": "Export IP evidence JSON",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/security/ip/export?ip={{ip_address}}"
+          }
+        },
+        {
+          "name": "Save my IP investigation note",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/security/ip/case",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ip\": \"{{ip_address}}\",\n  \"status\": \"Investigating\",\n  \"note\": \"Reviewing saved flow and endpoint evidence.\",\n  \"version\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Sign out and revoke current token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{base_url}}/api/logout"
+          }
+        }
+      ]
     }
   ]
 }

@@ -81,6 +81,12 @@ function detail(data) {
 $("close").onclick = () => $("detail").close();
 $("logout").onclick = async () => {
   if (running) await stop();
+  try {
+    await json("/logout", { method: "POST" });
+  } catch (e) {
+    notice("Sign out could not be confirmed: " + e.message);
+    return;
+  }
   sessionStorage.removeItem("token");
   location.reload();
 };
@@ -371,7 +377,7 @@ function draw() {
     list
       .map(
         (r) =>
-          `<tr><td><b>#${r.row_number}</b><small>${esc(r.src_ip.value || "Unavailable")} → ${esc(r.dst_ip.value || "Unavailable")}</small><small>IP ${esc(r.src_ip.status)} / ${esc(r.dst_ip.status)} · Protocol ${esc(r.protocol || "Unavailable")}</small></td><td>${
+          `<tr><td><b>#${r.row_number}</b><small>${esc(r.src_ip.value || "Unavailable")} → ${esc(r.dst_ip.value || "Unavailable")}</small><small>IP ${esc(r.src_ip.status)} / ${esc(r.dst_ip.status)} · Protocol ${esc(r.protocol || "Unavailable")}</small>${r.src_ip.status === "valid" ? `<button class="link" data-investigate-ip="${esc(r.src_ip.value)}">Investigate source IP</button>` : ""}</td><td>${
             r.status === "invalid"
               ? esc(r.error)
               : Object.entries(r.models)
@@ -398,7 +404,7 @@ async function incidents() {
     list
       .map(
         (r) =>
-          `<div class="incident"><b>#${r.id} · ${esc(r.label)} · ${r.risk}/100</b><small> · ${r.occurrences || 1} related review flows · ${esc(r.src_ip || "Unavailable")} → ${esc(r.dst_ip || "Unavailable")} · scan ${esc(r.scan_id.slice(0, 8))}, first row ${r.row_number}</small><div class="controls"><button data-case="${r.id}">Investigate / PDF</button><select id="status${r.id}">${["Open", "Investigating", "Resolved", "False Positive"].map((s) => `<option ${s === r.status ? "selected" : ""}>${s}</option>`).join("")}</select><input id="note${r.id}" value="${esc(r.note)}" placeholder="Investigation note" maxlength="2000"><button data-incident="${r.id}" ${role === "Viewer" ? "disabled" : ""}>Save</button></div></div>`,
+          `<div class="incident"><b>#${r.id} · ${esc(r.label)} · ${r.risk}/100</b><small> · ${r.occurrences || 1} related review flows · ${esc(r.src_ip || "Unavailable")} → ${esc(r.dst_ip || "Unavailable")} · scan ${esc(r.scan_id.slice(0, 8))}, first row ${r.row_number}</small><div class="controls"><button data-case="${r.id}">Investigate / PDF</button>${r.src_ip && r.src_ip !== "Unavailable" ? `<button data-investigate-ip="${esc(r.src_ip)}">Investigate source IP</button>` : ""}<select id="status${r.id}">${["Open", "Investigating", "Resolved", "False Positive"].map((s) => `<option ${s === r.status ? "selected" : ""}>${s}</option>`).join("")}</select><input id="note${r.id}" value="${esc(r.note)}" placeholder="Investigation note" maxlength="2000"><button data-incident="${r.id}" ${role === "Viewer" ? "disabled" : ""}>Save</button></div></div>`,
       )
       .join("") || "<p>No incidents.</p>";
   $("incidentList").querySelectorAll("[data-case]").forEach(b => b.onclick = () => openCase(b.dataset.case).catch(e => notice(e.message)));
@@ -485,7 +491,6 @@ async function team() {
           }
         }),
     );
-  $("auditList").textContent = JSON.stringify(await json("/audit"), null, 2);
 }
 $("export").onclick = () => download(scanId);
 $("report").onclick = async () => {

@@ -29,3 +29,14 @@ Postman can inspect SSE HTTP streams. It does not change how the ML model works.
 Sources: https://blog.postman.com/support-for-server-sent-events/ and https://learning.postman.com/docs/use/send-requests/requests/
 
 The October 13 release also provides GET /api/scans/{scan_id}/report-html for a printable report, and authenticated DELETE /api/scans/{scan_id} for deliberate cleanup after completion. Grouped incident records include occurrences, source/destination and maximum observed risk.
+
+
+## October 18 security events and IP investigation
+
+Use the verified-email login flow in the current collection: signup invitation and fresh real Turnstile token, email verification, then email/password login with a fresh Turnstile token. Earlier username-only signup/password examples above are historical. No CAPTCHA bypass is provided in Postman.
+
+The Security events and IP investigation folder adds scoped audit search, filtered NDJSON export, IP investigation, selected-scan investigation, IP JSON export, versioned note saving and sign out. Set ip_address to an address shown in a real saved flow. Initially use version 0 for a new IP note; after saving, use the returned version for the next update. A stale version returns 409.
+
+Admin sees anonymous authentication failures; other roles see their own account-attributed events. Add since/until as ISO dates including an offset and before from next_before for older event pages. Exports provide X-Content-SHA256 and event exports also provide exported/total/truncated headers. IP results are local evidence, not an external reputation verdict.
+
+POST /api/logout revokes the current token. Log in again before subsequent protected requests. Do not publish your real collection variables, invitation, verification code or bearer token to GitHub.
