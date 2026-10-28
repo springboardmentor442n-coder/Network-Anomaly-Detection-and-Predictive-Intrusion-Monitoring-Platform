@@ -1,0 +1,23 @@
+{
+  "random_forest": {
+    "accuracy": 0.6984,
+    "weighted_precision": 0.841,
+    "weighted_recall": 0.6984,
+    "weighted_f1": 0.7458,
+    "artifact": "random_forest.joblib"
+  },
+  "extra_trees": {
+    "accuracy": 0.636,
+    "weighted_precision": 0.8589,
+    "weighted_recall": 0.636,
+    "weighted_f1": 0.7019,
+    "artifact": "extra_trees.joblib"
+  },
+  "xgboost": {
+    "accuracy": 0.7706,
+    "weighted_precision": 0.8309,
+    "weighted_recall": 0.7706,
+    "weighted_f1": 0.7773,
+    "artifact": "xgboost.joblib"
+  }
+}

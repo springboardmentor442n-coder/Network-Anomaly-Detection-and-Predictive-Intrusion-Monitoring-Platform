@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+.env.local
+backend/.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.vscode/
+*.log
+.DS_Store
