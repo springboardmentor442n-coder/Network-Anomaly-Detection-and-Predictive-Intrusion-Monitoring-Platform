@@ -1,11 +1,21 @@
 import os
+import shutil
 import sqlite3
 import hashlib
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 
-DB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-DB_PATH = os.path.join(DB_DIR, "netshield.db")
+DEFAULT_DB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+DEFAULT_DB_PATH = os.path.join(DEFAULT_DB_DIR, "netshield.db")
+
+# On serverless platforms (like Vercel or AWS Lambda), root filesystem is read-only.
+# Use /tmp which is writable.
+if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    DB_DIR = "/tmp/netshield_data"
+    DB_PATH = os.path.join(DB_DIR, "netshield.db")
+else:
+    DB_DIR = DEFAULT_DB_DIR
+    DB_PATH = DEFAULT_DB_PATH
 
 def hash_password(password: str) -> str:
     """Hashes a password using SHA-256 with a salt."""
@@ -14,6 +24,11 @@ def hash_password(password: str) -> str:
 
 def get_db_connection():
     os.makedirs(DB_DIR, exist_ok=True)
+    if DB_PATH != DEFAULT_DB_PATH and os.path.exists(DEFAULT_DB_PATH) and not os.path.exists(DB_PATH):
+        try:
+            shutil.copy2(DEFAULT_DB_PATH, DB_PATH)
+        except Exception:
+            pass
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
